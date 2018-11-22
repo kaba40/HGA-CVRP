@@ -5,6 +5,16 @@
  *      Author: kkeita
  */
 
+#include<stdio.h>
+#include<stdlib.h>
+#include<iostream>
 
+using namespace std;
 
+int main()
+{
+	cout << " implementation split algorithm" << endl;
 
+	return 0;
+
+}
