@@ -42,7 +42,7 @@ class DataAP
 
 private:
 
-	vector<customer> clients;
+	vector<customer> clients; // vector of customer
 	vector<double> arcCost; // pas precis
 
 	int nbNodes;
@@ -55,6 +55,7 @@ private:
 public:
 
 	DataAP( const char* data_vrp);
+	int getNodes();
 
 	virtual ~DataAP();
 };

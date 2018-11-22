@@ -54,20 +54,15 @@ void DataAP::readData( const char* data_vrp)
 		// get Edge_Weight_Section three lines
 		int nbLines = 0;
 		for(int i = 1; i < nbNodes; i++)
-			nbLines+=i;
-		cout << "nbLines = " << nbLines << endl;
+			nbLines++;
+
 		arcCost = vector<double>(nbLines+1);
 		arcCost[0] = 0;
 		for(int i = 1; i < nbLines; i++)
 		{
-
-		}
-		int i = 0;
-		while( i < nbLines)
-		{
-			i++;
 			fichier >> arcCost[i];
 		}
+
 
 		//skip useless string
 		fichier >> uselessStr;
@@ -91,7 +86,16 @@ void DataAP::readData( const char* data_vrp)
 		fichier >> depotIndex;
 //		string fline = "DEMAND_SECTION" ;
 
-
+		fichier.close();
+	}
+	else
+	{
+	      cout << "Error opening file " << data_vrp << endl;
+	      abort();
 	}
 }
 
+int DataAP::getNodes()
+{
+	return nbNodes;
+}
