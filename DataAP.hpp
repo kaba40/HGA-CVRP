@@ -25,25 +25,26 @@
 #include <queue>
 #include <utility>      // std::pair
 
+//#include "Customer.hpp"
 using namespace std;
 //using namespace boost;
 
 
-struct customer
-{
-	int index;
-	double demand;
-//	double distReturn;
-//	double distNext;
-};
+//struct customer
+//{
+//	int index;
+//	double demand;
+//};
+
+class Customer;
 
 class DataAP
 {
 
 private:
 
-	vector<customer> clients; // vector of customer
-	vector<vector<int>> distNodes; // distances between nodes LOWER_DIAG_ROW
+	vector<Customer*> clients; // vector of customer
+	vector<vector<double>> distNodes; // distances between nodes LOWER_DIAG_ROW
 
 	int numberNodes;
 	int numberVehicle;
@@ -55,11 +56,12 @@ private:
 
 public:
 
+ 	DataAP();
 	DataAP( const char* data_vrp, int nbVeh);
 	int getNumberNodes();
 	int getNumberVehicle();
 	int getVehicleCap();
-	int getDistances(int index1, int index2);
+	double getDistances(int index1, int index2);
 	virtual ~DataAP();
 };
 

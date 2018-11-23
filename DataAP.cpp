@@ -6,14 +6,26 @@
  */
 
 #include "DataAP.hpp"
+#include "Customer.hpp"
 
+DataAP::DataAP()
+{
+	 numberNodes = 0;
+	 numberVehicle = 0;
+	 vehicleCap = 0;
+	 depotIndex = 0;
+}
 DataAP::DataAP( const char* data_vrp, int nbVeh)
 {
 	readData(data_vrp, nbVeh);
 }
 
-DataAP::~DataAP(){
-	// TODO Auto-generated destructor stub
+DataAP::~DataAP()
+{
+	for(int i = 1; i < numberNodes+1; i++)
+	{
+		delete clients[i];
+	}
 }
 
 void DataAP::readData( const char* data_vrp, int nbVeh)
@@ -77,12 +89,15 @@ void DataAP::readData( const char* data_vrp, int nbVeh)
 		fichier >> uselessStr;
 
 		//fill vector of customer
-		clients = vector<customer> (numberNodes+1);
+		clients = vector<Customer*> (numberNodes+1);
 
 		for(int i = 1; i < numberNodes+1; i++)
 		{
-			fichier >> clients[i].index;
-			fichier >> clients[i].demand;
+			int Idx, Dde;
+			fichier >> Idx;
+			fichier >> Dde;
+
+			clients[i] = new Customer(Idx, Dde);
 		}
 
 		// skip useless string
@@ -116,7 +131,7 @@ int DataAP::getVehicleCap()
 	return vehicleCap;
 }
 
-int DataAP::getDistances(int index1, int index2)
+double DataAP::getDistances(int index1, int index2)
 {
 	if(index1 == 0 || index2 == 0)
 	{
