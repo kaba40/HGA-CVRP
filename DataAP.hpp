@@ -43,20 +43,23 @@ class DataAP
 private:
 
 	vector<customer> clients; // vector of customer
-	vector<double> arcCost; // pas precis
+	vector<vector<int>> distNodes; // distances between nodes LOWER_DIAG_ROW
 
-	int nbNodes;
+	int numberNodes;
+	int numberVehicle;
 	int vehicleCap;
 	int depotIndex;
 
- void readData( const char* data_vrp);
+ void readData( const char* data_vrp, int nbVeh);
 
 
 public:
 
-	DataAP( const char* data_vrp);
-	int getNodes();
-
+	DataAP( const char* data_vrp, int nbVeh);
+	int getNumberNodes();
+	int getNumberVehicle();
+	int getVehicleCap();
+	int getDistances(int index1, int index2);
 	virtual ~DataAP();
 };
 

@@ -7,73 +7,79 @@
 
 #include "DataAP.hpp"
 
-DataAP::DataAP( const char* data_vrp)
+DataAP::DataAP( const char* data_vrp, int nbVeh)
 {
-
-	readData(data_vrp);
+	readData(data_vrp, nbVeh);
 }
 
 DataAP::~DataAP(){
 	// TODO Auto-generated destructor stub
 }
 
-void DataAP::readData( const char* data_vrp)
+void DataAP::readData( const char* data_vrp, int nbVeh)
 {
+	numberVehicle = nbVeh;
+
 	// lecture des données
-	ifstream fichier;
+
 	string line;
 	string uselessStr;
 
-	fichier.open(data_vrp);
+
+	ifstream fichier(data_vrp);
 	if(fichier.is_open())
 	{
-		// sauter les lignes inutiles
+		// skip useless lines
 		getline(fichier, line);
 		getline(fichier, line);
-		fichier >> uselessStr;
-		fichier >> uselessStr;
+		getline(fichier, line);
 
-		// read number of vehicle
-		fichier >> nbNodes;
 
-		//skip useless string
-
-		getline(fichier, line);
-		getline(fichier, line);
-		getline(fichier, line);
+		// read number of nodes
 		fichier >> uselessStr;
 		fichier >> uselessStr;
+		fichier >> numberNodes;
+
+		distNodes.resize(numberNodes+1);
+		for(int i = 1; i < numberNodes+1; i++)
+			distNodes[i].resize(i, 0);
+
+//		cout << "number of nodes = " << nbNodes << endl;
+//		exit(-1);
+
+		//skip useless lines
+		getline(fichier, line);
+		getline(fichier, line);
+		getline(fichier, line);
+		getline(fichier, line);
 
 		//read vehicle capacity
+		fichier >> uselessStr;
+		fichier >> uselessStr;
 		fichier >> vehicleCap;
 
 		//skip useless line
 		getline(fichier, line);
+		getline(fichier, line);
 
-
-		// get Edge_Weight_Section three lines
-		int nbLines = 0;
-		for(int i = 1; i < nbNodes; i++)
-			nbLines++;
-
-		arcCost = vector<double>(nbLines+1);
-		arcCost[0] = 0;
-		for(int i = 1; i < nbLines; i++)
+		// get distances between nodes in EDGE_WEIGHT_SECTION
+		for(int i = 1; i < numberNodes+1; i++)
 		{
-			fichier >> arcCost[i];
+			for(int j = 1; j < i; j++)
+			{
+				int d;
+				fichier >> d;
+				distNodes[i][j] = d;
+			}
 		}
-
 
 		//skip useless string
 		fichier >> uselessStr;
 
 		//fill vector of customer
-		clients = vector<customer> (nbNodes+1);
+		clients = vector<customer> (numberNodes+1);
 
-		clients[0].demand = 0;
-		clients[0].index = 0;
-
-		for(int i = 1; i < nbNodes; i++)
+		for(int i = 1; i < numberNodes+1; i++)
 		{
 			fichier >> clients[i].index;
 			fichier >> clients[i].demand;
@@ -95,7 +101,45 @@ void DataAP::readData( const char* data_vrp)
 	}
 }
 
-int DataAP::getNodes()
+int DataAP::getNumberNodes()
 {
-	return nbNodes;
+	return numberNodes;
+}
+
+int DataAP::getNumberVehicle()
+{
+	return numberVehicle;
+}
+
+int DataAP::getVehicleCap()
+{
+	return vehicleCap;
+}
+
+int DataAP::getDistances(int index1, int index2)
+{
+	if(index1 == 0 || index2 == 0)
+	{
+		cerr << " index1 and index2 must be superior to 0" << endl;
+		exit(-1);
+	}
+
+	if(index1 > numberNodes || index2 > numberNodes)
+	{
+		cerr << " index1 and index2 must be inferior to " << numberNodes << endl;
+		exit(-1);
+	}
+
+	if( index1 == index2)
+	{
+		cerr << " index1 and index2 must not be equal " << endl;
+		exit(-1);
+	}
+
+	if(index1 < index2)
+	{
+		return distNodes[index2][index1];
+	}
+
+	return distNodes[index1][index2];
 }

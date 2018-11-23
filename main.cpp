@@ -16,13 +16,20 @@ int main()
 {
 
 	string name_data = "Data/E-n7.vrp";
-
 	const char* data_vrp = name_data.c_str();
 
-	DataAP * data_instance;
-	data_instance = new DataAP(data_vrp);
+	int numVeh = 1;
 
-	cout<< "number of nodes = "<< data_instance->getNodes() << endl;
+	DataAP * data_instance;
+	data_instance = new DataAP(data_vrp, numVeh);
+
+	cout << " affichage d'information d'une instance " << endl;
+
+	cout<< " number of nodes = "<< data_instance->getNumberNodes() << endl;
+	cout << " number of vehicles = " << data_instance->getNumberVehicle() << endl;
+	cout << " vehicle capacity = " << data_instance->getVehicleCap() << endl;
+	cout << " distance entre 1 et 2 = " << data_instance->getDistances(1,2) << endl;
+	cout << " distance entre 2 et 1 = " << data_instance->getDistances(2,1) << endl;
 
 	cout << " implementation split algorithm" << endl;
 
