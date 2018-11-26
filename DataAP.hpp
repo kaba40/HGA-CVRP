@@ -62,6 +62,7 @@ public:
 	int getNumberVehicle();
 	int getVehicleCap();
 	double getDistances(int index1, int index2);
+	Customer* getCustomerByIndex( int index);
 	virtual ~DataAP();
 };
 

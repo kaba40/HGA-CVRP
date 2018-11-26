@@ -97,7 +97,12 @@ void DataAP::readData( const char* data_vrp, int nbVeh)
 			fichier >> Idx;
 			fichier >> Dde;
 
-			clients[i] = new Customer(Idx, Dde);
+			clients[i] = new Customer(Idx, Dde, this);
+		}
+
+		for(int i = 1; i < numberNodes+1; i++)
+		{
+			cout << "custo " << i << " index " << clients[i]->getIndex() << " demand " << clients[i]->getDemand() << endl;
 		}
 
 		// skip useless string
@@ -157,4 +162,31 @@ double DataAP::getDistances(int index1, int index2)
 	}
 
 	return distNodes[index1][index2];
+}
+
+Customer* DataAP::getCustomerByIndex( int index)
+{
+	if(index == 0)
+	{
+		cerr << " index must be superior to 0" << endl;
+		exit(-1);
+	}
+
+	if(index > numberNodes)
+	{
+		cerr << " index must be inferior to " << numberNodes << endl;
+		exit(-1);
+	}
+
+	for(int i = 1; i < numberNodes+1; i++)
+	{
+		Customer *returCusto = clients[i];
+
+		if(index == returCusto->getIndex())
+		{
+			return returCusto;
+		}
+	}
+
+	return NULL;
 }

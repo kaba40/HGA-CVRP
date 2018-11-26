@@ -33,8 +33,8 @@ int main()
 	cout << " distance entre 2 et 1 = " << data_instance->getDistances(2,1) << endl;
 
 	Customer* custo1; Customer* custo2;
-	custo1 = new Customer(1,0);
-	custo2 = new Customer(2,1);
+	custo1 = new Customer(1,0, data_instance);
+	custo2 = new Customer(2,1, data_instance);
 
 	cout << " distance entre 1 et 2 = " << custo1->getDistance(custo2) << endl;
 

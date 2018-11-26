@@ -15,9 +15,9 @@ class Customer
 private:
 	int index;
 	int demand;
-
+	DataAP *data_Inst;
 public:
-	Customer(int ind, int dem);
+	Customer(int ind, int dem, DataAP* _data);
 	virtual ~Customer();
 
 	double getDistance(Customer *c);
