@@ -137,6 +137,11 @@ int DataAP::getNumberNodes()
 	return numberNodes;
 }
 
+int DataAP::getDepotIndex()
+{
+	return depotIndex;
+}
+
 int DataAP::getNumberVehicle()
 {
 	return numberVehicle;

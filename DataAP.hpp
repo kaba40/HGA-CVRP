@@ -59,6 +59,7 @@ public:
  	DataAP();
 	DataAP( const char* data_vrp, int nbVeh);
 	int getNumberNodes();
+	int getDepotIndex();
 	int getNumberVehicle();
 	int getVehicleCap();
 	double getDistances(int index1, int index2);

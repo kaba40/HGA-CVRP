@@ -10,6 +10,7 @@
 #include<iostream>
 #include "DataAP.hpp"
 #include "Customer.hpp"
+#include "SplitBellman.hpp"
 
 using namespace std;
 
@@ -41,6 +42,12 @@ int main()
 	cout << " distance entre 6 et 7 = " << custo1->getDistance(custo2) << endl;
 
 	cout << " implementation split algorithm" << endl;
+
+	SplitBellman *splitAlgo;
+
+	splitAlgo = new SplitBellman(data_instance);
+
+	cout << "split algo return value is " << splitAlgo->solve() << endl;
 
 	return 0;
 
