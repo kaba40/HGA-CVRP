@@ -8,6 +8,20 @@
 #include "DataAP.hpp"
 #include "Customer.hpp"
 
+void skip_line(ifstream& file, int n){
+
+	string line;
+	for(int i =0; i <n; ++i)
+		getline(file, line);
+}
+
+void skip_uselessStr_storeVal(ifstream& file, int& var){
+	string uselessStr;
+	file >> uselessStr;
+	file >> uselessStr;
+	file >> var;
+}
+
 DataAP::DataAP()
 {
 	 numberNodes = 0;
@@ -42,56 +56,53 @@ void DataAP::readData( const char* data_vrp, int nbVeh)
 	if(fichier.is_open())
 	{
 		// skip useless lines
-		getline(fichier, line);
-		getline(fichier, line);
-		getline(fichier, line);
+		skip_line(fichier, 3);
 
 
 		// read number of nodes
-		fichier >> uselessStr;
-		fichier >> uselessStr;
-		fichier >> numberNodes;
+		skip_uselessStr_storeVal(fichier, numberNodes);
 
-		distNodes.resize(numberNodes+1);
-		for(int i = 1; i < numberNodes+1; i++)
+		distNodes.resize(numberNodes);
+		/*
+		for(int i = 0; i < numberNodes; i++)
 			distNodes[i].resize(i, 0);
-
-//		cout << "number of nodes = " << nbNodes << endl;
-//		exit(-1);
+		//*/
 
 		//skip useless lines
-		getline(fichier, line);
-		getline(fichier, line);
-		getline(fichier, line);
-		getline(fichier, line);
+		skip_line(fichier, 4);
 
 		//read vehicle capacity
-		fichier >> uselessStr;
-		fichier >> uselessStr;
-		fichier >> vehicleCap;
+		skip_uselessStr_storeVal(fichier, vehicleCap);
 
 		//skip useless line
-		getline(fichier, line);
-		getline(fichier, line);
+		skip_line(fichier, 2);
 
 		// get distances between nodes in EDGE_WEIGHT_SECTION
-		for(int i = 1; i < numberNodes+1; i++)
+		for(int i = 0; i < numberNodes; i++)
 		{
-			for(int j = 1; j < i; j++)
+			for(int j = 0; j < i; j++) // fill a complete matrix
 			{
 				int d;
 				fichier >> d;
-				distNodes[i][j] = d;
+				distNodes[i].push_back(d);
 			}
 		}
-
+#ifdef DEBUG
+		for(int i = 0; i < numberNodes; i++)
+		{
+			for(int j = 0; j < i; j++)
+			{
+				cout << "distNode["<< i+1<< "][" << j+1 << "] =" << distNodes[i][j] << endl;
+			}
+		}
+#endif
 		//skip useless string
 		fichier >> uselessStr;
 
 		//fill vector of customer
-		clients = vector<Customer*> (numberNodes+1);
+		clients = vector<Customer*> (numberNodes);
 
-		for(int i = 1; i < numberNodes+1; i++)
+		for(int i = 0; i < numberNodes; i++)
 		{
 			int Idx, Dde;
 			fichier >> Idx;
@@ -99,12 +110,12 @@ void DataAP::readData( const char* data_vrp, int nbVeh)
 
 			clients[i] = new Customer(Idx, Dde, this);
 		}
-
-		for(int i = 1; i < numberNodes+1; i++)
+		/*
+		for(int i = 0; i < numberNodes; i++)
 		{
-			cout << "custo " << i << " index " << clients[i]->getIndex() << " demand " << clients[i]->getDemand() << endl;
+			cout << "custo " << i+1 << " index " << clients[i]->getIndex() << " demand " << clients[i]->getDemand() << endl;
 		}
-
+		//*/
 		// skip useless string
 		fichier >> uselessStr;
 
@@ -158,35 +169,27 @@ double DataAP::getDistances(int index1, int index2)
 
 	if(index1 < index2)
 	{
+		index1--;
+		index2--;
 		return distNodes[index2][index1];
 	}
 
+	index1--;
+	index2--;
 	return distNodes[index1][index2];
 }
 
 Customer* DataAP::getCustomerByIndex( int index)
 {
-	if(index == 0)
+	// assert(index > 0 && index <= numnerNodes); precondition
+	if(index < 0 || index > numberNodes)
 	{
-		cerr << " index must be superior to 0" << endl;
-		exit(-1);
+		cerr << " index must be superior to 0 or lower than numberNodes" << endl;
+		exit(-1); // generer une exception
 	}
 
-	if(index > numberNodes)
-	{
-		cerr << " index must be inferior to " << numberNodes << endl;
-		exit(-1);
-	}
+	if(index > 0)
+		index--;
+	return clients[index];
 
-	for(int i = 1; i < numberNodes+1; i++)
-	{
-		Customer *returCusto = clients[i];
-
-		if(index == returCusto->getIndex())
-		{
-			return returCusto;
-		}
-	}
-
-	return NULL;
 }

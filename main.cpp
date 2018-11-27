@@ -32,11 +32,13 @@ int main()
 	cout << " distance entre 1 et 2 = " << data_instance->getDistances(1,2) << endl;
 	cout << " distance entre 2 et 1 = " << data_instance->getDistances(2,1) << endl;
 
-	Customer* custo1; Customer* custo2;
-	custo1 = new Customer(1,0, data_instance);
-	custo2 = new Customer(2,1, data_instance);
+	Customer* custo1 = data_instance->getCustomerByIndex(6);
 
-	cout << " distance entre 1 et 2 = " << custo1->getDistance(custo2) << endl;
+	Customer* custo2 = data_instance->getCustomerByIndex(7);
+//	custo1 = new Customer(1,0, data_instance);
+//	custo2 = new Customer(2,1, data_instance);
+
+	cout << " distance entre 6 et 7 = " << custo1->getDistance(custo2) << endl;
 
 	cout << " implementation split algorithm" << endl;
 
