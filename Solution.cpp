@@ -12,19 +12,33 @@ Solution::Solution(DataAP *tsp_dat)
 	solutionCost =0;
 	numberOfRouteInSolution = 0;
 	tsp_data = tsp_dat;
+
+	/* // kairaba: tu dois initialiser ici l'encodage
+	   / ainsi la méthode Decodage ne prendra aucun argument
+	   encoding = data_instance->getCustomers();
+
+	  
+	//*/
 }
 
 Solution::~Solution()
 {
+
+  /* // kairaba : ce n'est pas ici qu'il faut détruire la liste des customers
+     // si tu as plusieurs solutions, comment feras tu si tu détruis tous les customers ?
+     // tu dois détruire les customers dans le destructeur de la classe DataAP
 	for(int i = 0; i < tsp_data->getNumberNodes()-1; i++)
 	{
 		delete encodage[i];
 	}
+  //*/
 	// TODO Auto-generated destructor stub
 }
 
 
-bool Solution::Decodage(vector<Customer*> enc)
+// kairaba : méthode sans argument
+// enc : attribut de la classe. Donc tu y as accès
+bool Solution::Decodage(vector<Customer*> enc) 
 {
 	bool returValue = false;
 	SplitBellman *splitAlgo;
@@ -65,6 +79,8 @@ bool Solution::Decodage(vector<Customer*> enc)
 
 }
 
+// kairaba : méthode sans argument
+// enc : attribut de la classe. Donc tu y as accès
 void Solution::CheckSolution(vector<Customer*> enc)
 {
 	int start, end;
@@ -110,6 +126,8 @@ void Solution::CheckSolution(vector<Customer*> enc)
 	}
 }
 
+// kairaba : méthode sans argument
+// enc : attribut de la classe. Donc tu y as accès
 void Solution::PrintSolution(vector<Customer*> enc)
 {
 

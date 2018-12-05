@@ -42,9 +42,17 @@ private:
 public:
 	Solution(DataAP *tsp_dat);
 	virtual ~Solution();
+  // kairaba : méthode sans argument
+  // enc : attribut de la classe. Donc tu y as accès
 	bool Decodage(vector<Customer*> enc);
+
+  // kairaba : méthode sans argument
+  // enc : attribut de la classe. Donc tu y as accès
 	void CheckSolution(vector<Customer*> enc);
-	void PrintSolution(vector<Customer*> enc);
+
+  // kairaba : méthode sans argument
+  // enc : attribut de la classe. Donc tu y as accès
+  void PrintSolution(vector<Customer*> enc);
 
 	vector<int> getTourStructure();
 	double getObjVal();

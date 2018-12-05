@@ -45,6 +45,12 @@ int main()
 	encoding = data_instance->getCustomers();
 
 #ifdef SPLIT_ALGORITHM_DEBUG
+	// kairaba : avant d'utiliser random_shuffle, il faut exécuter la méthode
+	// qui suit d'abord. Autrement, entre deux lancements de ton programme
+	// on aura toujours le même vector
+	// Enfin, la génération d'une séquence aléatoire doit être une méthode
+	// de la classe solution. Cette méthode initialisera l'attribut encoding.
+	std::srand ( unsigned ( std::time(0) ) );
 	random_shuffle(encoding.begin(), encoding.end());
 	for(uint i = 0; i< encoding.size(); i++)
 	{
