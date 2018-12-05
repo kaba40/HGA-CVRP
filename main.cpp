@@ -8,9 +8,12 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<iostream>
+#include<algorithm>
+#include<random>
 #include "DataAP.hpp"
 #include "Customer.hpp"
 #include "SplitBellman.hpp"
+#include "Solution.hpp"
 
 using namespace std;
 
@@ -30,24 +33,34 @@ int main()
 	cout<< " number of nodes = "<< data_instance->getNumberNodes() << endl;
 	cout << " number of vehicles = " << data_instance->getNumberVehicle() << endl;
 	cout << " vehicle capacity = " << data_instance->getVehicleCap() << endl;
-	cout << " distance entre 1 et 2 = " << data_instance->getDistances(1,2) << endl;
-	cout << " distance entre 2 et 1 = " << data_instance->getDistances(2,1) << endl;
 
-	Customer* custo1 = data_instance->getCustomerByIndex(6);
-
-	Customer* custo2 = data_instance->getCustomerByIndex(7);
-//	custo1 = new Customer(1,0, data_instance);
-//	custo2 = new Customer(2,1, data_instance);
-
-	cout << " distance entre 6 et 7 = " << custo1->getDistance(custo2) << endl;
+	cout <<  endl;
 
 	cout << " implementation split algorithm" << endl;
 
-	SplitBellman *splitAlgo;
+	Solution *solution_tsp;
+	solution_tsp = new Solution(data_instance);
 
-	splitAlgo = new SplitBellman(data_instance);
+	vector<Customer*> encoding = vector<Customer*>(data_instance->getNumberNodes()-1);
+	encoding = data_instance->getCustomers();
 
-	cout << "split algo return value is " << splitAlgo->solve() << endl;
+#ifdef SPLIT_ALGORITHM_DEBUG
+	random_shuffle(encoding.begin(), encoding.end());
+	for(uint i = 0; i< encoding.size(); i++)
+	{
+		cout << "enc[" << i << "]= " << encoding[i]->getId() << endl;
+		cout << "custo " << encoding[i]->getId() << " index " << encoding[i]->getIndex() << " demand " << encoding[i]->getDemand() << endl;
+	}
+
+#endif
+
+	if(solution_tsp->Decodage(encoding))
+	{
+		solution_tsp->CheckSolution(encoding);
+		solution_tsp->PrintSolution(encoding);
+	}
+
+
 
 	return 0;
 

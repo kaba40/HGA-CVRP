@@ -8,19 +8,28 @@
 #ifndef CUSTOMER_HPP_
 #define CUSTOMER_HPP_
 
+#include<stdio.h>
+#include<stdlib.h>
+#include<iostream>
+#include <string>
+
+using namespace std;
 //#include "DataAP.hpp"
 class DataAP;
 class Customer
 {
 private:
 	int index;
+	string id;
 	int demand;
 	DataAP *data_Inst;
 public:
-	Customer(int ind, int dem, DataAP* _data);
+	Customer(string idx, int ind, int dem, DataAP* _data);
 	virtual ~Customer();
 
 	double getDistance(Customer *c);
+	double getDistanceDepot();
+	string getId();
 	int getIndex();
 	int getDemand();
 };

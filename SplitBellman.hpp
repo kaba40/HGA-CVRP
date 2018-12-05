@@ -13,13 +13,16 @@
 class SplitBellman
 {
 private:
-	DataAP * _tspData; //data instance
-	vector<double> _pathCost; //cost of the shortest path
-	vector<int> _pred; //index of the predecessor
+	DataAP * tspData; //data instance
+	vector<Customer*> encod;
+	vector<double> pathCost; //cost of the shortest path
+	vector<int> pred; //index of the predecessor
 public:
-	SplitBellman(DataAP* tspData);
-	int solve();
+	SplitBellman(DataAP* tspDat, vector<Customer*> enc);
 	virtual ~SplitBellman();
+	int solve();
+	vector<double>& getPathCost(void);
+	vector<int>& getPredence(void);
 };
 
 #endif /* SPLITBELLMAN_HPP_ */

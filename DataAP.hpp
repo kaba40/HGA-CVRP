@@ -49,7 +49,6 @@ private:
 	int numberNodes;
 	int numberVehicle;
 	int vehicleCap;
-	int depotIndex;
 
  void readData( const char* data_vrp, int nbVeh);
 
@@ -59,11 +58,11 @@ public:
  	DataAP();
 	DataAP( const char* data_vrp, int nbVeh);
 	int getNumberNodes();
-	int getDepotIndex();
 	int getNumberVehicle();
 	int getVehicleCap();
 	double getDistances(int index1, int index2);
 	Customer* getCustomerByIndex( int index);
+	vector<Customer*> getCustomers();
 	virtual ~DataAP();
 };
 

@@ -8,10 +8,47 @@
 #ifndef SOLUTION_HPP_
 #define SOLUTION_HPP_
 
-class Solution {
+#include<iostream>
+#include<stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <string>
+#include <fstream>
+#include <iomanip>
+#include <sstream>
+#include <time.h>
+
+#include <set>
+#include <vector>
+#include <list>
+#include <map>
+#include <queue>
+#include <utility>
+
+#include "Customer.hpp"
+#include "DataAP.hpp"
+#include "SplitBellman.hpp"
+
+using namespace std;
+class Solution
+{
+private:
+//	list<> de customers
+	vector<Customer*> encodage;
+	vector<int> tour;
+	double solutionCost; //objective_value
+	int numberOfRouteInSolution;
+	DataAP *tsp_data;
 public:
-	Solution();
+	Solution(DataAP *tsp_dat);
 	virtual ~Solution();
+	bool Decodage(vector<Customer*> enc);
+	void CheckSolution(vector<Customer*> enc);
+	void PrintSolution(vector<Customer*> enc);
+
+	vector<int> getTourStructure();
+	double getObjVal();
+	int getNumberOfRoutesInSolution();
 };
 
 #endif /* SOLUTION_HPP_ */

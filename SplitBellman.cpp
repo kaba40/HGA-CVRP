@@ -8,75 +8,102 @@
 #include "SplitBellman.hpp"
 #include "Customer.hpp"
 
-SplitBellman::SplitBellman(DataAP* tspData)
+SplitBellman::SplitBellman(DataAP* tspDat,  vector<Customer*> enc)
 {
-	_tspData = tspData;
+	tspData = tspDat;
+	encod = enc;
 	// TODO Auto-generated constructor stub
-
 }
 
 SplitBellman::~SplitBellman() {
 	// TODO Auto-generated destructor stub
 }
 
+
 int SplitBellman::solve()
 {
 	double load, distance, cost;
+#ifdef DEBUG
+	for(int i = 0; i < tspData->getNumberNodes()-1; i++)
+	{
+		cout << "encod[" << i << "]= " << encod[i]->getId() << endl;
+	}
+#endif
 
 	//initialization of vectors
-	_pathCost = vector<double>(_tspData->getNumberNodes());
-	_pred = vector<int>(_tspData->getNumberNodes());
+	pathCost = vector<double>(tspData->getNumberNodes(), 1.e30);
+	pred = vector<int>(tspData->getNumberNodes(), -1);
 
-	for(int i = 0; i < _tspData->getNumberNodes(); i++)
-	{
-		_pathCost[i] = 1.e30;
-		_pred[i] = -1;
-	}
-
-	_pathCost[0] = 0.0;
+	pathCost[0] = 0.0; //depot
 
 	//split algorithm
-	for( int t = 0; t < _tspData->getNumberNodes(); t++)
+	for( int t = 0; t < tspData->getNumberNodes()-1; t++)
 	{
 		load = 0;
 		distance = 0;
-		int i = t+2 ;//t+1;
-
+		int i = t+1;
+#ifdef SPLIT_ALGORITHM_DEBUG
 		cout << "t = " << t << endl;
+#endif
 
-		while((i < _tspData->getNumberNodes()) && ((load + _tspData->getCustomerByIndex(i)->getDemand()) <= _tspData->getVehicleCap()))
+//		while((i < tspData->getNumberNodes()) && ((load + tspData->getCustomerByIndex(encod[i-1])->getDemand()) <= tspData->getVehicleCap()))
+		while((i < tspData->getNumberNodes()) && ((load + encod[i-1]->getDemand()) <= tspData->getVehicleCap()))
 		{
-			load += _tspData->getCustomerByIndex(i)->getDemand();
-			Customer *depot, *clientI, *clientIav;
+			Customer *clientI, *clientIav;
+			clientI = encod[i-1]; // clientI = tspData->getCustomerByIndex(encod[i-1]);
+			load += clientI->getDemand();
 
-			depot = _tspData->getCustomerByIndex(_tspData->getDepotIndex());
-
-			cout << "depotIndex = " << depot->getIndex() << endl;
-
-			cout << " i = " << i << endl;
-			if( i == t+2) //if( i == t+1)
+			if( i == t+1)
 			{
-				clientI = _tspData->getCustomerByIndex(i);
-				cout << " clientI index = " << clientI->getIndex() << endl;
-				distance += depot->getDistance(clientI); // exception index1 and index2 must not be equal
+				distance += clientI->getDistanceDepot();
+#ifdef SPLIT_ALGORITHM_DEBUG
+				cout << "distance [" << 0 << "][" << clientI->getId() << "]= " << distance << endl;
+#endif
 			}
 			else
 			{
-				clientIav = _tspData->getCustomerByIndex(i-1);
-				clientI = _tspData->getCustomerByIndex(i);
+				clientIav = encod[i-2];
 				distance += clientIav->getDistance(clientI);
+#ifdef SPLIT_ALGORITHM_DEBUG
+				cout << "distance [" << clientIav->getId() << "][" << clientI->getId() << "]= " << distance << endl;
+#endif
 			}
 
-
-			cost = distance + depot->getDistance(clientI);
-			if(_pathCost[t] + cost < _pathCost[i] && load <= _tspData->getVehicleCap())
+//			exit(-1);
+			cost = distance + clientI->getDistanceDepot() ;// distance from depot
+			if(pathCost[t] + cost < pathCost[i] && load <= tspData->getVehicleCap())
 			{
-				_pathCost[i] = _pathCost[t] + cost;
-				_pred[i] = t;
+				pathCost[i] = pathCost[t] + cost; // modifier pathCost[encod[i-1]] par pathCost[]
+				pred[i] = t;
+#ifdef SPLIT_ALGORITHM_DEBUG
+				cout << "pathCost[" << i << "]= " << pathCost[t] + cost << endl;
+				cout << "pred[" << i << "]= " << t << endl;
+#endif
 			}
 			 i++;
 		}
 	}
 
-	return 0;
+	if(pathCost[tspData->getNumberNodes()-1] > 1.e29)
+	{
+		cout << "ERROR : no Split solution has been propagated until the last node" << endl ;
+		throw string ("ERROR : no Split solution has been propagated until the last node");
+	}
+#ifdef SPLIT_ALGORITHM_DEBUG
+	for(int i = 0; i < tspData->getNumberNodes(); i++)
+		cout<< "pred[" << i << "]" << pred[i] << endl;
+	cout << "pathCost[" << tspData->getNumberNodes()-1 << "]= " << pathCost[tspData->getNumberNodes()-1] << endl;
+#endif
+	return 1;
+}
+
+vector<double>& SplitBellman::getPathCost(void)
+{
+
+	return pathCost;
+}
+
+vector<int>& SplitBellman::getPredence(void)
+{
+	return pred;
 }
