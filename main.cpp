@@ -41,29 +41,22 @@ int main()
 	Solution *solution_tsp;
 	solution_tsp = new Solution(data_instance);
 
-	vector<Customer*> encoding = vector<Customer*>(data_instance->getNumberNodes()-1);
-	encoding = data_instance->getCustomers();
+	solution_tsp->setRandomSequence();
+
 
 #ifdef SPLIT_ALGORITHM_DEBUG
-	// kairaba : avant d'utiliser random_shuffle, il faut exécuter la méthode
-	// qui suit d'abord. Autrement, entre deux lancements de ton programme
-	// on aura toujours le même vector
-	// Enfin, la génération d'une séquence aléatoire doit être une méthode
-	// de la classe solution. Cette méthode initialisera l'attribut encoding.
-	std::srand ( unsigned ( std::time(0) ) );
-	random_shuffle(encoding.begin(), encoding.end());
-	for(uint i = 0; i< encoding.size(); i++)
+
+	for(uint i = 0; i< solution_tsp->getSequence().size(); i++)
 	{
-		cout << "enc[" << i << "]= " << encoding[i]->getId() << endl;
-		cout << "custo " << encoding[i]->getId() << " index " << encoding[i]->getIndex() << " demand " << encoding[i]->getDemand() << endl;
+		cout << "custo " << solution_tsp->getSequence()[i]->getId() << " index " << solution_tsp->getSequence()[i]->getIndex() << " demand " << solution_tsp->getSequence()[i]->getDemand() << endl;
 	}
 
 #endif
 
-	if(solution_tsp->Decodage(encoding))
+	if(solution_tsp->Decodage())
 	{
-		solution_tsp->CheckSolution(encoding);
-		solution_tsp->PrintSolution(encoding);
+		solution_tsp->CheckSolution();
+		solution_tsp->PrintSolution();
 	}
 
 

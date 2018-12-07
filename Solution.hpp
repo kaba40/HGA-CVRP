@@ -24,6 +24,8 @@
 #include <map>
 #include <queue>
 #include <utility>
+#include<algorithm>
+#include<random>
 
 #include "Customer.hpp"
 #include "DataAP.hpp"
@@ -33,7 +35,6 @@ using namespace std;
 class Solution
 {
 private:
-//	list<> de customers
 	vector<Customer*> encodage;
 	vector<int> tour;
 	double solutionCost; //objective_value
@@ -42,21 +43,24 @@ private:
 public:
 	Solution(DataAP *tsp_dat);
 	virtual ~Solution();
+
+	void setRandomSequence();
   // kairaba : méthode sans argument
   // enc : attribut de la classe. Donc tu y as accès
-	bool Decodage(vector<Customer*> enc);
+	bool Decodage();
 
   // kairaba : méthode sans argument
   // enc : attribut de la classe. Donc tu y as accès
-	void CheckSolution(vector<Customer*> enc);
+	void CheckSolution();
 
   // kairaba : méthode sans argument
   // enc : attribut de la classe. Donc tu y as accès
-  void PrintSolution(vector<Customer*> enc);
+  void PrintSolution();
 
 	vector<int> getTourStructure();
 	double getObjVal();
 	int getNumberOfRoutesInSolution();
+	vector<Customer*> getSequence();
 };
 
 #endif /* SOLUTION_HPP_ */

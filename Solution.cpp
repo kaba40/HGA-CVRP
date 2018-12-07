@@ -7,11 +7,14 @@
 
 #include "Solution.hpp"
 
+
+
 Solution::Solution(DataAP *tsp_dat)
 {
 	solutionCost =0;
 	numberOfRouteInSolution = 0;
 	tsp_data = tsp_dat;
+	encodage = tsp_dat->getCustomers();
 
 	/* // kairaba: tu dois initialiser ici l'encodage
 	   / ainsi la méthode Decodage ne prendra aucun argument
@@ -35,14 +38,24 @@ Solution::~Solution()
 	// TODO Auto-generated destructor stub
 }
 
+void Solution::setRandomSequence()
+{
+	// kairaba : avant d'utiliser random_shuffle, il faut exécuter la méthode
+	// qui suit d'abord. Autrement, entre deux lancements de ton programme
+	// on aura toujours le même vector
+	// Enfin, la génération d'une séquence aléatoire doit être une méthode
+	// de la classe solution. Cette méthode initialisera l'attribut encoding.
+	srand(unsigned (time(0)) );
+	random_shuffle(encodage.begin(), encodage.end());
+}
 
 // kairaba : méthode sans argument
 // enc : attribut de la classe. Donc tu y as accès
-bool Solution::Decodage(vector<Customer*> enc) 
+bool Solution::Decodage()
 {
 	bool returValue = false;
 	SplitBellman *splitAlgo;
-	splitAlgo = new SplitBellman(tsp_data, enc);
+	splitAlgo = new SplitBellman(tsp_data, encodage);
 
 	if(splitAlgo->solve())
 	{
@@ -81,7 +94,7 @@ bool Solution::Decodage(vector<Customer*> enc)
 
 // kairaba : méthode sans argument
 // enc : attribut de la classe. Donc tu y as accès
-void Solution::CheckSolution(vector<Customer*> enc)
+void Solution::CheckSolution()
 {
 	int start, end;
 	double load;
@@ -97,18 +110,18 @@ void Solution::CheckSolution(vector<Customer*> enc)
 		if( i < numberOfRouteInSolution-1)
 			end = tour[i+1];
 		else
-			end = enc.size()+1;
+			end = encodage.size()+1;
 
 
 		for(int j = start; j < end; j++)
-			load += enc[j-1]->getDemand();
+			load += encodage[j-1]->getDemand();
 
-		distance += enc[start-1]->getDistanceDepot() + enc[end-2]->getDistanceDepot();
+		distance += encodage[start-1]->getDistanceDepot() + encodage[end-2]->getDistanceDepot();
 		for(int j = start; j < end-1; j++)
 		{
 			int k = j-1;
 			int ksuiv = k+1;
-			distance += enc[k]->getDistance(enc[ksuiv]);
+			distance += encodage[k]->getDistance(encodage[ksuiv]);
 		}
 
 		if(load > tsp_data->getVehicleCap() + 0.0001)
@@ -128,7 +141,7 @@ void Solution::CheckSolution(vector<Customer*> enc)
 
 // kairaba : méthode sans argument
 // enc : attribut de la classe. Donc tu y as accès
-void Solution::PrintSolution(vector<Customer*> enc)
+void Solution::PrintSolution()
 {
 
 	cout << endl ;
@@ -142,16 +155,21 @@ void Solution::PrintSolution(vector<Customer*> enc)
 		if( i < numberOfRouteInSolution-1)
 			end = tour[i+1];
 		else
-			end = enc.size()+1;
+			end = encodage.size()+1;
 
 		cout << "TOUR[" << i << "] = {" ;
 		for(int j = start; j < end; j++)
-			cout << enc[j-1]->getId() << " " ;
+			cout << encodage[j-1]->getId() << " " ;
 		cout << "}" << endl;
 
 	}
 	cout << "------------------------------------" << endl ;
 	cout << endl ;
+}
+
+vector<Customer*> Solution::getSequence()
+{
+	return encodage;
 }
 
 vector<int> Solution::getTourStructure()
