@@ -9,14 +9,12 @@
 #define SPLITBELLMAN_HPP_
 
 #include "DataAP.hpp"
-#include "DLinkedList.hpp"
 
 class SplitBellman
 {
 private:
 	DataAP * tspData; //data instance
-//	vector<Customer*> encod;
-	DLinkedList encod;
+	vector<Customer*> encod;
 	vector<double> pathCost; //cost of the shortest path
 	vector<int> pred; //index of the predecessor
 public:

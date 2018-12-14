@@ -15,16 +15,19 @@ class Node
 private:
 	Node *next;
 	Node *previous;
-	Customer *client;
+//	Customer *client;
+	int data;
 public:
-	Node(Customer *clt);
-	Node(Node *nxt, Node *prev, Customer *clt);
+	Node(int d); //Node(Customer *clt);
+	Node(Node *nxt, Node *prev, int d); //Node(Node *nxt, Node *prev, Customer *clt);
 	virtual ~Node();
 
 	Node* getNext();
 	Node* getPrevious();
 	void setNext(Node *nxt);
 	void setPrevious(Node *prev);
+
+	int getData();
 };
 
 #endif /* NODE_HPP_ */

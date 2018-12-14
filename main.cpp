@@ -10,15 +10,45 @@
 #include<iostream>
 #include<algorithm>
 #include<random>
+
 #include "DataAP.hpp"
 #include "Customer.hpp"
 #include "SplitBellman.hpp"
 #include "Solution.hpp"
+#include "Node.hpp"
+#include "DLinkedList.hpp"
 
 using namespace std;
 
 int main()
 {
+
+	DLinkedList list;
+
+	for(int i = 0; i < 20 ; i+=2)
+	{
+		Node *node;
+		node = new Node(i+1);
+		list.push_front(node);
+	}
+
+	list.show();
+//	Node *tmp;
+//	tmp = new Node(1001);
+	list.push_front(new Node(1001));
+
+	cout << "montre l'ajout de 1001 au debut" << endl;
+
+	list.show();
+
+	list.push_back(new Node(673));
+
+	cout << "montre l'ajout de 673 à la fin" << endl;
+
+	list.show();
+
+
+	exit(-1);
 
 	string name_data = "Data/E-n7.vrp";
 	const char* data_vrp = name_data.c_str();
@@ -59,11 +89,6 @@ int main()
 		solution_tsp->PrintSolution();
 	}
 
-//	int *p = NULL;
-//	if(!p)
-//	{
-//		cout << "true" << endl;
-//	}
 
 
 	delete data_instance;

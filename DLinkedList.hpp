@@ -29,6 +29,7 @@ public:
 	void delete_list();
 
 	inline int getSize(){return size;}
+	void show();
 
 
 };

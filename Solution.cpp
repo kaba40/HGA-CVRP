@@ -14,16 +14,14 @@ Solution::Solution(DataAP *tsp_dat)
 	solutionCost =0;
 	numberOfRouteInSolution = 0;
 	tsp_data = tsp_dat;
-//	encodage = tsp_dat->getCustomers();
+	encodage = tsp_dat->getCustomers();
 
-	vector<Customer*> custos = tsp_data->getCustomers();
-	for(int i = 0; i < custos; i++)
-	{
-		Node *tmp;
-		tmp = new Node(custos[i]);
-		encodage.push_front(tmp);
-	}
+	/* // kairaba: tu dois initialiser ici l'encodage
+	   / ainsi la méthode Decodage ne prendra aucun argument
+	   encoding = data_instance->getCustomers();
 
+
+	//*/
 }
 
 Solution::~Solution()
@@ -42,19 +40,13 @@ Solution::~Solution()
 
 void Solution::setRandomSequence()
 {
-	vector<Customer*> custos = tsp_data->getCustomers();
+	// kairaba : avant d'utiliser random_shuffle, il faut exécuter la méthode
+	// qui suit d'abord. Autrement, entre deux lancements de ton programme
+	// on aura toujours le même vector
+	// Enfin, la génération d'une séquence aléatoire doit être une méthode
+	// de la classe solution. Cette méthode initialisera l'attribut encoding.
 	srand(unsigned (time(0)) );
-//	random_shuffle(encodage.begin(), encodage.end());
-	random_shuffle(custos.begin(), custos.end());
-
-	encodage.delete_list();
-	for(int i = 0; i < custos; i++)
-	{
-		Node *tmp;
-		tmp = new Node(custos[i]);
-		encodage.push_front(tmp);
-	}
-
+	random_shuffle(encodage.begin(), encodage.end());
 }
 
 // kairaba : méthode sans argument

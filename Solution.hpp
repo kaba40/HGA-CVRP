@@ -36,8 +36,7 @@ using namespace std;
 class Solution
 {
 private:
-//	vector<Customer*> encodage;
-	DLinkedList encodage; // Is possible DLinkedList encodage; ?
+	vector<Customer*> encodage;
 	vector<int> tour;
 	double solutionCost; //objective_value
 	int numberOfRouteInSolution;
