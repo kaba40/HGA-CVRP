@@ -59,6 +59,15 @@ int main()
 		solution_tsp->PrintSolution();
 	}
 
+//	int *p = NULL;
+//	if(!p)
+//	{
+//		cout << "true" << endl;
+//	}
+
+
+	delete data_instance;
+	delete solution_tsp;
 
 
 	return 0;
