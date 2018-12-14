@@ -30,12 +30,14 @@
 #include "Customer.hpp"
 #include "DataAP.hpp"
 #include "SplitBellman.hpp"
+#include "DLinkedList.hpp"
 
 using namespace std;
 class Solution
 {
 private:
-	vector<Customer*> encodage;
+//	vector<Customer*> encodage;
+	DLinkedList encodage; // Is possible DLinkedList encodage; ?
 	vector<int> tour;
 	double solutionCost; //objective_value
 	int numberOfRouteInSolution;

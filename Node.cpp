@@ -7,6 +7,13 @@
 
 #include "Node.hpp"
 
+Node::Node(Customer* clt)
+{
+	this->client = clt;
+	this->next = nullptr;
+	this->previous = nullptr;
+}
+
 Node::Node(Node *nxt, Node *prev, Customer *clt)
 {
 	this->next = nxt;

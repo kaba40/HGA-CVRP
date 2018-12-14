@@ -26,6 +26,7 @@ public:
 	void insert(int i, Node *node);
 	Node* pop_front();
 	Node* pop_back();
+	void delete_list();
 
 	inline int getSize(){return size;}
 

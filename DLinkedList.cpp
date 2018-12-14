@@ -119,3 +119,19 @@ Node* DLinkedList::pop_back()
 
 	return tmp;
 }
+
+void DLinkedList::delete_list()
+{
+	Node *tmp = head;
+	while(tmp)
+	{
+		Node *current = tmp;
+		tmp =tmp->getNext();
+
+		current = nullptr;
+		delete current;
+	}
+
+	head = nullptr;
+	tail = nullptr;
+}

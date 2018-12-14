@@ -17,6 +17,7 @@ private:
 	Node *previous;
 	Customer *client;
 public:
+	Node(Customer *clt);
 	Node(Node *nxt, Node *prev, Customer *clt);
 	virtual ~Node();
 
