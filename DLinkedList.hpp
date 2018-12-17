@@ -31,7 +31,6 @@ public:
 	inline int getSize(){return size;}
 	void show();
 
-
 };
 
 #endif /* DLINKEDLIST_HPP_ */
