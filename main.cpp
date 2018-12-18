@@ -72,11 +72,13 @@ int main()
 
 	list->show();
 
-	list->insert(1, new Node(10));
+	list->insert(0, new Node(10));
 	list->show();
+
 
 	list->insert(3, new Node(8));
 	list->show();
+
 
 	list->insert(5, new Node(6));
 	list->show();

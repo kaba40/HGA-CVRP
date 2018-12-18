@@ -72,50 +72,54 @@ void DLinkedList::push_back(Node *node) // add an element to the end
     size++;
 }
 
-void DLinkedList::insert(int position, Node *node)
+void DLinkedList::insert(int position, Node *node) // modify insert function
 {
 	if(!node)
 		throw invalid_argument("Non-empty list pointer can't be null");
 
 	// kairaba : normalement, avec une boucle bien construite, cela suffira
 
-	// kairaba : on peut imaginer que quand c'est négatif, on veuille l'insérer à la fin ( on l'insère valeur_absolue(position) en partant de la fin)
-	if(position <= 0)
-		push_front(node);
-	// kairaba : on peut imaginer que quand c'est supérieur à la taille, on veuille l'insérer au début (on l'insère valeur_absolue(position-size) en partant du début)
-	else if(position > size)
-		push_back(node);
-	else
+	Node *tmp = head;
+	int i = 0;
+
+	while(tmp != NULL && i < position-1)
 	{
 
-		Node *tmp = head;
-		int i = 1;
-
-		while(tmp != NULL && i <= position)
-		{
-			if( i == position)
-			{
-				if(tmp->getPrevious() == NULL)
-					push_front(node);
-				else
-				{
-
-					tmp->getPrevious()->setNext(node);
-					tmp->setPrevious(node);
-					node->setPrevious(tmp->getPrevious());
-					node->setNext(tmp);
-					size++;
-
-				}
-			}
-			else
-			{
-				tmp = tmp->getNext();
-			}
-
-			i++;
-		}
+		tmp = tmp->getNext();
+		i++;
 	}
+
+	if(tmp == NULL && position <= 0)
+	{
+		head = node;
+		tail = node;
+		head->setNext(NULL);
+	}
+	else if(tmp != NULL && position <= 0)
+	{
+		node->setNext(head);
+		head->setPrevious(node);
+		head = node;
+
+    	head->setPrevious(NULL);
+	}
+	else if( tmp == NULL && position >= size)
+	{
+		node->setPrevious(tail);
+		tail->setNext(node);
+		tail = node;
+		tail->setNext(NULL);
+	}
+	else
+	{
+		tmp->getPrevious()->setNext(node);
+		tmp->setPrevious(node);
+		node->setPrevious(tmp->getPrevious());
+		node->setNext(tmp);
+	}
+
+	size++;
+
 }
 
 Node* DLinkedList::pop_front()
