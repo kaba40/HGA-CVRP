@@ -36,7 +36,8 @@ using namespace std;
 class Solution
 {
 private:
-	vector<Customer*> encodage;
+//	vector<Customer*> encodage;
+	DLinkedList* encodage;
 	vector<int> tour;
 	double solutionCost; //objective_value
 	int numberOfRouteInSolution;
@@ -61,7 +62,8 @@ public:
 	vector<int> getTourStructure();
 	double getObjVal();
 	int getNumberOfRoutesInSolution();
-	vector<Customer*> getSequence();
+//	vector<Customer*> getSequence();
+	DLinkedList* getSequence();
 };
 
 #endif /* SOLUTION_HPP_ */

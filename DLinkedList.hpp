@@ -23,7 +23,8 @@ public:
 
 	void push_front(Node *node);
 	void push_back(Node *node);
-	void insert(int i, Node *node);
+	void insert(int position, Node *node);
+	Node* find(int position);
 	Node* pop_front();
 	Node* pop_back();
 	void delete_list();

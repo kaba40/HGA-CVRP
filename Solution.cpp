@@ -14,7 +14,16 @@ Solution::Solution(DataAP *tsp_dat)
 	solutionCost =0;
 	numberOfRouteInSolution = 0;
 	tsp_data = tsp_dat;
-	encodage = tsp_dat->getCustomers();
+//	encodage = tsp_dat->getCustomers();
+	encodage = new DLinkedList();
+
+	vector<Customer*> enc = tsp_dat->getCustomers();
+
+	for(uint i = 0; i < enc.size(); i++)
+	{
+		Node *node = new Node(enc[i]);
+		encodage->push_back(node);
+	}
 
 	/* // kairaba: tu dois initialiser ici l'encodage
 	   / ainsi la méthode Decodage ne prendra aucun argument
@@ -45,8 +54,18 @@ void Solution::setRandomSequence()
 	// on aura toujours le même vector
 	// Enfin, la génération d'une séquence aléatoire doit être une méthode
 	// de la classe solution. Cette méthode initialisera l'attribut encoding.
+	vector<Customer*> encod = tsp_data->getCustomers();
 	srand(unsigned (time(0)) );
-	random_shuffle(encodage.begin(), encodage.end());
+	random_shuffle(encod.begin(), encod.end());
+
+	encodage->delete_list();
+
+	for(uint i = 0; i < encod.size(); i++)
+	{
+		Node *node = new Node(encod[i]);
+		encodage->push_back(node);
+	}
+
 }
 
 // kairaba : méthode sans argument
@@ -110,18 +129,18 @@ void Solution::CheckSolution()
 		if( i < numberOfRouteInSolution-1)
 			end = tour[i+1];
 		else
-			end = encodage.size()+1;
+			end = encodage->getSize() +1; //encodage.size()+1;
 
 
 		for(int j = start; j < end; j++)
-			load += encodage[j-1]->getDemand();
+			load += encodage->find(j-1)->getClient()->getDemand(); //encodage[j-1]->getDemand();
 
-		distance += encodage[start-1]->getDistanceDepot() + encodage[end-2]->getDistanceDepot();
+		distance +=  encodage->find(start-1)->getClient()->getDistanceDepot() + encodage->find(end-2)->getClient()->getDistanceDepot();//encodage[start-1]->getDistanceDepot() + encodage[end-2]->getDistanceDepot();
 		for(int j = start; j < end-1; j++)
 		{
 			int k = j-1;
 			int ksuiv = k+1;
-			distance += encodage[k]->getDistance(encodage[ksuiv]);
+			distance += encodage->find(k)->getClient()->getDistance(encodage->find(ksuiv)->getClient());//encodage[k]->getDistance(encodage[ksuiv]);
 		}
 
 		if(load > tsp_data->getVehicleCap() + 0.0001)
@@ -155,11 +174,11 @@ void Solution::PrintSolution()
 		if( i < numberOfRouteInSolution-1)
 			end = tour[i+1];
 		else
-			end = encodage.size()+1;
+			end = encodage->getSize() +1; //encodage.size()+1;
 
 		cout << "TOUR[" << i << "] = {" ;
 		for(int j = start; j < end; j++)
-			cout << encodage[j-1]->getId() << " " ;
+			cout << encodage->find(j-1)->getClient()->getId() << " " ;//cout << encodage[j-1]->getId() << " " ;
 		cout << "}" << endl;
 
 	}
@@ -167,7 +186,7 @@ void Solution::PrintSolution()
 	cout << endl ;
 }
 
-vector<Customer*> Solution::getSequence()
+DLinkedList* Solution::getSequence()
 {
 	return encodage;
 }

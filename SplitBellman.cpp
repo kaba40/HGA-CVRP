@@ -8,7 +8,7 @@
 #include "SplitBellman.hpp"
 #include "Customer.hpp"
 
-SplitBellman::SplitBellman(DataAP* tspDat,  vector<Customer*> enc)
+SplitBellman::SplitBellman(DataAP* tspDat,  DLinkedList* enc)
 {
 	tspData = tspDat;
 	encod = enc;
@@ -26,7 +26,7 @@ int SplitBellman::solve()
 #ifdef DEBUG
 	for(int i = 0; i < tspData->getNumberNodes()-1; i++)
 	{
-		cout << "encod[" << i << "]= " << encod[i]->getId() << endl;
+		cout << "encod[" << i << "]= " << encod->find(i)->getClient()->getId() << endl;
 	}
 #endif
 
@@ -47,10 +47,10 @@ int SplitBellman::solve()
 #endif
 
 //		while((i < tspData->getNumberNodes()) && ((load + tspData->getCustomerByIndex(encod[i-1])->getDemand()) <= tspData->getVehicleCap()))
-		while((i < tspData->getNumberNodes()) && ((load + encod[i-1]->getDemand()) <= tspData->getVehicleCap()))
+		while((i < tspData->getNumberNodes()) && ((load + encod->find(i-1)->getClient()->getDemand()) <= tspData->getVehicleCap()))
 		{
 			Customer *clientI, *clientIav;
-			clientI = encod[i-1]; // clientI = tspData->getCustomerByIndex(encod[i-1]);
+			clientI =  encod->find(i-1)->getClient() ; //encod[i-1]; // clientI = tspData->getCustomerByIndex(encod[i-1]);
 			load += clientI->getDemand();
 
 			if( i == t+1)
@@ -62,7 +62,7 @@ int SplitBellman::solve()
 			}
 			else
 			{
-				clientIav = encod[i-2];
+				clientIav = encod->find(i-2)->getClient() ; // encod[i-2];
 				distance += clientIav->getDistance(clientI);
 #ifdef SPLIT_ALGORITHM_DEBUG
 				cout << "distance [" << clientIav->getId() << "][" << clientI->getId() << "]= " << distance << endl;

@@ -82,7 +82,7 @@ void DLinkedList::insert(int position, Node *node) // modify insert function
 	Node *tmp = head;
 	int i = 0;
 
-	while(tmp != NULL && i < position-1)
+	while(tmp != NULL && i < position)
 	{
 
 		tmp = tmp->getNext();
@@ -121,6 +121,27 @@ void DLinkedList::insert(int position, Node *node) // modify insert function
 	size++;
 
 }
+
+Node* DLinkedList::find(int position)
+{
+	Node *ret = NULL;
+	if(head != NULL)
+	{
+		Node *tmp = head;
+		int i = 0;
+
+		while(tmp != NULL && i != position)
+		{
+			tmp = tmp->getNext();
+			i++;
+		}
+
+		ret = tmp;
+	}
+
+	return ret;
+}
+
 
 Node* DLinkedList::pop_front()
 {
@@ -168,6 +189,7 @@ void DLinkedList::delete_list()
 
 	head = NULL;
 	tail = NULL;
+	size = 0;
 }
 
 void DLinkedList::show()
@@ -179,7 +201,7 @@ void DLinkedList::show()
 
 	while(tmp)
 	{
-		cout << "Element " << num  << " de la liste = " << tmp->getData() << endl;
+		cout << "Element " << num  << " de la liste = " << tmp->getClient()->getId() << endl;
 		tmp = tmp->getNext();
 		num++;
 	}

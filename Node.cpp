@@ -7,26 +7,13 @@
 
 #include "Node.hpp"
 
-Node::Node(int d)
-{
-	this->data = d;
-	this->next = NULL;
-	this->previous = NULL;
-}
 
-Node::Node(Node *nxt, Node *prev, int d)
-{
-	this->next = nxt;
-	this->previous = prev;
-	this->data = d;
-}
 
-/*
 Node::Node(Customer* clt)
 {
 	this->client = clt;
-	this->next = nullptr;
-	this->previous = nullptr;
+	this->next = NULL;
+	this->previous = NULL;
 }
 
 Node::Node(Node *nxt, Node *prev, Customer *clt)
@@ -37,7 +24,6 @@ Node::Node(Node *nxt, Node *prev, Customer *clt)
 
 }
 
-// */
 Node::~Node()
 {
 	// TODO Auto-generated destructor stub
@@ -63,7 +49,7 @@ void Node::setPrevious(Node *prev)
 	this->previous = prev;
 }
 
-int Node::getData()
+Customer* Node::getClient()
 {
-	return data;
+	return this->client;
 }

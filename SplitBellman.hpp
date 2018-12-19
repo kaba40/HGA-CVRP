@@ -9,16 +9,18 @@
 #define SPLITBELLMAN_HPP_
 
 #include "DataAP.hpp"
+#include "DLinkedList.hpp"
 
 class SplitBellman
 {
 private:
 	DataAP * tspData; //data instance
-	vector<Customer*> encod;
+//	vector<Customer*> encod;
+	DLinkedList* encod;
 	vector<double> pathCost; //cost of the shortest path
 	vector<int> pred; //index of the predecessor
 public:
-	SplitBellman(DataAP* tspDat, vector<Customer*> enc);
+	SplitBellman(DataAP* tspDat, DLinkedList* enc);
 	virtual ~SplitBellman();
 	int solve();
 	vector<double>& getPathCost(void);
