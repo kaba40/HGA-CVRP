@@ -9,21 +9,13 @@
 
 
 
-Solution::Solution(DataAP *tsp_dat)
+Solution::Solution(DataAP *tsp_dat, DLinkedList* encod)
 {
 	solutionCost =0;
 	numberOfRouteInSolution = 0;
 	tsp_data = tsp_dat;
 //	encodage = tsp_dat->getCustomers();
-	encodage = new DLinkedList();
-
-	vector<Customer*> enc = tsp_dat->getCustomers();
-
-	for(uint i = 0; i < enc.size(); i++)
-	{
-		Node *node = new Node(enc[i]);
-		encodage->push_back(node);
-	}
+	encodage = encod;
 
 	/* // kairaba: tu dois initialiser ici l'encodage
 	   / ainsi la méthode Decodage ne prendra aucun argument

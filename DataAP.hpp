@@ -25,6 +25,8 @@
 #include <queue>
 #include <utility>      // std::pair
 
+#include "DLinkedList.hpp"
+
 //#include "Customer.hpp"
 using namespace std;
 //using namespace boost;
@@ -63,6 +65,7 @@ public:
 	double getDistances(int index1, int index2);
 	Customer* getCustomerByIndex( int index);
 	vector<Customer*> getCustomers();
+	DLinkedList* getCustomerList();
 	virtual ~DataAP();
 };
 

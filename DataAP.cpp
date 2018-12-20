@@ -188,3 +188,16 @@ vector<Customer*> DataAP::getCustomers()
 {
 	return clients;
 }
+
+DLinkedList* DataAP::getCustomerList()
+{
+
+	DLinkedList* encoding = new DLinkedList();
+	for(uint i = 0; i < clients.size(); i++)
+	{
+		Node *node = new Node(clients[i]);
+		encoding->push_back(node);
+	}
+
+	return encoding;
+}

@@ -36,9 +36,12 @@ int SplitBellman::solve()
 
 	pathCost[0] = 0.0; //depot
 
+
+	int t = 0;
 	//split algorithm
-	for( int t = 0; t < tspData->getNumberNodes()-1; t++)
+	for(Node* tmp = encod->getHead(); tmp != NULL; tmp = tmp->getNext())
 	{
+
 		load = 0;
 		distance = 0;
 		int i = t+1;
@@ -46,11 +49,12 @@ int SplitBellman::solve()
 		cout << "t = " << t << endl;
 #endif
 
-//		while((i < tspData->getNumberNodes()) && ((load + tspData->getCustomerByIndex(encod[i-1])->getDemand()) <= tspData->getVehicleCap()))
-		while((i < tspData->getNumberNodes()) && ((load + encod->find(i-1)->getClient()->getDemand()) <= tspData->getVehicleCap()))
+		Node *current = tmp;
+
+		while((i < tspData->getNumberNodes()) && ((load + current->getClient()->getDemand()) <= tspData->getVehicleCap()))
 		{
 			Customer *clientI, *clientIav;
-			clientI =  encod->find(i-1)->getClient() ; //encod[i-1]; // clientI = tspData->getCustomerByIndex(encod[i-1]);
+			clientI =  current->getClient() ;
 			load += clientI->getDemand();
 
 			if( i == t+1)
@@ -62,26 +66,27 @@ int SplitBellman::solve()
 			}
 			else
 			{
-				clientIav = encod->find(i-2)->getClient() ; // encod[i-2];
+				clientIav = current->getPrevious()->getClient() ;
 				distance += clientIav->getDistance(clientI);
 #ifdef SPLIT_ALGORITHM_DEBUG
 				cout << "distance [" << clientIav->getId() << "][" << clientI->getId() << "]= " << distance << endl;
 #endif
 			}
 
-//			exit(-1);
-			cost = distance + clientI->getDistanceDepot() ;// distance from depot
+			cost = distance + clientI->getDistanceDepot() ;
 			if(pathCost[t] + cost < pathCost[i] && load <= tspData->getVehicleCap())
 			{
-				pathCost[i] = pathCost[t] + cost; // modifier pathCost[encod[i-1]] par pathCost[]
+				pathCost[i] = pathCost[t] + cost;
 				pred[i] = t;
 #ifdef SPLIT_ALGORITHM_DEBUG
 				cout << "pathCost[" << i << "]= " << pathCost[t] + cost << endl;
 				cout << "pred[" << i << "]= " << t << endl;
 #endif
 			}
+			current = current->getNext();
 			 i++;
 		}
+		t++;
 	}
 
 	if(pathCost[tspData->getNumberNodes()-1] > 1.e29)

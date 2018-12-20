@@ -43,7 +43,7 @@ private:
 	int numberOfRouteInSolution;
 	DataAP *tsp_data;
 public:
-	Solution(DataAP *tsp_dat);
+	Solution(DataAP *tsp_dat, DLinkedList* encod);
 	virtual ~Solution();
 
 	void setRandomSequence();

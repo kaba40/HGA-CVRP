@@ -26,6 +26,19 @@ DLinkedList::~DLinkedList() {
     // TODO Auto-generated destructor stub
 }
 
+Node* DLinkedList::getHead()
+{
+	if(head == NULL)
+		throw string("We don't need null object");
+	return head;
+}
+
+Node* DLinkedList::getTail()
+{
+	if(tail == NULL)
+		throw string("We don't need null object");
+	return tail;
+}
 
 void DLinkedList::push_front(Node *node) // add an element to the front
 {
@@ -174,6 +187,43 @@ Node* DLinkedList::pop_back()
     size--;
 
     return tmp;
+}
+
+Node* DLinkedList::pop_position(int position)
+{
+	Node *tmp = NULL;
+	if(head != NULL)
+	{
+		tmp = head;
+		int i = 0;
+
+		while(tmp != NULL && i < position)
+		{
+			tmp = tmp->getNext();
+			i++;
+		}
+
+		if(tmp->getNext() == NULL)
+		{
+			tail = tmp->getPrevious();
+			tail->setNext(NULL);
+		}
+		else if(tmp->getPrevious() == NULL)
+		{
+			head = tmp->getNext();
+			head->setPrevious(NULL);
+		}
+		else
+		{
+			tmp->getNext()->setPrevious(tmp->getPrevious());
+			tmp->getPrevious()->setNext(tmp->getNext());
+		}
+
+//		delete tmp;
+		size--;
+	}
+
+	return tmp;
 }
 
 void DLinkedList::delete_list()

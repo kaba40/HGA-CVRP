@@ -42,7 +42,7 @@ int main()
 	cout << " implementation split algorithm" << endl;
 
 	Solution *solution_tsp;
-	solution_tsp = new Solution(data_instance);
+	solution_tsp = new Solution(data_instance, data_instance->getCustomerList());
 
 	solution_tsp->setRandomSequence();
 
