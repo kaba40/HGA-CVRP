@@ -36,7 +36,7 @@ int SplitBellman::solve()
 
 	pathCost[0] = 0.0; //depot
 
-
+	encod->show();
 	int t = 0;
 	//split algorithm
 	for(Node* tmp = encod->getHead(); tmp != NULL; tmp = tmp->getNext())
@@ -55,6 +55,7 @@ int SplitBellman::solve()
 		{
 			Customer *clientI, *clientIav;
 			clientI =  current->getClient() ;
+			cout << "ClientI = " << clientI->getId() << endl;
 			load += clientI->getDemand();
 
 			if( i == t+1)
@@ -67,6 +68,7 @@ int SplitBellman::solve()
 			else
 			{
 				clientIav = current->getPrevious()->getClient() ;
+				cout << "ClientIav = " << clientIav->getId() << endl;
 				distance += clientIav->getDistance(clientI);
 #ifdef SPLIT_ALGORITHM_DEBUG
 				cout << "distance [" << clientIav->getId() << "][" << clientI->getId() << "]= " << distance << endl;

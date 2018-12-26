@@ -17,6 +17,7 @@
 #include "Solution.hpp"
 #include "Node.hpp"
 #include "DLinkedList.hpp"
+#include "LocalSearch.hpp"
 
 using namespace std;
 
@@ -44,7 +45,27 @@ int main()
 	Solution *solution_tsp;
 	solution_tsp = new Solution(data_instance, data_instance->getCustomerList());
 
-	solution_tsp->setRandomSequence();
+	DLinkedList *list = data_instance->getCustomerList();
+
+	list->show();
+	Node *delNode = list->pop_position(0);
+	list->show();
+	list->insert(4,delNode); // prob avec méthode insert dans DLinkedList.cpp mais je ne vois pas la cause ???
+	list->show();
+	for(Node *tmp = list->getHead(); tmp != NULL; tmp = tmp->getNext())
+	{
+		Node *current = tmp->getNext();
+
+		if(current != NULL)
+		{
+			cout << "clientI = " << current->getClient()->getId() << " ";
+			cout << "clientIav = " << current->getPrevious()->getClient()->getId() << endl;
+		}
+
+	}
+
+	exit(-1);
+//	solution_tsp->setRandomSequence();
 
 #ifdef SPLIT_ALGORITHM_DEBUG
 
@@ -62,8 +83,22 @@ int main()
 		solution_tsp->PrintSolution();
 	}
 
-
-
+//	LocalSearch* localAlgo = new LocalSearch(data_instance, data_instance->getCustomerList());
+//
+//	DLinkedList *localSol = localAlgo->Insert(data_instance->getCustomerList());
+//
+//	Solution *sol = new Solution(data_instance, localSol);
+//
+//	if(sol->Decodage())
+//	{
+//		sol->CheckSolution();
+//		sol->PrintSolution();
+//	}
+//
+//
+//	delete localAlgo;
+//	delete localSol;
+//	delete sol;
 	delete data_instance;
 	delete solution_tsp;
 

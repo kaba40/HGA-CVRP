@@ -123,9 +123,14 @@ void Solution::CheckSolution()
 		else
 			end = encodage->getSize() +1; //encodage.size()+1;
 
-
+		cout << "encodage->getSize() in Solution =" << encodage->getSize() << endl;
 		for(int j = start; j < end; j++)
+		{
+			cout << "numberOfRouteInSolution= " << numberOfRouteInSolution << endl;
+			cout << "j= " << j << endl;
 			load += encodage->find(j-1)->getClient()->getDemand(); //encodage[j-1]->getDemand();
+		}
+
 
 		distance +=  encodage->find(start-1)->getClient()->getDistanceDepot() + encodage->find(end-2)->getClient()->getDistanceDepot();//encodage[start-1]->getDistanceDepot() + encodage[end-2]->getDistanceDepot();
 		for(int j = start; j < end-1; j++)

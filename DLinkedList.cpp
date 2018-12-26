@@ -90,8 +90,6 @@ void DLinkedList::insert(int position, Node *node) // modify insert function
 	if(!node)
 		throw invalid_argument("Non-empty list pointer can't be null");
 
-	// kairaba : normalement, avec une boucle bien construite, cela suffira
-
 	Node *tmp = head;
 	int i = 0;
 
@@ -102,33 +100,42 @@ void DLinkedList::insert(int position, Node *node) // modify insert function
 		i++;
 	}
 
-	if(tmp == NULL && position <= 0)
+	if(tmp == NULL )
 	{
-		head = node;
-		tail = node;
-		head->setNext(NULL);
-	}
-	else if(tmp != NULL && position <= 0)
-	{
-		node->setNext(head);
-		head->setPrevious(node);
-		head = node;
+		if(tmp->getPrevious() == NULL)
+		{
+			head = node;
+			tail = node;
+	    	tail->setPrevious(NULL);
+		}
+		else
+		{
+	    	 node->setPrevious(tail);
+	    	 tail->setNext(node);
+	    	 tail = node;
+		}
 
-    	head->setPrevious(NULL);
+		 tail->setNext(NULL);
+
 	}
-	else if( tmp == NULL && position >= size)
+	else if(tmp != NULL)
 	{
-		node->setPrevious(tail);
-		tail->setNext(node);
-		tail = node;
-		tail->setNext(NULL);
-	}
-	else
-	{
-		tmp->getPrevious()->setNext(node);
-		tmp->setPrevious(node);
-		node->setPrevious(tmp->getPrevious());
-		node->setNext(tmp);
+		if(tmp->getPrevious() == NULL)
+		{
+			node->setNext(head);
+			head->setPrevious(node);
+			head = node;
+
+	    	head->setPrevious(NULL);
+		}
+		else
+		{
+			tmp->getPrevious()->setNext(node);
+			tmp->setPrevious(node);
+			node->setPrevious(tmp->getPrevious());
+			node->setNext(tmp);
+		}
+
 	}
 
 	size++;
@@ -219,7 +226,6 @@ Node* DLinkedList::pop_position(int position)
 			tmp->getPrevious()->setNext(tmp->getNext());
 		}
 
-//		delete tmp;
 		size--;
 	}
 
@@ -244,17 +250,20 @@ void DLinkedList::delete_list()
 
 void DLinkedList::show()
 {
-	cout << " Afficher la liste : " << endl;
+	cout << " Afficher la liste : " ;
 
 	Node *tmp = head;
 	int num = 0;
 
 	while(tmp)
 	{
-		cout << "Element " << num  << " de la liste = " << tmp->getClient()->getId() << endl;
+	//	cout << "Element " << num  << " Id = " << tmp->getClient()->getId() << " index = " << tmp->getClient()->getIndex() ;
+		cout << tmp->getClient()->getId() << "--"  ;
 		tmp = tmp->getNext();
 		num++;
 	}
+
+	cout << endl;
 }
 
 

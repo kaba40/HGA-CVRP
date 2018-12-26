@@ -20,6 +20,8 @@ LocalSearch::~LocalSearch() {
 DLinkedList* LocalSearch::Insert(DLinkedList *encod)
 {
 	DLinkedList *initEncode = encod;
+
+	cout << "initEncode1 = " ; initEncode->show() ;
 	Solution *initSol = new Solution(data_vrp, initEncode);
 	if(initSol->Decodage())
 	{
@@ -27,52 +29,71 @@ DLinkedList* LocalSearch::Insert(DLinkedList *encod)
 
 		double obj = initSol->getObjVal();
 
-		do
+		cout << "obj = " << obj << endl;
+
+		int t = 0;
+		for(Node *tmp = encod->getHead(); tmp != NULL; tmp = tmp->getNext())
 		{
-			Node *firstNode = initEncode->pop_front(); //case 1
-			initEncode->push_back(firstNode);
-
-//			Node *lastNode = initEncode->pop_back(); same result as the first one
-//			initEncode->push_front(lastNode);
-
-//			Node *firstNode = initEncode->pop_front(); //case 2
-//			for(int i = 0; i < initEncode->getSize(); i++)
-//			{
-//				initEncode->insert(i, firstNode);
-//			}
+			Node *insertNode = initEncode->pop_position(t);
 
 
+			cout << "insertNode " << t << " =" << insertNode->getClient()->getId() << endl;
+			cout << "initEncode2  " << t << " =" ; initEncode->show() ;
+			int i = 0;
+			double obj2;
 
+			do
+			{
+				initEncode->insert(i, insertNode);
+				cout << "initEncode3  " << i << " =" ; initEncode->show() ;
 
+				Solution *initSol2 = new Solution(data_vrp, initEncode);
 
-		} while(obj > 100);
+				if(initSol2->Decodage())
+				{
+					initSol2->CheckSolution();
+					obj2 = initSol2->getObjVal();
+				}
+				cout << "obj2 = " << obj2 << " obj = " << obj << endl;
+
+				initEncode->pop_position(t);
+				i++;
+
+				cout << "encod->getSize() = " << encod->getSize() << endl;
+
+			} while(obj2 >= obj && i <= encod->getSize());
+
+			if(obj2 < obj - 0.0001)
+				break;
+
+			t++;
+		}
+
 	}
-
-
-
+	return initEncode;
 }
 
-DLinkedList* LocalSearch::TwoInsert(DLinkedList *encod)
-{
-
-}
-
-DLinkedList* LocalSearch::Swap(DLinkedList *encod)
-{
-
-}
-
-DLinkedList* LocalSearch::SwapArcs(DLinkedList *encod)
-{
-
-}
-
-DLinkedList* LocalSearch::SwapTwoArcs(DLinkedList *encod)
-{
-
-}
-
-DLinkedList* LocalSearch::LocalAlgo(DLinkedList *encod)
-{
-
-}
+//DLinkedList* LocalSearch::TwoInsert(DLinkedList *encod)
+//{
+//
+//}
+//
+//DLinkedList* LocalSearch::Swap(DLinkedList *encod)
+//{
+//
+//}
+//
+//DLinkedList* LocalSearch::SwapArcs(DLinkedList *encod)
+//{
+//
+//}
+//
+//DLinkedList* LocalSearch::SwapTwoArcs(DLinkedList *encod)
+//{
+//
+//}
+//
+//DLinkedList* LocalSearch::LocalAlgo(DLinkedList *encod)
+//{
+//
+//}
