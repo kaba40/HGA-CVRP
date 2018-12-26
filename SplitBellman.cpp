@@ -37,9 +37,10 @@ int SplitBellman::solve()
 	pathCost[0] = 0.0; //depot
 
 	encod->show();
-	int t = 0;
+
+	Node* tmp = encod->getHead();
 	//split algorithm
-	for(Node* tmp = encod->getHead(); tmp != NULL; tmp = tmp->getNext())
+	for( int t = 0; t < tspData->getNumberNodes()-1; t++)
 	{
 
 		load = 0;
@@ -88,7 +89,8 @@ int SplitBellman::solve()
 			current = current->getNext();
 			 i++;
 		}
-		t++;
+		tmp = tmp->getNext();
+
 	}
 
 	if(pathCost[tspData->getNumberNodes()-1] > 1.e29)

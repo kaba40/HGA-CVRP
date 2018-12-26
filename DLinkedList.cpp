@@ -91,18 +91,19 @@ void DLinkedList::insert(int position, Node *node) // modify insert function
 		throw invalid_argument("Non-empty list pointer can't be null");
 
 	Node *tmp = head;
+	Node *oldTmp = NULL;
 	int i = 0;
 
 	while(tmp != NULL && i < position)
 	{
-
+		oldTmp = tmp;
 		tmp = tmp->getNext();
 		i++;
 	}
 
 	if(tmp == NULL )
 	{
-		if(tmp->getPrevious() == NULL)
+		if(oldTmp == NULL)
 		{
 			head = node;
 			tail = node;
@@ -130,10 +131,12 @@ void DLinkedList::insert(int position, Node *node) // modify insert function
 		}
 		else
 		{
+			//order is important
 			tmp->getPrevious()->setNext(node);
-			tmp->setPrevious(node);
-			node->setPrevious(tmp->getPrevious());
 			node->setNext(tmp);
+			node->setPrevious(tmp->getPrevious());
+			tmp->setPrevious(node);
+
 		}
 
 	}

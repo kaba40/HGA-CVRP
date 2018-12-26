@@ -7,10 +7,9 @@
 
 #include "LocalSearch.hpp"
 
-LocalSearch::LocalSearch(DataAP *data, DLinkedList *encod)
+LocalSearch::LocalSearch(Solution *initSol)
 {
-	this->encoding = encod;
-	this->data_vrp = data;
+	this->encoding = initSol->getSequence();
 }
 
 LocalSearch::~LocalSearch() {
@@ -21,55 +20,42 @@ DLinkedList* LocalSearch::Insert(DLinkedList *encod)
 {
 	DLinkedList *initEncode = encod;
 
-	cout << "initEncode1 = " ; initEncode->show() ;
-	Solution *initSol = new Solution(data_vrp, initEncode);
-	if(initSol->Decodage())
-	{
-		initSol->CheckSolution();
+	cout << "initEncode1 = " ; initEncode->show() ; cout << endl;
 
-		double obj = initSol->getObjVal();
-
-		cout << "obj = " << obj << endl;
-
-		int t = 0;
-		for(Node *tmp = encod->getHead(); tmp != NULL; tmp = tmp->getNext())
+		int t1 = 0;
+		for(Node *tmp1 = initEncode->getHead(); tmp1 != NULL; tmp1 = tmp1->getNext())
 		{
-			Node *insertNode = initEncode->pop_position(t);
+			cout << "tmp1 " << t1 << " = " << tmp1->getClient()->getId() << endl;;
 
-
-			cout << "insertNode " << t << " =" << insertNode->getClient()->getId() << endl;
-			cout << "initEncode2  " << t << " =" ; initEncode->show() ;
-			int i = 0;
-			double obj2;
-
-			do
+			int t2 = 0;
+			for(Node *tmp2 = initEncode->getHead(); tmp2 != NULL; tmp2 = tmp2->getNext())
 			{
-				initEncode->insert(i, insertNode);
-				cout << "initEncode3  " << i << " =" ; initEncode->show() ;
-
-				Solution *initSol2 = new Solution(data_vrp, initEncode);
-
-				if(initSol2->Decodage())
+				cout << "tmp2 " << t2 << " = " << tmp2->getClient()->getId() << endl;
+				if(tmp1 == tmp2)
 				{
-					initSol2->CheckSolution();
-					obj2 = initSol2->getObjVal();
+
 				}
-				cout << "obj2 = " << obj2 << " obj = " << obj << endl;
+				else
+				{
+					tmp1->setNext(NULL);
+					tmp1->setPrevious(NULL);
 
-				initEncode->pop_position(t);
-				i++;
+					tmp2->setNext(tmp1);
+					tmp1->setPrevious(tmp2);
+					tmp1->setNext(tmp2->getNext());
+					tmp2->getNext()->setPrevious(tmp1);
 
-				cout << "encod->getSize() = " << encod->getSize() << endl;
 
-			} while(obj2 >= obj && i <= encod->getSize());
+				}
 
-			if(obj2 < obj - 0.0001)
-				break;
+				cout << "initEncode2  " << " " << " =" ; encod->show() ; cout << endl;
 
-			t++;
+				t2++;
+			}
+			t1++;
 		}
 
-	}
+
 	return initEncode;
 }
 

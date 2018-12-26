@@ -17,9 +17,8 @@ class LocalSearch
 {
 private:
 	DLinkedList *encoding;
-	DataAP *data_vrp;
 public:
-	LocalSearch(DataAP *data, DLinkedList *encod);
+	LocalSearch(Solution *initSol); // solution seulement
 	virtual ~LocalSearch();
 
 	DLinkedList* Insert(DLinkedList *encod);
