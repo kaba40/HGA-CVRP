@@ -25,6 +25,15 @@ DLinkedList::DLinkedList(Node *hd, Node *tl)
 DLinkedList::~DLinkedList() {
     // TODO Auto-generated destructor stub
 }
+void DLinkedList::setHead(Node *node)
+{
+	this->head = node;
+}
+
+void DLinkedList::setTail(Node *node)
+{
+	this->tail = node;
+}
 
 Node* DLinkedList::getHead()
 {

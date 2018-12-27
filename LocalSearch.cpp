@@ -37,18 +37,44 @@ DLinkedList* LocalSearch::Insert(DLinkedList *encod)
 				}
 				else
 				{
-					tmp1->setNext(NULL);
-					tmp1->setPrevious(NULL);
+//					if(tmp1->getNext() == NULL)
+//					{
+//						initEncode->setTail(tmp1->getPrevious());
+//						initEncode->getTail()->setNext(NULL);
+//					}
+//					else if(tmp1->getPrevious() == NULL)
+//					{
+////						head = tmp->getNext();
+////						head->setPrevious(NULL);
+//						initEncode->setHead(tmp1->getNext());
+//						initEncode->getHead()->setPrevious(NULL);
+//					}
+//					else
+//					{
+//						tmp1->getNext()->setPrevious(tmp1->getPrevious());
+//						tmp1->getPrevious()->setNext(tmp1->getNext());
+//					}
+////					tmp1->setNext(NULL);
+////					tmp1->setPrevious(NULL);
+
+					cout << "initEncode20  " << " " << " =" ; encod->show() ; cout << endl;
 
 					tmp2->setNext(tmp1);
 					tmp1->setPrevious(tmp2);
 					tmp1->setNext(tmp2->getNext());
-					tmp2->getNext()->setPrevious(tmp1);
+					tmp2->setPrevious(tmp1->getPrevious());
 
+//					tmp2->getPrevious()->setNext(tmp1);
+//					tmp1->setNext(tmp2);
+//					tmp1->setPrevious(tmp2->getPrevious());
+//					tmp2->setPrevious(tmp1);
 
+					cout << "initEncode2  " << " " << " =" ; encod->show() ; cout << endl;
+
+					exit(-1);
 				}
 
-				cout << "initEncode2  " << " " << " =" ; encod->show() ; cout << endl;
+
 
 				t2++;
 			}

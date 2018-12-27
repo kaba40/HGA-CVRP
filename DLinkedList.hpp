@@ -21,6 +21,8 @@ public:
 	DLinkedList(Node *hd, Node *tl);
 	virtual ~DLinkedList();
 
+	void setHead(Node *node);
+	void setTail(Node *node);
 	Node* getHead();
 	Node* getTail();
 
