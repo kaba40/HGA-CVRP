@@ -79,6 +79,7 @@ bool Solution::Decodage()
 		// count the number of routes -- numberOfRoutes
 		int nbTour = tsp_data->getNumberNodes()-1;
 		vector<int> pred = splitAlgo->getPredence();
+		numberOfRouteInSolution = 0; // to remove
 		while(nbTour != 0)
 		{
 			nbTour = pred[nbTour];
@@ -114,6 +115,8 @@ void Solution::CheckSolution()
 	if(tour[0] != 1)
 		cout << " Error : the first route should start with the first customer" << endl;
 
+//	cout << "numberOfRouteInSolution = " << numberOfRouteInSolution << endl;
+
 	for(int i = 0; i < numberOfRouteInSolution; i++)
 	{
 		load = 0;
@@ -123,11 +126,11 @@ void Solution::CheckSolution()
 		else
 			end = encodage->getSize() +1; //encodage.size()+1;
 
-		cout << "encodage->getSize() in Solution =" << encodage->getSize() << endl;
+//		cout << "encodage->getSize() in Solution =" << encodage->getSize() << endl;
 		for(int j = start; j < end; j++)
 		{
-			cout << "numberOfRouteInSolution= " << numberOfRouteInSolution << endl;
-			cout << "j= " << j << endl;
+//			cout << "numberOfRouteInSolution= " << numberOfRouteInSolution << endl;
+//			cout << "j= " << j << endl;
 			load += encodage->find(j-1)->getClient()->getDemand(); //encodage[j-1]->getDemand();
 		}
 

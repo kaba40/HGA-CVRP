@@ -64,7 +64,7 @@ int main()
 		solution_tsp->PrintSolution();
 	}
 
-//	exit(-1);
+
 	LocalSearch* localAlgo = new LocalSearch(solution_tsp);
 	localAlgo->Insert();
 //
