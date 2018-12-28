@@ -9,80 +9,43 @@
 
 LocalSearch::LocalSearch(Solution *initSol)
 {
-	this->encoding = initSol->getSequence();
+	this->initSol = initSol;
 }
 
 LocalSearch::~LocalSearch() {
 	// TODO Auto-generated destructor stub
 }
 
-DLinkedList* LocalSearch::Insert(DLinkedList *encod)
+bool LocalSearch::Insert()
 {
-	DLinkedList *initEncode = encod;
 
-	cout << "initEncode1 = " ; initEncode->show() ; cout << endl;
+	cout << "initEncode1 = " ; this->initSol->getSequence()->show() ; cout << endl;
 
-		int t1 = 0;
-		for(Node *tmp1 = initEncode->getHead(); tmp1 != NULL; tmp1 = tmp1->getNext())
+
+		for(Node *insertNode = this->initSol->getSequence()->getHead(); insertNode != NULL; insertNode = insertNode->getNext())
 		{
-			cout << "tmp1 " << t1 << " = " << tmp1->getClient()->getId() << endl;;
+			cout << "insertNode " << " " << " = " << insertNode->getClient()->getId() ;
 
-			int t2 = 0;
-			for(Node *tmp2 = initEncode->getHead(); tmp2 != NULL; tmp2 = tmp2->getNext())
+			bool addAfter = false;
+
+			for(Node *moveNode = this->initSol->getSequence()->getHead(); moveNode != NULL; moveNode = moveNode->getNext())
 			{
-				cout << "tmp2 " << t2 << " = " << tmp2->getClient()->getId() << endl;
-				if(tmp1 == tmp2)
-				{
+				cout << "moveNode " << " " << " = " << moveNode->getClient()->getId() ;
 
-				}
-				else
-				{
-//					if(tmp1->getNext() == NULL)
-//					{
-//						initEncode->setTail(tmp1->getPrevious());
-//						initEncode->getTail()->setNext(NULL);
-//					}
-//					else if(tmp1->getPrevious() == NULL)
-//					{
-////						head = tmp->getNext();
-////						head->setPrevious(NULL);
-//						initEncode->setHead(tmp1->getNext());
-//						initEncode->getHead()->setPrevious(NULL);
-//					}
-//					else
-//					{
-//						tmp1->getNext()->setPrevious(tmp1->getPrevious());
-//						tmp1->getPrevious()->setNext(tmp1->getNext());
-//					}
-////					tmp1->setNext(NULL);
-////					tmp1->setPrevious(NULL);
+				// si tmp1 == tmp2 rien faire et addAfter = true
+				// enlever tmp1 de la liste
+				// inserer tmp1 apres tmp2 si addafter = true
+				// inserer tmp1 avant tmp2 si addafter = false
+				// evaluer la liste
+				//	si improve affiche new list and return
+				//	si non improve execute line suivante
+				// inserer tmp1 à sa place initiale en l'enlevant de sa place actuelle
 
-					cout << "initEncode20  " << " " << " =" ; encod->show() ; cout << endl;
-
-					tmp2->setNext(tmp1);
-					tmp1->setPrevious(tmp2);
-					tmp1->setNext(tmp2->getNext());
-					tmp2->setPrevious(tmp1->getPrevious());
-
-//					tmp2->getPrevious()->setNext(tmp1);
-//					tmp1->setNext(tmp2);
-//					tmp1->setPrevious(tmp2->getPrevious());
-//					tmp2->setPrevious(tmp1);
-
-					cout << "initEncode2  " << " " << " =" ; encod->show() ; cout << endl;
-
-					exit(-1);
-				}
-
-
-
-				t2++;
 			}
-			t1++;
+
 		}
 
-
-	return initEncode;
+	return false;
 }
 
 //DLinkedList* LocalSearch::TwoInsert(DLinkedList *encod)

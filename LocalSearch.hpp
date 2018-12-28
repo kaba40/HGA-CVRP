@@ -16,12 +16,12 @@
 class LocalSearch
 {
 private:
-	DLinkedList *encoding;
+	Solution *initSol;
 public:
 	LocalSearch(Solution *initSol); // solution seulement
 	virtual ~LocalSearch();
 
-	DLinkedList* Insert(DLinkedList *encod);
+	bool Insert();
 	DLinkedList* TwoInsert(DLinkedList *encod);
 	DLinkedList* Swap(DLinkedList *encod);
 	DLinkedList* SwapArcs(DLinkedList *encod);
