@@ -30,7 +30,7 @@ bool LocalSearch::Insert()
 
 		for(Node *insertNode = this->initSol->getSequence()->getHead(); insertNode != NULL; insertNode = insertNode->getNext())
 		{
-			cout << "insertNode " << " " << " = " << insertNode->getClient()->getId() << ";";
+			cout << "--------------------insertNode " << " " << " = " << insertNode->getClient()->getId() << "-----------------------" << endl;
 
 			insertNodePrev = insertNode->getPrevious();
 			insertNodeNext = insertNode->getNext();
@@ -44,7 +44,7 @@ bool LocalSearch::Insert()
 
 			for(Node *moveNode = this->initSol->getSequence()->getHead(); moveNode != NULL; moveNode = moveNode->getNext())
 			{
-				cout << " moveNode " << " " << " = " << moveNode->getClient()->getId() << endl;
+				cout << "-------------------------- moveNode " << " " << " = " << moveNode->getClient()->getId() << "------------------- " << endl;
 
 				// si tmp1 == tmp2 rien faire et addAfter = true
 				if(insertNode == moveNode)
@@ -163,6 +163,8 @@ bool LocalSearch::Insert()
 						insertNode->setNext(NULL);
 					}
 
+					cout << " show list after removing " << insertNode->getClient()->getId() << " in its current place " ;  this->initSol->getSequence()->show() ;
+
 					// inserer insertNode à sa place initiale
 					if(insertNodePrev == NULL)
 					{
@@ -183,12 +185,15 @@ bool LocalSearch::Insert()
 						insertNodePrev->setNext(insertNode);
 						insertNode->setPrevious(insertNodePrev);
 						insertNode->setNext(insertNodeNext);
-						insertNode->setPrevious(insertNode);
+						insertNodeNext->setPrevious(insertNode);
 					}
 
-				}
+					cout << " show list after inserting " << insertNode->getClient()->getId() << " in its initial place " ;  this->initSol->getSequence()->show() ;
 
+				}
+cout << "-------------------------------------------------------------------------------------------------" << endl;
 			}
+cout << "-------------------------------------------------------------------------------------------------" << endl;
 
 		}
 
@@ -214,8 +219,4 @@ bool LocalSearch::Insert()
 //{
 //
 //}
-//
-//DLinkedList* LocalSearch::LocalAlgo(DLinkedList *encod)
-//{
-//
-//}
+

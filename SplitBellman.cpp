@@ -54,7 +54,6 @@ int SplitBellman::solve()
 		{
 			Customer *clientI, *clientIav;
 			clientI =  current->getClient() ;
-//			cout << "CltI = " << clientI->getId() << " ";
 			load += clientI->getDemand();
 
 			if( i == t+1)
@@ -67,7 +66,7 @@ int SplitBellman::solve()
 			else
 			{
 				clientIav = current->getPrevious()->getClient() ;
-//				cout << "CltIav = " << clientIav->getId() << endl;
+//				cout << "CltI = " << clientI->getId() << " " << "CltIav = " << clientIav->getId() << endl;
 				distance += clientIav->getDistance(clientI);
 #ifdef SPLIT_ALGORITHM_DEBUG
 				cout << "distance [" << clientIav->getId() << "][" << clientI->getId() << "]= " << distance << endl;

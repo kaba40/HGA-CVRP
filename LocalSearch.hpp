@@ -22,12 +22,10 @@ public:
 	virtual ~LocalSearch();
 
 	bool Insert();
-	DLinkedList* TwoInsert(DLinkedList *encod);
-	DLinkedList* Swap(DLinkedList *encod);
-	DLinkedList* SwapArcs(DLinkedList *encod);
-	DLinkedList* SwapTwoArcs(DLinkedList *encod);
-	DLinkedList* LocalAlgo(DLinkedList *encod);
-
+	bool TwoInsert();
+	bool Swap();
+	bool SwapArcs();
+	bool SwapTwoArcs();
 };
 
 #endif /* LOCALSEARCH_HPP_ */
