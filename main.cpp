@@ -67,21 +67,8 @@ int main()
 
 	LocalSearch* localAlgo = new LocalSearch(solution_tsp);
 	localAlgo->Insert();
-//
-//	DLinkedList *localSol = localAlgo->Insert(data_instance->getCustomerList());
-//
-//	Solution *sol = new Solution(data_instance, localSol);
-//
-//	if(sol->Decodage())
-//	{
-//		sol->CheckSolution();
-//		sol->PrintSolution();
-//	}
-//
-//
+
 	delete localAlgo;
-//	delete localSol;
-//	delete sol;
 	delete data_instance;
 	delete solution_tsp;
 

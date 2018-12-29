@@ -21,17 +21,30 @@ bool LocalSearch::Insert()
 
 	cout << "local search insert initial sequence = " ; this->initSol->getSequence()->show() ; cout << endl;
 
+		double initialObjVal = this->initSol->getObjVal();
+		cout << "initialObjVal = " << initialObjVal << endl;
+		double newObjVal;
+
+		Node *insertNodePrev = NULL;
+		Node *insertNodeNext = NULL;
 
 		for(Node *insertNode = this->initSol->getSequence()->getHead(); insertNode != NULL; insertNode = insertNode->getNext())
 		{
 			cout << "insertNode " << " " << " = " << insertNode->getClient()->getId() << ";";
 
+			insertNodePrev = insertNode->getPrevious();
+			insertNodeNext = insertNode->getNext();
+
+			if(insertNodePrev != NULL)
+				cout << "insertNodePrev = " << insertNodePrev->getClient()->getId() << " ;" ;
+			if(insertNodeNext != NULL)
+				cout << " insertNodeNext = " << insertNodeNext->getClient()->getId() << endl;
+
 			bool addAfter = false;
-			int initPosition ;
 
 			for(Node *moveNode = this->initSol->getSequence()->getHead(); moveNode != NULL; moveNode = moveNode->getNext())
 			{
-				cout << " moveNode " << " " << " = " << moveNode->getClient()->getId() ;
+				cout << " moveNode " << " " << " = " << moveNode->getClient()->getId() << endl;
 
 				// si tmp1 == tmp2 rien faire et addAfter = true
 				if(insertNode == moveNode)
@@ -45,13 +58,11 @@ bool LocalSearch::Insert()
 					{
 						this->initSol->getSequence()->setHead(insertNode->getNext());
 						this->initSol->getSequence()->getHead()->setPrevious(NULL);
-						initPosition = 1;
 					}
 					else if(insertNode == this->initSol->getSequence()->getTail())
 					{
 						this->initSol->getSequence()->setTail(insertNode->getPrevious());
 						this->initSol->getSequence()->getTail()->setNext(NULL);
-						initPosition = 2;
 					}
 					else
 					{
@@ -59,11 +70,12 @@ bool LocalSearch::Insert()
 						insertNode->getNext()->setPrevious(insertNode->getPrevious());
 						insertNode->setPrevious(NULL);
 						insertNode->setNext(NULL);
-						initPosition = 3;
 
 					}
 
-					// inserer tmp1 apres tmp2 si addafter = true
+					cout << " show list after removing  " << insertNode->getClient()->getId() << " "  ;  this->initSol->getSequence()->show() ;
+
+					// insert insertNode after moveNode if addAfter = true
 					if(addAfter == true)
 					{
 						if(moveNode->getNext() == NULL)
@@ -83,8 +95,10 @@ bool LocalSearch::Insert()
 							insertNode->setPrevious(moveNode);
 						}
 
+						cout << " show list after inserting " << insertNode->getClient()->getId() << " after " << moveNode->getClient()->getId()  ;  this->initSol->getSequence()->show() ;
+
 					}
-					else // inserer tmp1 avant tmp2 si addafter = false
+					else // insert insertNode before moveNode if addAfter = false
 					{
 						if(moveNode->getPrevious() == NULL)
 						{
@@ -100,61 +114,79 @@ bool LocalSearch::Insert()
 							moveNode->setPrevious(insertNode);
 							insertNode->setNext(moveNode);
 						}
+
+						cout << " show list after inserting " << insertNode->getClient()->getId() << " before " << moveNode->getClient()->getId()  ;  this->initSol->getSequence()->show() ;
+
 					}
 
 				}
 
 
-				this->initSol->getSequence()->show();
+
 
 				// evaluer la liste
 
 				if(this->initSol->Decodage())
 				{
 					this->initSol->CheckSolution();
-					this->initSol->PrintSolution();
+//					this->initSol->PrintSolution();
+					newObjVal = this->initSol->getObjVal();
+
 				}
 
-//				exit(-1);
-
-
-
+				cout << " objVal = " << this->initSol->getObjVal() << " "; this->initSol->getSequence()->show();
 
 				//	si improve affiche new list and return
-				//	si non improve execute line suivante
-				// inserer tmp1 à sa place initiale en l'enlevant de sa place actuelle
-//				switch(initPosition)
-//				{
-//
-//				case 1:
-//				{
-//			    	insertNode->setNext(this->initSol->getSequence()->getHead());
-//			    	this->initSol->getSequence()->getHead()->setPrevious(insertNode);
-//			    	this->initSol->getSequence()->setHead(insertNode);
-//			    	this->initSol->getSequence()->getHead()->setPrevious(NULL);
-//					break;
-//				};
-//
-//				case 2:
-//				{
-//					insertNode->setPrevious(this->initSol->getSequence()->getTail());
-//					this->initSol->getSequence()->getTail()->setNext(insertNode);
-//					this->initSol->getSequence()->setTail(insertNode);
-//					this->initSol->getSequence()->getTail()->setNext(NULL);
-//					break;
-//				};
-//
-//				case 3:
-//				{
-//					break;
-//				};
-//
-//				default:
-//					cout << " bad value for initPosition " << endl;
-//					break;
-//				}
+				if(newObjVal < initialObjVal - 0.0001)
+				{
+//					this->initSol->getSequence()->show();
+					return true;
+				}
+				else
+				{
+					// enlever insertNode à sa place actuelle
+					if(insertNode == this->initSol->getSequence()->getHead())
+					{
+						this->initSol->getSequence()->setHead(insertNode->getNext());
+						this->initSol->getSequence()->getHead()->setPrevious(NULL);
+					}
+					else if(insertNode == this->initSol->getSequence()->getTail())
+					{
+						this->initSol->getSequence()->setTail(insertNode->getPrevious());
+						this->initSol->getSequence()->getTail()->setNext(NULL);
+					}
+					else
+					{
+						insertNode->getPrevious()->setNext(insertNode->getNext());
+						insertNode->getNext()->setPrevious(insertNode->getPrevious());
+						insertNode->setPrevious(NULL);
+						insertNode->setNext(NULL);
+					}
 
-				this->initSol->getSequence()->show();
+					// inserer insertNode à sa place initiale
+					if(insertNodePrev == NULL)
+					{
+				    	insertNode->setNext(this->initSol->getSequence()->getHead());
+				    	this->initSol->getSequence()->getHead()->setPrevious(insertNode);
+				    	this->initSol->getSequence()->setHead(insertNode);
+				    	this->initSol->getSequence()->getHead()->setPrevious(NULL);
+					}
+					else if( insertNodeNext == NULL)
+					{
+						insertNode->setPrevious(this->initSol->getSequence()->getTail());
+						this->initSol->getSequence()->getTail()->setNext(insertNode);
+						this->initSol->getSequence()->setTail(insertNode);
+						this->initSol->getSequence()->getTail()->setNext(NULL);
+					}
+					else
+					{
+						insertNodePrev->setNext(insertNode);
+						insertNode->setPrevious(insertNodePrev);
+						insertNode->setNext(insertNodeNext);
+						insertNode->setPrevious(insertNode);
+					}
+
+				}
 
 			}
 

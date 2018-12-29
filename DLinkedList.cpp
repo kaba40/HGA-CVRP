@@ -262,7 +262,7 @@ void DLinkedList::delete_list()
 
 void DLinkedList::show()
 {
-	cout << " Afficher la liste : " ;
+	cout << " list : " ;
 
 	Node *tmp = head;
 	int num = 0;
