@@ -66,7 +66,8 @@ int main()
 
 
 	LocalSearch* localAlgo = new LocalSearch(solution_tsp);
-	localAlgo->Insert();
+//	localAlgo->Insert();
+	localAlgo->TwoInsert();
 
 	delete localAlgo;
 	delete data_instance;

@@ -11,12 +11,14 @@
 #include<stdio.h>
 
 #include "DLinkedList.hpp"
-#include "DataAP.hpp"
 #include "Solution.hpp"
 class LocalSearch
 {
 private:
 	Solution *initSol;
+
+	void removeInsertNode(Node* insertNode);
+
 public:
 	LocalSearch(Solution *initSol); // solution seulement
 	virtual ~LocalSearch();
