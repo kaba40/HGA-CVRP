@@ -17,14 +17,20 @@ class LocalSearch
 private:
 	Solution *initSol;
 
-	void removeInsertNode(Node* insertNode);
+	void removeNode(Node* insertNode);
+	void addTail(Node* insertNode);
+	void addHead(Node* insertNode);
+	void insertAfter(Node* insertNode, Node* moveNode);
+	void insertBefore(Node* insertNode, Node* moveNode);
+	void insertBetween(Node* insertNodePrev, Node* insertNode,
+			Node* insertNodeNext);
 
 public:
 	LocalSearch(Solution *initSol); // solution seulement
 	virtual ~LocalSearch();
 
 	bool Insert();
-	bool TwoInsert();
+	bool ArcInsert();
 	bool Swap();
 	bool SwapArcs();
 	bool SwapTwoArcs();
