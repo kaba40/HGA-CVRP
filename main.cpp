@@ -31,7 +31,7 @@ int main()
 
 	DataAP * data_instance;
 	data_instance = new DataAP(data_vrp, numVeh);
-
+#ifdef DEBUG_Main
 	cout << " affichage d'information d'une instance " << endl;
 
 	cout<< " number of nodes = "<< data_instance->getNumberNodes() << endl;
@@ -41,16 +41,17 @@ int main()
 	cout <<  endl;
 
 	cout << " implementation split algorithm" << endl;
-
+	cout << endl;
+#endif
 	Solution *solution_tsp;
 	solution_tsp = new Solution(data_instance, data_instance->getCustomerList());
 
 
 //	solution_tsp->setRandomSequence();
 
-#ifdef SPLIT_ALGORITHM_DEBUG
+#ifdef DEBUG_Main
 
-	for(uint i = 0; i< solution_tsp->getSequence()->getSize(); i++)
+	for(int i = 0; i< solution_tsp->getSequence()->getSize(); i++)
 	{
 		cout << "custo " << solution_tsp->getSequence()->find(i)->getClient()->getId() << " index " << solution_tsp->getSequence()->find(i)->getClient()->getIndex() << " demand " << solution_tsp->getSequence()->find(i)->getClient()->getDemand() << endl;
 	}
@@ -66,9 +67,25 @@ int main()
 
 
 	LocalSearch* localAlgo = new LocalSearch(solution_tsp);
-//	localAlgo->Insert();
-//	localAlgo->ArcInsert();
-	localAlgo->Swap();
+//	if(localAlgo->Insert())
+//	{
+//		solution_tsp->PrintSolution();
+//	}
+
+//	if(localAlgo->ArcInsert())
+//	{
+//		solution_tsp->PrintSolution();
+//	}
+
+//	if(localAlgo->Swap())
+//	{
+//		solution_tsp->PrintSolution();
+//	}
+
+	if(localAlgo->SwapArcs())
+	{
+		solution_tsp->PrintSolution();
+	}
 
 	delete localAlgo;
 	delete data_instance;
