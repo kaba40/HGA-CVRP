@@ -82,7 +82,12 @@ int main()
 //		solution_tsp->PrintSolution();
 //	}
 
-	if(localAlgo->SwapArcs())
+//	if(localAlgo->SwapArcs())
+//	{
+//		solution_tsp->PrintSolution();
+//	}
+
+	if(localAlgo->SwapTwoArcs())
 	{
 		solution_tsp->PrintSolution();
 	}
