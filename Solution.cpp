@@ -11,7 +11,7 @@
 
 Solution::Solution(DataAP *tsp_dat, DLinkedList* encod)
 {
-	solutionCost =0;
+	solutionCost = 0;
 	numberOfRouteInSolution = 0;
 	tsp_data = tsp_dat;
 //	encodage = tsp_dat->getCustomers();

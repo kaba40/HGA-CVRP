@@ -67,29 +67,45 @@ int main()
 
 
 	LocalSearch* localAlgo = new LocalSearch(solution_tsp);
-//	if(localAlgo->Insert())
-//	{
-//		solution_tsp->PrintSolution();
-//	}
+	if(localAlgo->Insert())
+	{
+		cout << "Insert" << endl;
+		solution_tsp->CheckSolution();
+		solution_tsp->PrintSolution();
+		solution_tsp->getSequence()->show();
+	}
 
-//	if(localAlgo->ArcInsert())
-//	{
-//		solution_tsp->PrintSolution();
-//	}
+	if(localAlgo->ArcInsert())
+	{
+		cout << "ArcInsert" << endl;
+		solution_tsp->CheckSolution();
+		solution_tsp->PrintSolution();
+		solution_tsp->getSequence()->show();
+	}
 
-//	if(localAlgo->Swap())
-//	{
-//		solution_tsp->PrintSolution();
-//	}
+	if(localAlgo->Swap())
+	{
+		cout << "Swap" << endl;
+		solution_tsp->CheckSolution();
+		solution_tsp->PrintSolution();
+		solution_tsp->getSequence()->show();
+	}
 
-//	if(localAlgo->SwapArcs())
-//	{
-//		solution_tsp->PrintSolution();
-//	}
+	if(localAlgo->SwapArcs())
+	{
+		cout << "SwapArcs" << endl;
+		solution_tsp->CheckSolution();
+		solution_tsp->PrintSolution();
+		solution_tsp->getSequence()->show();
+	}
+
 
 	if(localAlgo->SwapTwoArcs())
 	{
+		cout << "SwapTwoArcs" << endl;
+		solution_tsp->CheckSolution();
 		solution_tsp->PrintSolution();
+		solution_tsp->getSequence()->show();
 	}
 
 	delete localAlgo;
