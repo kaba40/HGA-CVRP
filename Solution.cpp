@@ -201,7 +201,22 @@ double Solution::getObjVal()
 	return solutionCost;
 }
 
-int Solution::getNumberOfRoutesInSolution()
+int Solution::getRoutesNumber()
 {
 	return numberOfRouteInSolution;
+}
+
+void Solution::setObjVal(double objVal)
+{
+	this->solutionCost = objVal;
+}
+
+void Solution::setTourStructure(vector<int> route)
+{
+	this->tour = route;
+}
+
+void Solution::setRouteNumber(int numRoute)
+{
+	this->numberOfRouteInSolution = numRoute;
 }

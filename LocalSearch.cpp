@@ -24,6 +24,8 @@ bool LocalSearch::Insert()
 	cout << "local search insert initial sequence = " ; this->initSol->getSequence()->show() ; cout << endl;
 #endif
 	double initialObjVal = this->initSol->getObjVal();
+	int numberRoute = this->initSol->getRoutesNumber();
+	vector<int> tour = this->initSol->getTourStructure();
 #ifdef DEBUG_Insert
 	cout << "initialObjVal = " << initialObjVal << endl;
 #endif
@@ -122,6 +124,13 @@ bool LocalSearch::Insert()
 			}
 			else // otherwise restore the list
 			{
+				// reset initialObjVal, tour and number of routes
+				this->initSol->setObjVal(initialObjVal);
+				this->initSol->setRouteNumber(numberRoute);
+				this->initSol->setTourStructure(tour);
+
+				// reset the initial sequence
+
 				// remove insertNode in its current place
 				this->initSol->getSequence()->removeNode(insertNode);
 
@@ -165,6 +174,8 @@ bool LocalSearch::ArcInsert()
 	cout << "local search ArcInsert initial sequence = " ; this->initSol->getSequence()->show() ;
 #endif
 	double initialObjVal = this->initSol->getObjVal();
+	int numberRoute = this->initSol->getRoutesNumber();
+	vector<int> tour = this->initSol->getTourStructure();
 #ifdef DEBUG_ArcInsert
 	cout << "initialObjVal = " << initialObjVal << endl;
 #endif
@@ -284,6 +295,12 @@ bool LocalSearch::ArcInsert()
 				}
 				else // otherwise restore the list
 				{
+					// reset initialObjVal, tour and number of routes
+					this->initSol->setObjVal(initialObjVal);
+					this->initSol->setRouteNumber(numberRoute);
+					this->initSol->setTourStructure(tour);
+
+					// reset the initial sequence
 					// remove insertNodeFirst and insertNodeLast in their current place from the list
 					this->initSol->getSequence()->removeNode(insertNodeFirst);
 					this->initSol->getSequence()->removeNode(insertNodeLast);
@@ -337,6 +354,8 @@ bool LocalSearch::Swap()
 	cout << "local search Swap initial sequence = " ; this->initSol->getSequence()->show() ;
 #endif
 	double initialObjVal = this->initSol->getObjVal();
+	int numberRoute = this->initSol->getRoutesNumber();
+	vector<int> tour = this->initSol->getTourStructure();
 #ifdef DEBUG_Swap
 	cout << "initialObjVal = " << initialObjVal << endl;
 #endif
@@ -482,6 +501,13 @@ bool LocalSearch::Swap()
 			}
 			else // otherwise restore the list
 			{
+				// reset initialObjVal, tour and number of routes
+				this->initSol->setObjVal(initialObjVal);
+				this->initSol->setRouteNumber(numberRoute);
+				this->initSol->setTourStructure(tour);
+
+				// reset the initial sequence
+
 				// remove swapNodeFirst in its current place
 				this->initSol->getSequence()->removeNode(swapNodeFirst);
 
@@ -544,6 +570,8 @@ bool LocalSearch::SwapArcs()
 	cout << "local search SwapArc initial sequence = " ; this->initSol->getSequence()->show() ;
 #endif
 	double initialObjVal = this->initSol->getObjVal();
+	int numberRoute = this->initSol->getRoutesNumber();
+	vector<int> tour = this->initSol->getTourStructure();
 #ifdef DEBUG_SwapArcs
 	cout << "initialObjVal = " << initialObjVal << endl;
 #endif
@@ -689,7 +717,6 @@ bool LocalSearch::SwapArcs()
 								//insert swapNode after  arcFirstNodePrev and before arcLastNodeNext
 								swapNode->insertBetween(arcFirstNodePrev,arcLastNodeNext);
 							}
-
 						}
 						else
 						{
@@ -719,7 +746,6 @@ bool LocalSearch::SwapArcs()
 								//insert swapNode after  arcFirstNodePrev and before arcLastNodeNext
 								swapNode->insertBetween(arcFirstNodePrev,arcLastNodeNext);
 							}
-
 						}
 #ifdef DEBUG_SwapArcs
 						cout << " show list after swapping  " << arcFirstNode->getClient()->getId() << "--" << arcLastNode->getClient()->getId() << " and " << swapNode->getClient()->getId() << " " ; this->initSol->getSequence()->show();
@@ -748,6 +774,13 @@ bool LocalSearch::SwapArcs()
 					}
 					else // otherwise restore the list
 					{
+						// reset initialObjVal, tour and number of routes
+						this->initSol->setObjVal(initialObjVal);
+						this->initSol->setRouteNumber(numberRoute);
+						this->initSol->setTourStructure(tour);
+
+						// reset the initial sequence
+
 						// remove arcFirstNode and arcLastNode in their current place
 						this->initSol->getSequence()->removeNode(arcFirstNode);
 						this->initSol->getSequence()->removeNode(arcLastNode);
@@ -823,8 +856,9 @@ bool LocalSearch::SwapTwoArcs()
 	cout << endl;
 	cout << "local search SwapTwoArcs initial sequence = " ; this->initSol->getSequence()->show() ;
 #endif
-
 	double initialObjVal = this->initSol->getObjVal();
+	int numberRoute = this->initSol->getRoutesNumber();
+	vector<int> tour = this->initSol->getTourStructure();
 #ifdef DEBUG_SwapTwoArcs
 	cout << "initialObjVal = " << initialObjVal << endl;
 #endif
@@ -960,7 +994,6 @@ bool LocalSearch::SwapTwoArcs()
 								// insert endArcSecond after startArcSecond and before endArcFirstNext
 								endArcSecond->insertBetween(startArcSecond,endArcFirstNext);
 							}
-
 						}
 						else
 						{
@@ -1010,6 +1043,13 @@ bool LocalSearch::SwapTwoArcs()
 					}
 					else // otherwise restore the list
 					{
+						// reset initialObjVal, tour and number of routes
+						this->initSol->setObjVal(initialObjVal);
+						this->initSol->setRouteNumber(numberRoute);
+						this->initSol->setTourStructure(tour);
+
+						// reset the initial sequence
+
 						// remove startArcFirst and endArcFirst in their current place
 						this->initSol->getSequence()->removeNode(startArcFirst);
 						this->initSol->getSequence()->removeNode(endArcFirst);

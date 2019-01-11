@@ -46,24 +46,22 @@ public:
 	Solution(DataAP *tsp_dat, DLinkedList* encod);
 	virtual ~Solution();
 
-	void setRandomSequence();
-  // kairaba : méthode sans argument
-  // enc : attribut de la classe. Donc tu y as accès
+
 	bool Decodage();
-
-  // kairaba : méthode sans argument
-  // enc : attribut de la classe. Donc tu y as accès
 	void CheckSolution();
+	void PrintSolution();
 
-  // kairaba : méthode sans argument
-  // enc : attribut de la classe. Donc tu y as accès
-  void PrintSolution();
-
+	//access methods
 	vector<int> getTourStructure();
 	double getObjVal();
-	int getNumberOfRoutesInSolution();
-//	vector<Customer*> getSequence();
+	int getRoutesNumber();
 	DLinkedList* getSequence();
+
+	//setting methods
+	void setRandomSequence();
+	void setObjVal(double objVal);
+	void setTourStructure(vector<int> route);
+	void setRouteNumber(int numRoute);
 };
 
 #endif /* SOLUTION_HPP_ */
