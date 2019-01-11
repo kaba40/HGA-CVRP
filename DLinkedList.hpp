@@ -23,6 +23,8 @@ public:
 
 	void setHead(Node *node);
 	void setTail(Node *node);
+	void addHead(Node *node);
+	void addTail(Node *node);
 	Node* getHead();
 	Node* getTail();
 
@@ -33,6 +35,7 @@ public:
 	Node* pop_front();
 	Node* pop_back();
 	Node* pop_position(int position);
+	void removeNode(Node *node);
 	void delete_list();
 
 	inline int getSize(){return size;}

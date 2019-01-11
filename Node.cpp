@@ -49,6 +49,33 @@ void Node::setPrevious(Node *prev)
 	this->previous = prev;
 }
 
+void Node::insertAfter(Node *node)
+{
+	//insert a node after current node
+	node->setNext(this->next);
+	this->next->setPrevious(node);
+	this->next = node ; //moveNode->setNext(insertNode);
+	node->setPrevious(this);
+}
+
+void Node::insertBefore(Node *node)
+{
+	//insert a node before current node
+	node->setPrevious(this->previous);
+	this->previous->setNext(node);
+	this->previous = node ;
+	node->setNext(this);
+}
+
+void Node::insertBetween(Node *nodePrev, Node *nodeNext)
+{
+	// insert current node after nodePrev and before nodeNext
+	nodePrev->setNext(this);
+	this->previous = nodePrev;
+	this->next = nodeNext;
+	nodeNext->setPrevious(this);
+}
+
 Customer* Node::getClient()
 {
 	return this->client;

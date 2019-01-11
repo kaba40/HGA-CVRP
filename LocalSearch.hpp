@@ -16,7 +16,7 @@ class LocalSearch
 {
 private:
 	Solution *initSol;
-
+	/*
 	void removeNode(Node* insertNode);
 	void addTail(Node* insertNode);
 	void addHead(Node* insertNode);
@@ -24,6 +24,7 @@ private:
 	void insertBefore(Node* insertNode, Node* moveNode);
 	void insertBetween(Node* insertNodePrev, Node* insertNode,
 			Node* insertNodeNext);
+	*/
 
 public:
 	LocalSearch(Solution *initSol); // solution seulement

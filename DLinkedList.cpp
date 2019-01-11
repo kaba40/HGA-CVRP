@@ -35,6 +35,22 @@ void DLinkedList::setTail(Node *node)
 	this->tail = node;
 }
 
+void DLinkedList::addHead(Node *node)
+{
+	node->setNext(this->head);
+	this->head->setPrevious(node);
+	this->head = node;
+	this->head->setPrevious(NULL);
+}
+
+void DLinkedList::addTail(Node *node)
+{
+	node->setPrevious(this->tail);
+	this->tail->setNext(node);
+	this->tail = node;
+	this->tail->setNext(NULL);
+}
+
 Node* DLinkedList::getHead()
 {
 	if(head == NULL)
@@ -242,6 +258,26 @@ Node* DLinkedList::pop_position(int position)
 	}
 
 	return tmp;
+}
+
+void DLinkedList::removeNode(Node *node)
+{
+	// remove insertNode from the list
+	if (node == this->head) {
+		this->head = node->getNext();
+		this->head->setPrevious(NULL);
+	} else if (node == this->tail) {
+		this->tail = node->getPrevious() ;
+		this->tail->setNext(NULL);
+	} else {
+		node->getPrevious()->setNext(node->getNext()) ;
+		node->getNext()->setPrevious(node->getPrevious());
+//		node->setPrevious(NULL);
+//		node->setNext(NULL);
+	}
+
+	node->setPrevious(NULL);
+	node->setNext(NULL);
 }
 
 void DLinkedList::delete_list()

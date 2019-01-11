@@ -26,6 +26,10 @@ public:
 	void setNext(Node *nxt);
 	void setPrevious(Node *prev);
 
+	void insertAfter(Node *node);
+	void insertBefore(Node *node);
+	void insertBetween(Node *nodePrev, Node *nodeNext);
+
 	Customer* getClient();
 };
 

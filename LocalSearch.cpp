@@ -16,6 +16,7 @@ LocalSearch::~LocalSearch() {
 	// TODO Auto-generated destructor stub
 }
 
+/*
 void LocalSearch::removeNode(Node* insertNode) {
 	// remove insertNode from the list
 	if (insertNode == this->initSol->getSequence()->getHead()) {
@@ -73,6 +74,8 @@ void LocalSearch::insertBetween(Node* insertNodePrev, Node* insertNode,
 	insertNodeNext->setPrevious(insertNode);
 }
 
+*/
+
 bool LocalSearch::Insert()
 {
 #ifdef DEBUG_Insert
@@ -116,7 +119,8 @@ bool LocalSearch::Insert()
 			else
 			{
 				// remove insertNode from the list
-				removeNode(insertNode);
+//				removeNode(insertNode);
+				this->initSol->getSequence()->removeNode(insertNode);
 #ifdef DEBUG_Insert
 				cout << " show list after removing  " << insertNode->getClient()->getId() << " "  ;  this->initSol->getSequence()->show() ;
 #endif
@@ -126,12 +130,14 @@ bool LocalSearch::Insert()
 					if(moveNode->getNext() == NULL)
 					{
 						//push back insertNode
-						addTail(insertNode);
+//						addTail(insertNode);
+						this->initSol->getSequence()->addTail(insertNode);
 					}
 					else
 					{
 						//insert insertNode after moveNode
-						insertAfter(insertNode, moveNode);
+//						insertAfter(insertNode, moveNode);
+						moveNode->insertAfter(insertNode);
 					}
 #ifdef DEBUG_Insert
 					cout << " show list after inserting " << insertNode->getClient()->getId() << " after " << moveNode->getClient()->getId()  ;  this->initSol->getSequence()->show() ;
@@ -142,12 +148,14 @@ bool LocalSearch::Insert()
 					if(moveNode->getPrevious() == NULL)
 					{
 						//push front insertNode
-						addHead(insertNode);
+//						addHead(insertNode);
+						this->initSol->getSequence()->addHead(insertNode);
 					}
 					else
 					{
 						//insert insertNode before moveNode
-						insertBefore(insertNode, moveNode);
+//						insertBefore(insertNode, moveNode);
+						moveNode->insertBefore(insertNode);
 					}
 #ifdef DEBUG_Insert
 					cout << " show list after inserting " << insertNode->getClient()->getId() << " before " << moveNode->getClient()->getId()  ;  this->initSol->getSequence()->show() ;
@@ -179,7 +187,9 @@ bool LocalSearch::Insert()
 			else // otherwise restore the list
 			{
 				// remove insertNode at its current place
-				removeNode(insertNode);
+//				removeNode(insertNode);
+				this->initSol->getSequence()->removeNode(insertNode);
+
 #ifdef DEBUG_Insert
 				cout << " show list after removing " << insertNode->getClient()->getId() << " in its current place " ;  this->initSol->getSequence()->show() ;
 #endif
@@ -187,15 +197,18 @@ bool LocalSearch::Insert()
 				// insert insertNode in its initial place
 				if(insertNodePrev == NULL)
 				{
-					addHead(insertNode);
+//					addHead(insertNode);
+					this->initSol->getSequence()->addHead(insertNode);
 				}
 				else if( insertNodeNext == NULL)
 				{
-					addTail(insertNode);
+//					addTail(insertNode);
+					this->initSol->getSequence()->addTail(insertNode);
 				}
 				else
 				{
-					insertBetween(insertNodePrev, insertNode, insertNodeNext);
+//					insertBetween(insertNodePrev, insertNode, insertNodeNext);
+					insertNode->insertBetween(insertNodePrev, insertNodeNext);
 				}
 #ifdef DEBUG_Insert
 				cout << " show list after inserting " << insertNode->getClient()->getId() << " in its initial place " ;  this->initSol->getSequence()->show() ;
@@ -230,16 +243,13 @@ bool LocalSearch::ArcInsert()
 
 	for(Node *insertNode = this->initSol->getSequence()->getHead(); insertNode != NULL; insertNode = insertNode->getNext())
 	{
-#ifdef DEBUG_ArcInsert
-		cout << "--------------------insertNode " << " " << " = " << insertNode->getClient()->getId() << " -----------------------" << endl;
-#endif
 		insertNodeFirst = insertNode;
 		insertNodeLast = insertNodeFirst->getNext();
 
 		if(insertNodeLast != NULL)
 		{
 #ifdef DEBUG_ArcInsert
-			cout << " insert arc = " << insertNodeFirst->getClient()->getId() << "--" << insertNodeLast->getClient()->getId() << endl;
+			cout << " -------------------- insert arc = " << insertNodeFirst->getClient()->getId() << "--" << insertNodeLast->getClient()->getId() << " -----------------------" << endl;
 #endif
 			insertNodeFirstPrev = insertNode->getPrevious();
 			insertNodeLastNext = insertNodeLast->getNext();
@@ -265,8 +275,10 @@ bool LocalSearch::ArcInsert()
 				else
 				{
 					//remove the two arcs from the list
-					removeNode(insertNodeFirst);
-					removeNode(insertNodeLast);
+//					removeNode(insertNodeFirst);
+//					removeNode(insertNodeLast);
+					this->initSol->getSequence()->removeNode(insertNodeFirst);
+					this->initSol->getSequence()->removeNode(insertNodeLast);
 #ifdef DEBUG_ArcInsert
 					cout << " show list after removing  " << insertNodeFirst->getClient()->getId() << "--" << insertNodeLast->getClient()->getId() ;  this->initSol->getSequence()->show() ;
 #endif
@@ -276,18 +288,22 @@ bool LocalSearch::ArcInsert()
 						if(moveNode->getNext() == NULL)
 						{
 							// add back insertNodeFirst
-							addTail(insertNodeFirst);
+//							addTail(insertNodeFirst);
+							this->initSol->getSequence()->addTail(insertNodeFirst);
 
 							// add back insertNodeLast
-							addTail(insertNodeLast);
+//							addTail(insertNodeLast);
+							this->initSol->getSequence()->addTail(insertNodeLast);
 						}
 						else
 						{
 							// insert insertNodeFirst after moveNode
-							insertAfter(insertNodeFirst, moveNode);
+//							insertAfter(insertNodeFirst, moveNode);
+							moveNode->insertAfter(insertNodeFirst);
 
 							// insert insertNodeLast after insertNodeFirst
-							insertAfter(insertNodeLast, insertNodeFirst);
+//							insertAfter(insertNodeLast, insertNodeFirst);
+							insertNodeFirst->insertAfter(insertNodeLast);
 						}
 #ifdef DEBUG_ArcInsert
 						cout << " show list after inserting " << insertNodeFirst->getClient()->getId() << "--" << insertNodeLast->getClient()->getId() << " after " << moveNode->getClient()->getId()  ;  this->initSol->getSequence()->show() ;
@@ -298,18 +314,22 @@ bool LocalSearch::ArcInsert()
 						if(moveNode->getPrevious() == NULL)
 						{
 							// add front insertNodeLast
-							addHead(insertNodeLast);
+//							addHead(insertNodeLast);
+							this->initSol->getSequence()->addHead(insertNodeLast);
 
 							// add front insertNodeFirst
-							addHead(insertNodeFirst);
+//							addHead(insertNodeFirst);
+							this->initSol->getSequence()->addHead(insertNodeFirst);
 						}
 						else
 						{
 							//insert insertNodeLast before moveNode
-							insertBefore(insertNodeLast, moveNode);
+//							insertBefore(insertNodeLast, moveNode);
+							moveNode->insertBefore(insertNodeLast);
 
 							//insert insertNodeFirst before insertNodeLast
-							insertBefore(insertNodeFirst, insertNodeLast);
+//							insertBefore(insertNodeFirst, insertNodeLast);
+							insertNodeLast->insertBefore(insertNodeFirst);
 						}
 #ifdef DEBUG_ArcInsert
 						cout << " show list after inserting " << insertNodeFirst->getClient()->getId() << "--" << insertNodeLast->getClient()->getId()  << " before " << moveNode->getClient()->getId()  ;  this->initSol->getSequence()->show();
@@ -339,9 +359,11 @@ bool LocalSearch::ArcInsert()
 				}
 				else // otherwise restore the list
 				{
-					// remove insertNodeFirst and insertNodeLast in their current place
-					removeNode(insertNodeFirst);
-					removeNode(insertNodeLast);
+					// remove insertNodeFirst and insertNodeLast in their current place from the list
+//					removeNode(insertNodeFirst);
+//					removeNode(insertNodeLast);
+					this->initSol->getSequence()->removeNode(insertNodeFirst);
+					this->initSol->getSequence()->removeNode(insertNodeLast);
 #ifdef DEBUG_ArcInsert
 					cout << " show list after removing " << insertNodeFirst->getClient()->getId() << "--" << insertNodeLast->getClient()->getId() << " in their current place " ;  this->initSol->getSequence()->show() ;
 #endif
@@ -349,26 +371,32 @@ bool LocalSearch::ArcInsert()
 					if(insertNodeFirstPrev == NULL)
 					{
 						// add insertNodeLast to the front
-						addHead(insertNodeLast);
+//						addHead(insertNodeLast);
+						this->initSol->getSequence()->addHead(insertNodeLast);
 
 						// add insertNodeFirst to the front
-						addHead(insertNodeFirst);
+//						addHead(insertNodeFirst);
+						this->initSol->getSequence()->addHead(insertNodeFirst);
 					}
 					else if( insertNodeLastNext == NULL)
 					{
 						// push back insertNodeFirst
-						addTail(insertNodeFirst);
+//						addTail(insertNodeFirst);
+						this->initSol->getSequence()->addTail(insertNodeFirst);
 
 						// push back insertNodeLast
-						addTail(insertNodeLast);
+//						addTail(insertNodeLast);
+						this->initSol->getSequence()->addTail(insertNodeLast);
 					}
 					else if(insertNodeFirstPrev != NULL && insertNodeLastNext != NULL)
 					{
 						// insert insertNodeFirst after insertNodeFirstPrev and before insertNodeLastNext
-						insertBetween(insertNodeFirstPrev, insertNodeFirst, insertNodeLastNext);
+//						insertBetween(insertNodeFirstPrev, insertNodeFirst, insertNodeLastNext);
+						insertNodeFirst->insertBetween(insertNodeFirstPrev,insertNodeLastNext);
 
 						//insert insertNodeLast after insertNodeFirst and before insertNodeLastNext
-						insertBetween(insertNodeFirst,insertNodeLast,insertNodeLastNext);
+//						insertBetween(insertNodeFirst,insertNodeLast,insertNodeLastNext);
+						insertNodeLast->insertBetween(insertNodeFirst,insertNodeLastNext);
 					}
 #ifdef DEBUG_ArcInsert
 					cout << " show list after inserting " << insertNodeFirst->getClient()->getId() << "--" << insertNodeLast->getClient()->getId() << " in their initial place " ; this->initSol->getSequence()->show();
@@ -432,7 +460,8 @@ bool LocalSearch::Swap()
 			cout << endl;
 #endif
 			//remove swapNodeFirst
-			removeNode(swapNodeFirst);
+//			removeNode(swapNodeFirst);
+			this->initSol->getSequence()->removeNode(swapNodeFirst);
 #ifdef DEBUG_Swap
 			cout << " show list after removing  " << swapNodeFirst->getClient()->getId() << " "  ; this->initSol->getSequence()->show();
 #endif
@@ -446,7 +475,8 @@ bool LocalSearch::Swap()
 				cout << endl;
 #endif
 				// remove swapNodeSecond
-				removeNode(swapNodeSecond);
+//				removeNode(swapNodeSecond);
+				this->initSol->getSequence()->removeNode(swapNodeSecond);
 #ifdef DEBUG_Swap
 				cout << " show list after removing  " << swapNodeSecond->getClient()->getId() << " "  ; this->initSol->getSequence()->show();
 #endif
@@ -457,21 +487,27 @@ bool LocalSearch::Swap()
 				if(sNodeSecondPrev == NULL)
 				{
 					//push front swapNodeFirst then swapNodeSecond
-					addHead(swapNodeFirst);
-					addHead(swapNodeSecond);
+//					addHead(swapNodeFirst);
+//					addHead(swapNodeSecond);
+					this->initSol->getSequence()->addHead(swapNodeFirst);
+					this->initSol->getSequence()->addHead(swapNodeSecond);
 				}
 				else if(sNodeSecondNext == NULL)
 				{
 					// push back swapNodeFirst then push front swapNodeSecond
-					addTail(swapNodeFirst);
-					addHead(swapNodeSecond);
+//					addTail(swapNodeFirst);
+//					addHead(swapNodeSecond);
+					this->initSol->getSequence()->addTail(swapNodeFirst);
+					this->initSol->getSequence()->addHead(swapNodeSecond);
 				}
 				else
 				{
 					// insert swapNodeFirst after sNodeSecondPrev and before sNodeSecondNext
 					// then push front swapNodeSecond
-					insertBetween(sNodeSecondPrev, swapNodeFirst, sNodeSecondNext);
-					addHead(swapNodeSecond);
+//					insertBetween(sNodeSecondPrev, swapNodeFirst, sNodeSecondNext);
+//					addHead(swapNodeSecond);
+					swapNodeFirst->insertBetween(sNodeSecondPrev,sNodeSecondNext);
+					this->initSol->getSequence()->addHead(swapNodeSecond);
 				}
 #ifdef DEBUG_Swap
 				cout << " show list after swapping  " << swapNodeFirst->getClient()->getId() << " and " << swapNodeSecond->getClient()->getId() << " " ; this->initSol->getSequence()->show();
@@ -484,32 +520,38 @@ bool LocalSearch::Swap()
 				if(sNodeSecondNext == NULL)
 				{
 					// push back swapNodeFirst
-					addTail(swapNodeFirst);
+//					addTail(swapNodeFirst);
+					this->initSol->getSequence()->addTail(swapNodeFirst);
 					if(swapNodeFirstNext == swapNodeSecond)
 					{
 						//insert swapNodeSecond after  swapNodeFirstPrev and before swapNodeFirst
-						insertBetween(swapNodeFirstPrev,swapNodeSecond,swapNodeFirst);
+//						insertBetween(swapNodeFirstPrev,swapNodeSecond,swapNodeFirst);
+						swapNodeSecond->insertBetween(swapNodeFirstPrev,swapNodeFirst);
 					}
 					else
 					{
 						//insert swapNodeSecond after  swapNodeFirstPrev and before swapNodeFirstNext
-						insertBetween(swapNodeFirstPrev,swapNodeSecond,swapNodeFirstNext);
+//						insertBetween(swapNodeFirstPrev,swapNodeSecond,swapNodeFirstNext);
+						swapNodeSecond->insertBetween(swapNodeFirstPrev,swapNodeFirstNext);
 					}
 
 				}
 				else
 				{
 					//insert swapNodeFirst after  sNodeSecondPrev and before sNodeSecondNext
-					insertBetween(sNodeSecondPrev,swapNodeFirst,sNodeSecondNext);
+//					insertBetween(sNodeSecondPrev,swapNodeFirst,sNodeSecondNext);
+					swapNodeFirst->insertBetween(sNodeSecondPrev,sNodeSecondNext);
 					if(swapNodeFirstNext == swapNodeSecond)
 					{
 						//insert swapNodeSecond after  swapNodeFirstPrev and before swapNodeFirst
-						insertBetween(swapNodeFirstPrev,swapNodeSecond,swapNodeFirst);
+//						insertBetween(swapNodeFirstPrev,swapNodeSecond,swapNodeFirst);
+						swapNodeSecond->insertBetween(swapNodeFirstPrev,swapNodeFirst);
 					}
 					else
 					{
 						//insert swapNodeSecond after  swapNodeFirstPrev and before swapNodeFirstNext
-						insertBetween(swapNodeFirstPrev,swapNodeSecond,swapNodeFirstNext);
+//						insertBetween(swapNodeFirstPrev,swapNodeSecond,swapNodeFirstNext);
+						swapNodeSecond->insertBetween(swapNodeFirstPrev,swapNodeFirstNext);
 					}
 
 				}
@@ -540,7 +582,8 @@ bool LocalSearch::Swap()
 			else // otherwise restore the list
 			{
 				// remove swapNodeFirst in its current place
-				removeNode(swapNodeFirst);
+//				removeNode(swapNodeFirst);
+				this->initSol->getSequence()->removeNode(swapNodeFirst);
 
 #ifdef DEBUG_Swap
 				cout << " show list after removing " << swapNodeFirst->getClient()->getId() <<  " in its current place " ;  this->initSol->getSequence()->show() ;
@@ -549,23 +592,27 @@ bool LocalSearch::Swap()
 				if(swapNodeFirstPrev == NULL)
 				{
 					//push front swapNodeFirst
-					addHead(swapNodeFirst);
+//					addHead(swapNodeFirst);
+					this->initSol->getSequence()->addHead(swapNodeFirst);
 				}
 				else if(swapNodeFirstNext == NULL)
 				{
 					// push back swapNodeFirst
-					addTail(swapNodeFirst);
+//					addTail(swapNodeFirst);
+					this->initSol->getSequence()->addTail(swapNodeFirst);
 				}
 				else
 				{
 					// insert swapNodeFirst after swapNodeFirstPrev
-					insertAfter(swapNodeFirst, swapNodeFirstPrev);
+//					insertAfter(swapNodeFirst, swapNodeFirstPrev);
+					swapNodeFirstPrev->insertAfter(swapNodeFirst);
 				}
 #ifdef DEBUG_Swap
 				cout << " show list after inserting " << swapNodeFirst->getClient()->getId() << " in its initial place " ;  this->initSol->getSequence()->show() ;
 #endif
 				// remove swapNodeSecond in its current place
-				removeNode(swapNodeSecond);
+//				removeNode(swapNodeSecond);
+				this->initSol->getSequence()->removeNode(swapNodeSecond);
 #ifdef DEBUG_Swap
 				cout << " show list after removing " <<  swapNodeSecond->getClient()->getId() << " in its current place " ;  this->initSol->getSequence()->show() ;
 #endif
@@ -573,12 +620,14 @@ bool LocalSearch::Swap()
 				if(swapNodeSecondNext == NULL)
 				{
 					// push back swapNodeSecond
-					addTail(swapNodeSecond);
+//					addTail(swapNodeSecond);
+					this->initSol->getSequence()->addTail(swapNodeSecond);
 				}
 				else
 				{
 					// insert swapNodeSecond after swapNodeSecondPrev and before swapNodeSecondNext
-					insertBetween(swapNodeSecondPrev,swapNodeSecond,swapNodeSecondNext);
+//					insertBetween(swapNodeSecondPrev,swapNodeSecond,swapNodeSecondNext);
+					swapNodeSecond->insertBetween(swapNodeSecondPrev,swapNodeSecondNext);
 				}
 #ifdef DEBUG_Swap
 				cout << " show list after inserting " <<  swapNodeSecond->getClient()->getId() << " in its initial place " ;  this->initSol->getSequence()->show() ;
@@ -655,8 +704,10 @@ bool LocalSearch::SwapArcs()
 					cout << endl;
 #endif
 					//remove swapNodeFirst and arcLastNode
-					removeNode(arcFirstNode);
-					removeNode(arcLastNode);
+//					removeNode(arcFirstNode);
+//					removeNode(arcLastNode);
+					this->initSol->getSequence()->removeNode(arcFirstNode);
+					this->initSol->getSequence()->removeNode(arcLastNode);
 #ifdef DEBUG_SwapArcs
 					cout << " show list after removing  " << arcFirstNode->getClient()->getId() << "--" << arcLastNode->getClient()->getId() << " "  ; this->initSol->getSequence()->show();
 #endif
@@ -671,7 +722,8 @@ bool LocalSearch::SwapArcs()
 					cout << endl;
 #endif
 					//remove swapNode
-					removeNode(swapNode);
+//					removeNode(swapNode);
+					this->initSol->getSequence()->removeNode(swapNode);
 #ifdef DEBUG_SwapArcs
 					cout << " show list after removing  " << swapNode->getClient()->getId() << " "  ; this->initSol->getSequence()->show();
 #endif
@@ -681,25 +733,35 @@ bool LocalSearch::SwapArcs()
 						if(sNodePrev == NULL)
 						{
 							//push front arcLastNode then arcFirstNode then swapNode
-							addHead(arcLastNode);
-							addHead(arcFirstNode);
-							addHead(swapNode); // not possible to put this instruction before if condition
+//							addHead(arcLastNode);
+//							addHead(arcFirstNode);
+//							addHead(swapNode); // not possible to put this instruction before if condition
+							this->initSol->getSequence()->addHead(arcLastNode);
+							this->initSol->getSequence()->addHead(arcFirstNode);
+							this->initSol->getSequence()->addHead(swapNode); // not possible to put this instruction before if condition
 						}
 						else if(sNodeNext == NULL)
 						{
 							// push back arcFirstNode then arcLastNode then push front swapNode
-							addTail(arcFirstNode);
-							addTail(arcLastNode);
-							addHead(swapNode);
+//							addTail(arcFirstNode);
+//							addTail(arcLastNode);
+//							addHead(swapNode);
+
+							this->initSol->getSequence()->addHead(arcFirstNode);
+							this->initSol->getSequence()->addHead(arcLastNode);
+							this->initSol->getSequence()->addHead(swapNode);
 						}
 						else
 						{
 							// insert arcFirstNode after sNodePrev and before sNodeNext
-							insertBetween(sNodePrev, arcFirstNode, sNodeNext);
+//							insertBetween(sNodePrev, arcFirstNode, sNodeNext);
+							arcFirstNode->insertBetween(sNodePrev,sNodeNext);
 							// insert arcLastNode after arcFirstNode and before sNodeNext
-							insertBetween(arcFirstNode,arcLastNode, sNodeNext);
+//							insertBetween(arcFirstNode,arcLastNode, sNodeNext);
+							arcLastNode->insertBetween(arcFirstNode,sNodeNext);
 							// then push front swapNode
-							addHead(swapNode);
+//							addHead(swapNode);
+							this->initSol->getSequence()->addHead(swapNode);
 						}
 #ifdef DEBUG_SwapArcs
 						cout << " show list after swapping  " << arcFirstNode->getClient()->getId() << "--" << arcLastNode->getClient()->getId() << " and " << swapNode->getClient()->getId() << " " ; this->initSol->getSequence()->show();
@@ -710,70 +772,89 @@ bool LocalSearch::SwapArcs()
 						if(sNodePrev == NULL)
 						{
 							// push front arcLastNode then arcFirstNode
-							addHead(arcLastNode);
-							addHead(arcFirstNode);
+//							addHead(arcLastNode);
+//							addHead(arcFirstNode);
+							this->initSol->getSequence()->addHead(arcLastNode);
+							this->initSol->getSequence()->addHead(arcFirstNode);
 							if(arcFirstNodePrev == swapNode)
 							{
 								// insert swapNode after arcLastNode and before arcLastNodeNext
-								insertBetween(arcLastNode,swapNode,arcLastNodeNext);
+//								insertBetween(arcLastNode,swapNode,arcLastNodeNext);
+								swapNode->insertBetween(arcLastNode,arcLastNodeNext);
 							}
 							else if(arcLastNodeNext == NULL)
 							{
 								// push back swapNode
-								addTail(swapNode);
+//								addTail(swapNode);
+								this->initSol->getSequence()->addTail(swapNode);
 							}
 							else
 							{
 								//insert swapNode after  arcFirstNodePrev and before arcLastNodeNext
-								insertBetween(arcFirstNodePrev,swapNode,arcLastNodeNext);
+//								insertBetween(arcFirstNodePrev,swapNode,arcLastNodeNext);
+								swapNode->insertBetween(arcFirstNodePrev,arcLastNodeNext);
 							}
 						}
 						else if(sNodeNext == NULL)
 						{
 							// push back arcFirstNode then arcLastNode
-							addTail(arcFirstNode);
-							addTail(arcLastNode);
+//							addTail(arcFirstNode);
+//							addTail(arcLastNode);
+							this->initSol->getSequence()->addTail(arcFirstNode);
+							this->initSol->getSequence()->addTail(arcLastNode);
 							if(arcLastNodeNext == swapNode)
 							{
 								//insert swapNode after  arcFirstNodePrev and before arcFirstNode
-								insertBetween(arcFirstNodePrev,swapNode,arcFirstNode);
+//								insertBetween(arcFirstNodePrev,swapNode,arcFirstNode);
+								swapNode->insertBetween(arcFirstNodePrev,arcFirstNode);
 							}
 							else if(arcFirstNodePrev == swapNode)
 							{
 								//push back swapNode
-								addTail(swapNode);
+//								addTail(swapNode);
+								this->initSol->getSequence()->addTail(swapNode);
 							}
 							else
 							{
 								//insert swapNode after  arcFirstNodePrev and before arcLastNodeNext
-								insertBetween(arcFirstNodePrev,swapNode,arcLastNodeNext);
+//								insertBetween(arcFirstNodePrev,swapNode,arcLastNodeNext);
+								swapNode->insertBetween(arcFirstNodePrev,arcLastNodeNext);
 							}
 
 						}
 						else
 						{
 							//insert arcFirstNode after  sNodePrev and before sNodeNext
-							insertBetween(sNodePrev,arcFirstNode,sNodeNext);
+//							insertBetween(sNodePrev,arcFirstNode,sNodeNext);
+							arcFirstNode->insertBetween(sNodePrev,sNodeNext);
 							//insert arcLastNode after arcFirstNode and before sNodeNext
-							insertBetween(arcFirstNode,arcLastNode,sNodeNext);
+//							insertBetween(arcFirstNode,arcLastNode,sNodeNext);
+							arcLastNode->insertBetween(arcFirstNode,sNodeNext);
 							if(arcFirstNodePrev == swapNode)
 							{
 								//insert swapNode after arcLastNode and before arcLastNodeNext
-								insertBetween(arcLastNode,swapNode,arcLastNodeNext);
+//								insertBetween(arcLastNode,swapNode,arcLastNodeNext);
+								swapNode->insertBetween(arcLastNode,arcLastNodeNext);
 
-							}else if(arcLastNodeNext == swapNode)
+							}
+							else if(arcLastNodeNext == swapNode)
 							{
 								//insert swapNode after  arcFirstNodePrev and before arcFirstNode
-								insertBetween(arcFirstNodePrev,swapNode,arcFirstNode);
-							}else if(arcLastNodeNext == NULL)
+//								insertBetween(arcFirstNodePrev,swapNode,arcFirstNode);
+								swapNode->insertBetween(arcFirstNodePrev,arcFirstNode);
+							}
+							else if(arcLastNodeNext == NULL)
 							{
 								// push back swapNode
-								addTail(swapNode);
+//								addTail(swapNode);
+								this->initSol->getSequence()->addTail(swapNode);
+
 							}
 							else
 							{
 								//insert swapNode after  arcFirstNodePrev and before arcLastNodeNext
-								insertBetween(arcFirstNodePrev,swapNode,arcLastNodeNext);
+//								insertBetween(arcFirstNodePrev,swapNode,arcLastNodeNext);
+								swapNode->insertBetween(arcFirstNodePrev,arcLastNodeNext);
 							}
 
 						}
@@ -805,8 +886,10 @@ bool LocalSearch::SwapArcs()
 					else // otherwise restore the list
 					{
 						// remove arcFirstNode and arcLastNode in their current place
-						removeNode(arcFirstNode);
-						removeNode(arcLastNode);
+//						removeNode(arcFirstNode);
+//						removeNode(arcLastNode);
+						this->initSol->getSequence()->removeNode(arcFirstNode);
+						this->initSol->getSequence()->removeNode(arcLastNode);
 
 #ifdef DEBUG_SwapArcs
 						cout << " show list after removing " << arcFirstNode->getClient()->getId() << "--" << arcLastNode->getClient()->getId() <<  " in their current place " ;  this->initSol->getSequence()->show() ;
@@ -815,28 +898,35 @@ bool LocalSearch::SwapArcs()
 						if(arcFirstNodePrev == NULL)
 						{
 							//push front arcLastNode then arcFirstNode
-							addHead(arcLastNode);
-							addHead(arcFirstNode);
+//							addHead(arcLastNode);
+//							addHead(arcFirstNode);
+							this->initSol->getSequence()->addHead(arcLastNode);
+							this->initSol->getSequence()->addHead(arcFirstNode);
 						}
 						else if(arcLastNodeNext == NULL)
 						{
 							// push back arcFirstNode then arcLastNode
-							addTail(arcFirstNode);
-							addTail(arcLastNode);
+//							addTail(arcFirstNode);
+//							addTail(arcLastNode);
+							this->initSol->getSequence()->addTail(arcFirstNode);
+							this->initSol->getSequence()->addTail(arcLastNode);
 						}
 						else
 						{
 							// insert arcFirstNode after arcFirstNodePrev
-							insertAfter(arcFirstNode,arcFirstNodePrev);
+//							insertAfter(arcFirstNode,arcFirstNodePrev);
+							arcFirstNodePrev->insertAfter(arcFirstNode);
 							// insert arcLastNode after arcFirstNode
-							insertAfter(arcLastNode,arcFirstNode);
+//							insertAfter(arcLastNode,arcFirstNode);
+							arcFirstNode->insertAfter(arcLastNode);
 						}
 
 #ifdef DEBUG_SwapArcs
 						cout << " show list after inserting " << arcFirstNode->getClient()->getId() << "--" << arcLastNode->getClient()->getId() <<  " in their initial place " ;  this->initSol->getSequence()->show() ;
 #endif
 						// remove swapNode in its current place
-						removeNode(swapNode);
+//						removeNode(swapNode);
+						this->initSol->getSequence()->removeNode(swapNode);
 #ifdef DEBUG_SwapArcs
 						cout << " show list after removing " << swapNode->getClient()->getId() <<   " in its current place " ;  this->initSol->getSequence()->show() ;
 #endif
@@ -844,17 +934,20 @@ bool LocalSearch::SwapArcs()
 						if(swapNodePrev == NULL)
 						{
 							// push front swapNode
-							addHead(swapNode);
+//							addHead(swapNode);
+							this->initSol->getSequence()->addHead(swapNode);
 						}
 						else if(swapNodeNext == NULL)
 						{
 							// push back swapNode
-							addTail(swapNode);
+//							addTail(swapNode);
+							this->initSol->getSequence()->addTail(swapNode);
 						}
 						else
 						{
 							// insert swapNode after swapNodePrev and before swapNodeNext
-							insertBetween(swapNodePrev,swapNode,swapNodeNext);
+//							insertBetween(swapNodePrev,swapNode,swapNodeNext);
+							swapNode->insertBetween(swapNodePrev,swapNodeNext);
 						}
 #ifdef DEBUG_SwapArcs
 						cout << " show list after inserting " <<  swapNode->getClient()->getId() << " in its initial place " ;  this->initSol->getSequence()->show() ;
@@ -879,7 +972,7 @@ bool LocalSearch::SwapTwoArcs()
 	cout << endl;
 	cout << "local search SwapTwoArcs initial sequence = " ; this->initSol->getSequence()->show() ;
 #endif
-//	this->initSol->Decodage();
+
 	double initialObjVal = this->initSol->getObjVal();
 #ifdef DEBUG_SwapTwoArcs
 	cout << "initialObjVal = " << initialObjVal << endl;
@@ -940,8 +1033,10 @@ bool LocalSearch::SwapTwoArcs()
 					cout << endl;
 #endif
 					//remove startArcFirst and endArcFirst
-					removeNode(startArcFirst);
-					removeNode(endArcFirst);
+//					removeNode(startArcFirst);
+//					removeNode(endArcFirst);
+					this->initSol->getSequence()->removeNode(startArcFirst);
+					this->initSol->getSequence()->removeNode(endArcFirst);
 #ifdef DEBUG_SwapTwoArcs
 					cout << " show list after removing  " << startArcFirst->getClient()->getId() << "--" << endArcFirst->getClient()->getId() << " "  ; this->initSol->getSequence()->show();
 #endif
@@ -959,8 +1054,10 @@ bool LocalSearch::SwapTwoArcs()
 #endif
 
 					//remove startArcSecond and endArcSecond
-					removeNode(startArcSecond);
-					removeNode(endArcSecond);
+//					removeNode(startArcSecond);
+//					removeNode(endArcSecond);
+					this->initSol->getSequence()->removeNode(startArcSecond);
+					this->initSol->getSequence()->removeNode(endArcSecond);
 #ifdef DEBUG_SwapTwoArcs
 					cout << " show list after removing  " << startArcSecond->getClient()->getId() << "--" << endArcSecond->getClient()->getId() << " "  ; this->initSol->getSequence()->show();
 #endif
@@ -970,31 +1067,44 @@ bool LocalSearch::SwapTwoArcs()
 						if(sArcSecondPrev == NULL)
 						{
 							//push front endArcFirst then startArcFirst
-							addHead(endArcFirst);
-							addHead(startArcFirst);
+//							addHead(endArcFirst);
+//							addHead(startArcFirst);
+							this->initSol->getSequence()->addHead(endArcFirst);
+							this->initSol->getSequence()->addHead(startArcFirst);
 							//push front endArcSecond then startArcSecond
-							addHead(endArcSecond); // not possible to put this instruction before if condition
-							addHead(startArcSecond);
+//							addHead(endArcSecond);
+//							addHead(startArcSecond);
+							this->initSol->getSequence()->addHead(endArcSecond);
+							this->initSol->getSequence()->addHead(startArcSecond);
 						}
 						else if(eArcSecondNext == NULL)
 						{
 							// push back startArcFirst then endArcFirst then push front swapNodeSecond
-							addTail(startArcFirst);
-							addTail(endArcFirst);
+//							addTail(startArcFirst);
+//							addTail(endArcFirst);
+							this->initSol->getSequence()->addTail(startArcFirst);
+							this->initSol->getSequence()->addTail(endArcFirst);
 							// push front endArcSecond then startArcSecond
-							addHead(endArcSecond);
-							addHead(startArcSecond);
+//							addHead(endArcSecond);
+//							addHead(startArcSecond);
+							this->initSol->getSequence()->addHead(endArcSecond);
+							this->initSol->getSequence()->addHead(startArcSecond);
 						}
 						else
 						{
 							// insert startArcFirst after sArcSecondPrev and before eArcSecondNext
-							insertBetween(sArcSecondPrev, startArcFirst, eArcSecondNext);
+//							insertBetween(sArcSecondPrev, startArcFirst, eArcSecondNext);
+							startArcFirst->insertBetween(sArcSecondPrev,eArcSecondNext);
 							// insert endArcFirst after startArcFirst and before eArcSecondNext
-							insertBetween(startArcFirst,endArcFirst, eArcSecondNext);
+//							insertBetween(startArcFirst,endArcFirst, eArcSecondNext);
+							endArcFirst->insertBetween(startArcFirst,eArcSecondNext);
 
 							// push front endArcSecond then startArcSecond
-							addHead(endArcSecond);
-							addHead(startArcSecond);
+//							addHead(endArcSecond);
+//							addHead(startArcSecond);
+							this->initSol->getSequence()->addHead(endArcSecond); // move it here
+							this->initSol->getSequence()->addHead(startArcSecond); // move it here
+
 						}
 #ifdef DEBUG_SwapTwoArcs
 						cout << " show list after swapping  " << startArcFirst->getClient()->getId() << "--" << endArcFirst->getClient()->getId() << " and " << startArcSecond->getClient()->getId() << "--" << endArcSecond->getClient()->getId() << " " ; this->initSol->getSequence()->show();
@@ -1006,44 +1116,56 @@ bool LocalSearch::SwapTwoArcs()
 						if(eArcSecondNext == NULL)
 						{
 							// push back startArcFirst then endArcFirst
-							addTail(startArcFirst);
-							addTail(endArcFirst);
+//							addTail(startArcFirst);
+//							addTail(endArcFirst);
+							this->initSol->getSequence()->addTail(startArcFirst);
+							this->initSol->getSequence()->addTail(endArcFirst);
 							if(endArcFirstNext == startArcSecond)
 							{
 								//insert startArcSecond after  startArcFirstPrev and before startArcFirst
-								insertBetween(startArcFirstPrev,startArcSecond,startArcFirst);
+//								insertBetween(startArcFirstPrev,startArcSecond,startArcFirst);
+								startArcSecond->insertBetween(startArcFirstPrev,startArcFirst);
 								// insert endArcSecond after startArcSecond and before startArcFirst
-								insertBetween(startArcSecond,endArcSecond,startArcFirst);
+//								insertBetween(startArcSecond,endArcSecond,startArcFirst);
+								endArcSecond->insertBetween(startArcSecond,startArcFirst);
 							}
 							else
 							{
 								//insert startArcSecond after  startArcFirstPrev and before endArcFirstNext
-								insertBetween(startArcFirstPrev,startArcSecond,endArcFirstNext);
+//								insertBetween(startArcFirstPrev,startArcSecond,endArcFirstNext);
+								startArcSecond->insertBetween(startArcFirstPrev,endArcFirstNext);
 								// insert endArcSecond after startArcSecond and before endArcFirstNext
-								insertBetween(startArcSecond,endArcSecond,endArcFirstNext);
+//								insertBetween(startArcSecond,endArcSecond,endArcFirstNext);
+								endArcSecond->insertBetween(startArcSecond,endArcFirstNext);
 							}
 
 						}
 						else
 						{
 							//insert startArcFirst after  sArcSecondPrev and before eArcSecondNext
-							insertBetween(sArcSecondPrev,startArcFirst,eArcSecondNext);
+//							insertBetween(sArcSecondPrev,startArcFirst,eArcSecondNext);
+							startArcFirst->insertBetween(sArcSecondPrev,eArcSecondNext);
 							//insert endArcFirst after startArcFirst and before eArcSecondNext
-							insertBetween(startArcFirst,endArcFirst,eArcSecondNext);
+//							insertBetween(startArcFirst,endArcFirst,eArcSecondNext);
+							endArcFirst->insertBetween(startArcFirst,eArcSecondNext);
 
 							if(endArcFirstNext == startArcSecond)
 							{
 								// insert startArcSecond after  startArcFirstPrev and before startArcFirst
-								insertBetween(startArcFirstPrev,startArcSecond,startArcFirst);
+//								insertBetween(startArcFirstPrev,startArcSecond,startArcFirst);
+								startArcSecond->insertBetween(startArcFirstPrev,startArcFirst);
 								// insert endArcSecond after startArcSecond and before startArcFirst
-								insertBetween(startArcSecond,endArcSecond,startArcFirst);
+//								insertBetween(startArcSecond,endArcSecond,startArcFirst);
+								endArcSecond->insertBetween(startArcSecond,startArcFirst);
 							}
 							else
 							{
 								//insert startArcSecond after  startArcFirstPrev and before endArcFirstNext
-								insertBetween(startArcFirstPrev,startArcSecond,endArcFirstNext);
+//								insertBetween(startArcFirstPrev,startArcSecond,endArcFirstNext);
+								startArcSecond->insertBetween(startArcFirstPrev,endArcFirstNext);
 								// insert endArcSecond after startArcSecond and before endArcFirstNext
-								insertBetween(startArcSecond,endArcSecond,endArcFirstNext);
+//								insertBetween(startArcSecond,endArcSecond,endArcFirstNext);
+								endArcSecond->insertBetween(startArcSecond,endArcFirstNext);
 							}
 
 						}
@@ -1074,8 +1196,10 @@ bool LocalSearch::SwapTwoArcs()
 					else // otherwise restore the list
 					{
 						// remove startArcFirst and endArcFirst in their current place
-						removeNode(startArcFirst);
-						removeNode(endArcFirst);
+//						removeNode(startArcFirst);
+//						removeNode(endArcFirst);
+						this->initSol->getSequence()->removeNode(startArcFirst);
+						this->initSol->getSequence()->removeNode(endArcFirst);
 
 #ifdef DEBUG_SwapTwoArcs
 						cout << " show list after removing " << startArcFirst->getClient()->getId() << "--" << endArcFirst->getClient()->getId() <<  " in their current place " ;  this->initSol->getSequence()->show() ;
@@ -1084,23 +1208,29 @@ bool LocalSearch::SwapTwoArcs()
 						if(startArcFirstPrev == NULL)
 						{
 							//push front endArcFirst then startArcFirst
-							addHead(endArcFirst);
-							addHead(startArcFirst);
+//							addHead(endArcFirst);
+//							addHead(startArcFirst);
+							this->initSol->getSequence()->addHead(endArcFirst);
+							this->initSol->getSequence()->addHead(startArcFirst);
 						}
 						else
 						{
 							// insert startArcFirst after startArcFirstPrev
-							insertAfter(startArcFirst,startArcFirstPrev);
+//							insertAfter(startArcFirst,startArcFirstPrev);
+							startArcFirstPrev->insertAfter(startArcFirst);
 							// insert endArcFirst after startArcFirst
-							insertAfter(endArcFirst,startArcFirst);
+//							insertAfter(endArcFirst,startArcFirst);
+							startArcFirst->insertAfter(endArcFirst);
 						}
 
 #ifdef DEBUG_SwapTwoArcs
 						cout << " show list after inserting " << startArcFirst->getClient()->getId() << "--" << endArcFirst->getClient()->getId() <<  " in their initial place " ;  this->initSol->getSequence()->show() ;
 #endif
 						// remove startArcSecond and endArcSecond in its current place
-						removeNode(startArcSecond);
-						removeNode(endArcSecond);
+//						removeNode(startArcSecond);
+//						removeNode(endArcSecond);
+						this->initSol->getSequence()->removeNode(startArcSecond);
+						this->initSol->getSequence()->removeNode(endArcSecond);
 #ifdef DEBUG_SwapTwoArcs
 						cout << " show list after removing " << startArcSecond->getClient()->getId() << "--" <<  endArcSecond->getClient()->getId() << " in its current place " ;  this->initSol->getSequence()->show() ;
 #endif
@@ -1108,15 +1238,19 @@ bool LocalSearch::SwapTwoArcs()
 						if(endArcSecondNext == NULL)
 						{
 							// push back startArcSecond then endArcSecond
-							addTail(startArcSecond);
-							addTail(endArcSecond);
+//							addTail(startArcSecond);
+//							addTail(endArcSecond);
+							this->initSol->getSequence()->addTail(startArcSecond);
+							this->initSol->getSequence()->addTail(endArcSecond);
 						}
 						else
 						{
 							// insert startArcSecond after startArcSecondPrev and before endArcSecondNext
-							insertBetween(startArcSecondPrev,startArcSecond,endArcSecondNext);
+//							insertBetween(startArcSecondPrev,startArcSecond,endArcSecondNext);
+							startArcSecond->insertBetween(startArcSecondPrev,endArcSecondNext);
 							// insert endArcSecond after startArcSecond and before endArcSecondNext
-							insertBetween(startArcSecond,endArcSecond,endArcSecondNext);
+//							insertBetween(startArcSecond,endArcSecond,endArcSecondNext);
+							endArcSecond->insertBetween(startArcSecond,endArcSecondNext);
 						}
 #ifdef DEBUG_SwapTwoArcs
 						cout << " show list after inserting " <<  startArcSecond->getClient()->getId() << "--" <<  endArcSecond->getClient()->getId() << " in their initial place " ;  this->initSol->getSequence()->show() ;
