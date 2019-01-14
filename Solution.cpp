@@ -70,7 +70,7 @@ bool Solution::Decodage()
 
 	if(splitAlgo->solve())
 	{
-		returValue =true;
+		returValue = true;
 
 		// fill objVal
 

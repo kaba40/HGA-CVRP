@@ -31,13 +31,16 @@
 #include "DataAP.hpp"
 #include "SplitBellman.hpp"
 #include "DLinkedList.hpp"
+#include "SeqData.hpp"
 
 using namespace std;
 class Solution
 {
 private:
-//	vector<Customer*> encodage;
+
 	DLinkedList* encodage;
+//	DLinkedList ***sequenceTab; //direct encoding
+	SeqData ***sequenceTab;
 	vector<int> tour;
 	double solutionCost; //objective_value
 	int numberOfRouteInSolution;
