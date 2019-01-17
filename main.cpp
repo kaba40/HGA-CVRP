@@ -65,50 +65,67 @@ int main()
 		solution_tsp->PrintSolution();
 	}
 
+	vector<vector<Node*>> routeSeq = solution_tsp->getRouteSequence();
+	cout << "solution_tsp->getRouteSequence().size() = " << routeSeq.size() << endl;
 
-	LocalSearch* localAlgo = new LocalSearch(solution_tsp);
-	if(localAlgo->Insert())
+	for(uint i = 0; i < routeSeq.size(); i++)
 	{
-		cout << "Insert" << endl;
-		solution_tsp->CheckSolution();
-		solution_tsp->PrintSolution();
-		solution_tsp->getSequence()->show();
+		cout << "solution_tsp->getRouteSequence()[" << i << "].size() ="  << solution_tsp->getRouteSequence()[i].size() << endl;
+		cout << "ROUTE[" << i << "] = {" ;
+		for(uint j = 0; j < routeSeq[i].size(); j++)
+		{
+			cout << routeSeq[i][j]->getClient()->getId() << " ";
+		}
+		cout << "}" << endl;
 	}
 
-	if(localAlgo->ArcInsert())
-	{
-		cout << "ArcInsert" << endl;
-		solution_tsp->CheckSolution();
-		solution_tsp->PrintSolution();
-		solution_tsp->getSequence()->show();
-	}
+	solution_tsp->getRouteSetSubSeq();
 
-	if(localAlgo->Swap())
-	{
-		cout << "Swap" << endl;
-		solution_tsp->CheckSolution();
-		solution_tsp->PrintSolution();
-		solution_tsp->getSequence()->show();
-	}
+	exit(-1);
 
-	if(localAlgo->SwapArcs())
-	{
-		cout << "SwapArcs" << endl;
-		solution_tsp->CheckSolution();
-		solution_tsp->PrintSolution();
-		solution_tsp->getSequence()->show();
-	}
-
-
-	if(localAlgo->SwapTwoArcs())
-	{
-		cout << "SwapTwoArcs" << endl;
-		solution_tsp->CheckSolution();
-		solution_tsp->PrintSolution();
-		solution_tsp->getSequence()->show();
-	}
-
-	delete localAlgo;
+//	LocalSearch* localAlgo = new LocalSearch(solution_tsp);
+//	if(localAlgo->Insert())
+//	{
+//		cout << "Insert" << endl;
+//		solution_tsp->CheckSolution();
+//		solution_tsp->PrintSolution();
+//		solution_tsp->getSequence()->show();
+//	}
+//
+//	if(localAlgo->ArcInsert())
+//	{
+//		cout << "ArcInsert" << endl;
+//		solution_tsp->CheckSolution();
+//		solution_tsp->PrintSolution();
+//		solution_tsp->getSequence()->show();
+//	}
+//
+//	if(localAlgo->Swap())
+//	{
+//		cout << "Swap" << endl;
+//		solution_tsp->CheckSolution();
+//		solution_tsp->PrintSolution();
+//		solution_tsp->getSequence()->show();
+//	}
+//
+//	if(localAlgo->SwapArcs())
+//	{
+//		cout << "SwapArcs" << endl;
+//		solution_tsp->CheckSolution();
+//		solution_tsp->PrintSolution();
+//		solution_tsp->getSequence()->show();
+//	}
+//
+//
+//	if(localAlgo->SwapTwoArcs())
+//	{
+//		cout << "SwapTwoArcs" << endl;
+//		solution_tsp->CheckSolution();
+//		solution_tsp->PrintSolution();
+//		solution_tsp->getSequence()->show();
+//	}
+//
+//	delete localAlgo;
 	delete data_instance;
 	delete solution_tsp;
 

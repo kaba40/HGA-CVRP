@@ -147,7 +147,9 @@ int DataAP::getVehicleCap()
 
 double DataAP::getDistances(int index1, int index2)
 {
-
+#ifdef DEBUG_DataAP
+	cout << "index1 =" << index1 << " index2 = " << index2 << endl;
+#endif
 	if(index1 >= numberNodes || index2 >= numberNodes) //
 	{
 		cerr << " index1 and index2 must be inferior to " << numberNodes << endl;

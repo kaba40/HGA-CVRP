@@ -20,8 +20,6 @@ Solution::Solution(DataAP *tsp_dat, DLinkedList* encod)
 	/* // kairaba: tu dois initialiser ici l'encodage
 	   / ainsi la méthode Decodage ne prendra aucun argument
 	   encoding = data_instance->getCustomers();
-
-
 	//*/
 }
 
@@ -104,8 +102,6 @@ bool Solution::Decodage()
 
 }
 
-// kairaba : méthode sans argument
-// enc : attribut de la classe. Donc tu y as accès
 void Solution::CheckSolution()
 {
 	int start, end;
@@ -158,8 +154,7 @@ void Solution::CheckSolution()
 	}
 }
 
-// kairaba : méthode sans argument
-// enc : attribut de la classe. Donc tu y as accès
+
 void Solution::PrintSolution()
 {
 
@@ -168,19 +163,30 @@ void Solution::PrintSolution()
 	cout << "SOLUTION COST : " << std::setprecision(12) << solutionCost << endl ;
 	cout << "NB ROUTES : " << numberOfRouteInSolution << endl ;
 	int start, end;
+	routeSeq.resize(numberOfRouteInSolution);
 	for(int i = 0; i < numberOfRouteInSolution; i++)
 	{
+
 		start = tour[i];
 		if( i < numberOfRouteInSolution-1)
 			end = tour[i+1];
 		else
 			end = encodage->getSize() +1; //encodage.size()+1;
 
+	//	routeSeq[i].push_back(dummyNode) tomorrow
+		// create depot customer and node
+		Customer* depotCustomer = new Customer("0",-1, 0, NULL); // depot customer
+		Node* depotNode = new Node(depotCustomer); // depot associated node
+		routeSeq[i].push_back(depotNode);
 		cout << "TOUR[" << i << "] = {" ;
 		for(int j = start; j < end; j++)
+		{
 			cout << encodage->find(j-1)->getClient()->getId() << " " ;//cout << encodage[j-1]->getId() << " " ;
+			routeSeq[i].push_back(encodage->find(j-1)); // add dummy depot node at the beginning and end of routeSeq
+		}
+		routeSeq[i].push_back(depotNode);
 		cout << "}" << endl;
-
+		//	routeSeq[i].push_back(dummyNode)
 	}
 	cout << "------------------------------------" << endl ;
 	cout << endl ;
@@ -189,6 +195,46 @@ void Solution::PrintSolution()
 DLinkedList* Solution::getSequence()
 {
 	return encodage;
+}
+
+vector<vector<Node*>> Solution::getRouteSequence()
+{
+	return routeSeq;
+}
+
+vector<vector<vector<SeqData*>>> Solution::getRouteSetSubSeq()
+{
+	sequenceTab.resize(numberOfRouteInSolution);
+	for(int i = 0; i < numberOfRouteInSolution; i++) // number of route
+	{
+		sequenceTab[i].resize(routeSeq[i].size()); // replace routeSeq[i].size()+1 by routeSeq[i].size() containing 2 dummy nodes
+		for(uint j = 0; j < sequenceTab[i].size(); j++) // number of sequence in a route
+		{
+#ifdef DEBUG_Sol
+			cout << "routeSeq[" << i << "][" << j << "]= " << routeSeq[i][j]->getClient()->getId() << endl;
+#endif
+			SeqData* seq = new SeqData(routeSeq[i][j]); // first one visit sub-sequence
+			sequenceTab[i][j].push_back(seq);
+			for(uint k = j+1; k < sequenceTab[i].size(); k++)
+			{
+#ifdef DEBUG_Sol
+			cout << "routeSeq[" << i << "][" << k << "]= " << routeSeq[i][k]->getClient()->getId() << " ";
+#endif
+			SeqData* seqNext = new SeqData(routeSeq[i][k]); // all visits after seq
+			SeqData* ret = NULL;
+
+			if(k == j+1)
+				 ret = seq->concatForWard(seqNext); // concatenate seq and seqNext
+			else
+				ret = ret->concatForWard(seqNext); // concatenate ret and seqNext don't work
+			sequenceTab[i][j].push_back(ret);
+			}
+			cout << endl;
+		}
+		cout << endl;
+	}
+
+	return sequenceTab;
 }
 
 vector<int> Solution::getTourStructure()

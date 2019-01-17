@@ -30,6 +30,7 @@
 #include "Customer.hpp"
 #include "DataAP.hpp"
 #include "SplitBellman.hpp"
+#include "Node.hpp"
 #include "DLinkedList.hpp"
 #include "SeqData.hpp"
 
@@ -40,8 +41,10 @@ private:
 
 	DLinkedList* encodage;
 //	DLinkedList ***sequenceTab; //direct encoding
-	SeqData ***sequenceTab;
+//	SeqData ***sequenceTab;
+	vector<vector<vector<SeqData*>>> sequenceTab;
 	vector<int> tour;
+	vector<vector<Node*>> routeSeq;
 	double solutionCost; //objective_value
 	int numberOfRouteInSolution;
 	DataAP *tsp_data;
@@ -59,6 +62,8 @@ public:
 	double getObjVal();
 	int getRoutesNumber();
 	DLinkedList* getSequence();
+	vector<vector<Node*>> getRouteSequence();
+	vector<vector<vector<SeqData*>>> getRouteSetSubSeq();
 
 	//setting methods
 	void setRandomSequence();
