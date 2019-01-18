@@ -214,6 +214,7 @@ vector<vector<vector<SeqData*>>> Solution::getRouteSetSubSeq()
 			cout << "routeSeq[" << i << "][" << j << "]= " << routeSeq[i][j]->getClient()->getId() << endl;
 #endif
 			SeqData* seq = new SeqData(routeSeq[i][j]); // first one visit sub-sequence
+			SeqData* ret = NULL;
 			sequenceTab[i][j].push_back(seq);
 			for(uint k = j+1; k < sequenceTab[i].size(); k++)
 			{
@@ -221,7 +222,7 @@ vector<vector<vector<SeqData*>>> Solution::getRouteSetSubSeq()
 			cout << "routeSeq[" << i << "][" << k << "]= " << routeSeq[i][k]->getClient()->getId() << " ";
 #endif
 			SeqData* seqNext = new SeqData(routeSeq[i][k]); // all visits after seq
-			SeqData* ret = NULL;
+
 
 			if(k == j+1)
 				 ret = seq->concatForWard(seqNext); // concatenate seq and seqNext

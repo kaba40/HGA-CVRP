@@ -109,8 +109,8 @@ SeqData* SeqData::concatForWard(SeqData *seq)
 //	Node *firstTail = this->tail; // last node of the caller sub-sequence
 //	Node *secondHead = seq->head; // first node of the passed sub-sequence
 
-	cout << "this->tail->getClient()->getDemand() = " << this->tail->getClient()->getDemand()  << endl;
-	cout << "seq->getHead()->getClient()->getDemand() = " << seq->getHead()->getClient()->getDemand()  << endl;
+	cout << "this index = " << this->tail->getClient()->getIndex() << " ";
+	cout << "seq index = " << seq->getHead()->getClient()->getIndex()  << endl;
 
 	if(this->tail->getClient()->getDemand() == 0 && seq->getHead()->getClient()->getDemand() != 0)
 	{
@@ -125,7 +125,7 @@ SeqData* SeqData::concatForWard(SeqData *seq)
 	else
 	{
 		// neither the tail of the first sub-sequence nor the head of the second sub-sequence is the depot
-		distAdded = seq->getHead()->getClient()->getDistance(this->tail->getClient());
+		distAdded = seq->getHead()->getClient()->getDistance(this->tail->getClient()); // error here
 	}
 
 	// copy
