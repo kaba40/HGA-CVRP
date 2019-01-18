@@ -106,12 +106,10 @@ SeqData* SeqData::concatForWard(SeqData *seq)
 	// get distance between the tail of the first sub-sequence and the head of the second sub-sequence
 	double distAdded;
 
-//	Node *firstTail = this->tail; // last node of the caller sub-sequence
-//	Node *secondHead = seq->head; // first node of the passed sub-sequence
-
-	cout << "this index = " << this->tail->getClient()->getIndex() << " ";
-	cout << "seq index = " << seq->getHead()->getClient()->getIndex()  << endl;
-
+#ifdef DEBUG_SeqData
+	cout << "thisId = " << this->tail->getClient()->getId() << " " << "seqId = " << seq->getHead()->getClient()->getId()  << " " ;
+	cout << "thisDemand = " << this->tail->getClient()->getDemand() << " " << "seqDemand = " << seq->getHead()->getClient()->getDemand() << endl;
+#endif
 	if(this->tail->getClient()->getDemand() == 0 && seq->getHead()->getClient()->getDemand() != 0)
 	{
 		// if the tail of the first sub-sequence is the depot
@@ -120,7 +118,12 @@ SeqData* SeqData::concatForWard(SeqData *seq)
 	else if(this->tail->getClient()->getDemand() != 0 && seq->getHead()->getClient()->getDemand() == 0)
 	{
 		// if the head of the second sub-sequence is the depot
-		distAdded = seq->getHead()->getClient()->getDistanceDepot();
+		distAdded = this->tail->getClient()->getDistanceDepot();
+	}
+	else if(this->tail->getClient()->getDemand() == 0 && seq->getHead()->getClient()->getDemand() == 0)
+	{
+			// if the two sub-sequences are depot
+			distAdded = 0;
 	}
 	else
 	{
@@ -128,7 +131,7 @@ SeqData* SeqData::concatForWard(SeqData *seq)
 		distAdded = seq->getHead()->getClient()->getDistance(this->tail->getClient()); // error here
 	}
 
-	// copy
+	// copy current object in return (ret) object
 	SeqData* ret = new SeqData(this);
 
 	// update demand data

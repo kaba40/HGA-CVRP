@@ -40,8 +40,6 @@ class Solution
 private:
 
 	DLinkedList* encodage;
-//	DLinkedList ***sequenceTab; //direct encoding
-//	SeqData ***sequenceTab;
 	vector<vector<vector<SeqData*>>> sequenceTab;
 	vector<int> tour;
 	vector<vector<Node*>> routeSeq;
@@ -57,15 +55,22 @@ public:
 	void CheckSolution();
 	void PrintSolution();
 
-	//access methods
+	// getter methods
 	vector<int> getTourStructure();
 	double getObjVal();
 	int getRoutesNumber();
-	DLinkedList* getSequence();
-	vector<vector<Node*>> getRouteSequence();
+	DLinkedList* getSequence(); // to delete may be
+	vector<vector<Node*>> getRouteSequence(); // to delete may be
 	vector<vector<vector<SeqData*>>> getRouteSetSubSeq();
 
-	//setting methods
+	//initialization methods
+	void initRouteSetSubSeq();
+
+	//updater methods
+	void updateRoute(int numRoute, vector<Node*> rteSeq); // update each route modify by a move
+	void updateOneRouteSetSubSeq(int numRoute);
+
+	//setter methods
 	void setRandomSequence();
 	void setObjVal(double objVal);
 	void setTourStructure(vector<int> route);

@@ -47,7 +47,7 @@ int main()
 	solution_tsp = new Solution(data_instance, data_instance->getCustomerList());
 
 
-//	solution_tsp->setRandomSequence();
+	solution_tsp->setRandomSequence();
 
 #ifdef DEBUG_Main
 
@@ -65,21 +65,35 @@ int main()
 		solution_tsp->PrintSolution();
 	}
 
-	vector<vector<Node*>> routeSeq = solution_tsp->getRouteSequence();
-	cout << "solution_tsp->getRouteSequence().size() = " << routeSeq.size() << endl;
+//	vector<vector<Node*>> routeSeq = solution_tsp->getRouteSequence();
+//
+//	for(uint i = 0; i < routeSeq.size(); i++)
+//	{
+//		cout << "ROUTE[" << i << "] = {" ;
+//		for(uint j = 0; j < routeSeq[i].size(); j++)
+//		{
+//			cout << routeSeq[i][j]->getClient()->getId() << " ";
+//		}
+//		cout << "}" << endl;
+//	}
 
-	for(uint i = 0; i < routeSeq.size(); i++)
+	solution_tsp->initRouteSetSubSeq();
+
+	vector<vector<vector<SeqData*>>> routeSetSubSeq = solution_tsp->getRouteSetSubSeq();
+
+	for(uint i = 0; i < routeSetSubSeq.size(); i++)
 	{
-		cout << "solution_tsp->getRouteSequence()[" << i << "].size() ="  << solution_tsp->getRouteSequence()[i].size() << endl;
-		cout << "ROUTE[" << i << "] = {" ;
-		for(uint j = 0; j < routeSeq[i].size(); j++)
+		cout << "route[" << i << "] " << "contain " << routeSetSubSeq[i].size() << " element" << endl;
+		for(uint j = 0; j < routeSetSubSeq[i].size(); j++)
 		{
-			cout << routeSeq[i][j]->getClient()->getId() << " ";
-		}
-		cout << "}" << endl;
-	}
 
-	solution_tsp->getRouteSetSubSeq();
+			for(uint k = 0; k < routeSetSubSeq[i][j].size(); k++)
+			{
+				cout << routeSetSubSeq[i][j][k]->getHead()->getClient()->getId() << "--" <<routeSetSubSeq[i][j][k]->getTail()->getClient()->getId() << " ";
+				cout << "---->" << " dde = " << routeSetSubSeq[i][j][k]->getDemand() << " dist = " << routeSetSubSeq[i][j][k]->getDistance() << endl;
+			}
+		}
+	}
 
 	exit(-1);
 

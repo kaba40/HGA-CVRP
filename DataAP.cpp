@@ -83,7 +83,7 @@ void DataAP::readData( const char* data_vrp, int nbVeh)
 				distNodes[i].push_back(d);
 			}
 		}
-#ifdef SPLIT_ALGORITHM_DEBUG
+#ifdef DEBUG_Distance
 		for(int i = 0; i < numberNodes; i++)
 		{
 			for(int j = 0; j < i; j++)

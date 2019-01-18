@@ -202,16 +202,21 @@ vector<vector<Node*>> Solution::getRouteSequence()
 	return routeSeq;
 }
 
-vector<vector<vector<SeqData*>>> Solution::getRouteSetSubSeq()
+void Solution::updateRoute(int numRoute, vector<Node*> rteSeq)
+{
+	routeSeq[numRoute] = rteSeq;
+}
+
+void Solution::initRouteSetSubSeq()
 {
 	sequenceTab.resize(numberOfRouteInSolution);
 	for(int i = 0; i < numberOfRouteInSolution; i++) // number of route
 	{
-		sequenceTab[i].resize(routeSeq[i].size()); // replace routeSeq[i].size()+1 by routeSeq[i].size() containing 2 dummy nodes
-		for(uint j = 0; j < sequenceTab[i].size(); j++) // number of sequence in a route
+		sequenceTab[i].resize(routeSeq[i].size()); //each route contains 2 dummy nodes
+		for(uint j = 0; j < sequenceTab[i].size()-1; j++) // number of nodes in a route
 		{
 #ifdef DEBUG_Sol
-			cout << "routeSeq[" << i << "][" << j << "]= " << routeSeq[i][j]->getClient()->getId() << endl;
+			cout << "this[" << i << "][" << j << "]= " << routeSeq[i][j]->getClient()->getId() << endl;
 #endif
 			SeqData* seq = new SeqData(routeSeq[i][j]); // first one visit sub-sequence
 			SeqData* ret = NULL;
@@ -219,22 +224,53 @@ vector<vector<vector<SeqData*>>> Solution::getRouteSetSubSeq()
 			for(uint k = j+1; k < sequenceTab[i].size(); k++)
 			{
 #ifdef DEBUG_Sol
-			cout << "routeSeq[" << i << "][" << k << "]= " << routeSeq[i][k]->getClient()->getId() << " ";
+			cout << "seq[" << i << "][" << k << "]= " << routeSeq[i][k]->getClient()->getId() << " ";
 #endif
 			SeqData* seqNext = new SeqData(routeSeq[i][k]); // all visits after seq
-
 
 			if(k == j+1)
 				 ret = seq->concatForWard(seqNext); // concatenate seq and seqNext
 			else
-				ret = ret->concatForWard(seqNext); // concatenate ret and seqNext don't work
+				ret = ret->concatForWard(seqNext); // concatenate ret and seqNext
 			sequenceTab[i][j].push_back(ret);
 			}
 			cout << endl;
 		}
 		cout << endl;
 	}
+}
 
+void Solution::updateOneRouteSetSubSeq(int numRoute)
+{
+	for(uint j = 0; j < sequenceTab[numRoute].size()-1; j++) // number of nodes in a route
+	{
+		sequenceTab[numRoute][j].clear(); // clear vector containing route nodes
+#ifdef DEBUG_Sol
+		// routeSeq[numRoute][j] is the updated route
+		cout << "this[" << i << "][" << j << "]= " << routeSeq[numRoute][j]->getClient()->getId() << endl;
+#endif
+		SeqData* seq = new SeqData(routeSeq[numRoute][j]); // first one visit sub-sequence
+		SeqData* ret = NULL;
+		sequenceTab[numRoute][j].push_back(seq);
+		for(uint k = j+1; k < sequenceTab[numRoute].size(); k++)
+		{
+#ifdef DEBUG_Sol
+		cout << "seq[" << i << "][" << k << "]= " << routeSeq[numRoute][k]->getClient()->getId() << " ";
+#endif
+		SeqData* seqNext = new SeqData(routeSeq[numRoute][k]); // all visits after seq
+
+		if(k == j+1)
+			 ret = seq->concatForWard(seqNext); // concatenate seq and seqNext
+		else
+			ret = ret->concatForWard(seqNext); // concatenate ret and seqNext don't work
+		sequenceTab[numRoute][j].push_back(ret);
+		}
+		cout << endl;
+	}
+}
+
+vector<vector<vector<SeqData*>>> Solution::getRouteSetSubSeq() // to test sequenceTab in the main method
+{
 	return sequenceTab;
 }
 
