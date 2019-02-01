@@ -154,8 +154,6 @@ double DataAP::getDistances(int index1, int index2)
 	{
 		cerr << " index1 and index2 must be inferior to " << numberNodes << endl;
 		throw string(" Verify index"); //exit(-1);
-
-
 	}
 
 	if( index1 == index2)

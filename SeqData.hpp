@@ -27,24 +27,25 @@ public:
 	SeqData(SeqData *seq);
 	virtual ~SeqData();
 
-	// set methods
+	// setter methods
 	void setDemand(int dde);
 	void setDistance(double dist);
 	void setHead(Node *hd);
 	void setTail(Node *tl);
 
-	// update methods
+	// updater methods
 	void updateDemand(int dde);
 	void updateDistance(double dist);
 
-	// get methods
+	// getter methods
 	int getDemand();
 	double getDistance();
 	Node* getHead();
 	Node* getTail();
 
-	// concatenation method
+	// concatenation methods
 	SeqData* concatForWard(SeqData *seq);
+	SeqData* concatBackWard(SeqData *seq);
 };
 
 #endif /* SEQDATA_HPP_ */

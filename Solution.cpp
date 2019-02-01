@@ -16,34 +16,15 @@ Solution::Solution(DataAP *tsp_dat, DLinkedList* encod)
 	tsp_data = tsp_dat;
 //	encodage = tsp_dat->getCustomers();
 	encodage = encod;
-
-	/* // kairaba: tu dois initialiser ici l'encodage
-	   / ainsi la méthode Decodage ne prendra aucun argument
-	   encoding = data_instance->getCustomers();
-	//*/
 }
 
 Solution::~Solution()
 {
-
-  /* // kairaba : ce n'est pas ici qu'il faut détruire la liste des customers
-     // si tu as plusieurs solutions, comment feras tu si tu détruis tous les customers ?
-     // tu dois détruire les customers dans le destructeur de la classe DataAP
-	for(int i = 0; i < tsp_data->getNumberNodes()-1; i++)
-	{
-		delete encodage[i];
-	}
-  //*/
 	// TODO Auto-generated destructor stub
 }
 
 void Solution::setRandomSequence()
 {
-	// kairaba : avant d'utiliser random_shuffle, il faut exécuter la méthode
-	// qui suit d'abord. Autrement, entre deux lancements de ton programme
-	// on aura toujours le même vector
-	// Enfin, la génération d'une séquence aléatoire doit être une méthode
-	// de la classe solution. Cette méthode initialisera l'attribut encoding.
 	vector<Customer*> encod = tsp_data->getCustomers();
 	srand(unsigned (time(0)) );
 	random_shuffle(encod.begin(), encod.end());
@@ -58,8 +39,7 @@ void Solution::setRandomSequence()
 
 }
 
-// kairaba : méthode sans argument
-// enc : attribut de la classe. Donc tu y as accès
+
 bool Solution::Decodage()
 {
 	bool returValue = false;
@@ -84,7 +64,7 @@ bool Solution::Decodage()
 			numberOfRouteInSolution++;
 		}
 
-		// fill Tour vector containg indices of i where a tour start
+		// fill Tour vector containing indices of i where a tour start
 		nbTour = tsp_data->getNumberNodes()-1;
 		tour = vector<int>(numberOfRouteInSolution);
 		for (int i = numberOfRouteInSolution-1 ; i >= 0 ; i --)
@@ -93,7 +73,7 @@ bool Solution::Decodage()
 			tour[i] = nbTour+1;
 		}
 	}
-#ifdef SPLIT_ALGORITHM_DEBUG
+#ifdef DEBUG_DecodSol
 	for(uint i = 0; i < tour.size(); i++)
 		cout << "tour[ " << i << "] =" << tour[i] << endl;
 #endif
@@ -101,6 +81,180 @@ bool Solution::Decodage()
 	return returValue;
 
 }
+
+bool Solution::EVAL2(double *cost, SeqData *seq1, SeqData *seq2)
+{
+
+#ifdef DEBUG_EvalSol
+	cout << "seqFirst_Id = " << seq1->getHead()->getClient()->getId() << endl;
+#endif
+
+	// feasibility evaluation for the concatenation of two sub-sequences
+	int totalLoad;
+	totalLoad = seq1->getDemand() + seq2->getDemand();
+
+	if(totalLoad > tsp_data->getVehicleCap() + 0.0001)
+	{
+		return false;
+	}
+
+	// cost evaluation for the concatenation of two sub-sequences
+	double totalCost;
+	double partialCostSeq1, partialCostSeq2;
+	double joinCost; // distance between last element of seq1 and first element of seq2
+
+	// compute partialCostSeq1
+	if(seq1->getHead()->getClient()->getDemand() == 0)
+	{
+		partialCostSeq1 = seq1->getDistance();
+	}
+	else
+	{
+		partialCostSeq1 = seq1->getHead()->getClient()->getDistanceDepot() + seq1->getDistance();
+	}
+
+	// compute partialCostSeq2
+	if(seq2->getTail()->getClient()->getDemand() == 0)
+	{
+		partialCostSeq2 = seq2->getDistance();
+	}
+	else
+	{
+		partialCostSeq2 = seq2->getTail()->getClient()->getDistanceDepot() + seq2->getDistance();
+	}
+
+	// compute joinCost (distance between last element of seq1 and first element of seq2)
+	if(seq1->getTail() != seq2->getHead())
+	{
+		if(seq1->getTail()->getClient()->getDemand() == 0 && seq2->getHead()->getClient()->getDemand() != 0)
+		{
+			joinCost = seq2->getHead()->getClient()->getDistanceDepot();
+		}
+		else if(seq1->getTail()->getClient()->getDemand() != 0 && seq2->getHead()->getClient()->getDemand() == 0)
+		{
+			joinCost = seq1->getTail()->getClient()->getDistanceDepot();
+		}
+		else
+		{
+			joinCost = seq1->getTail()->getClient()->getDistance(seq2->getHead()->getClient());
+		}
+
+	}
+	else
+	{
+		joinCost = 0;
+	}
+
+	// compute totalCost
+	totalCost = partialCostSeq1 + joinCost + partialCostSeq2;
+
+	*cost =  totalCost;
+
+	return true;
+}
+
+bool Solution::EVALN(double *cost, int numSeq, SeqData *seq, ...) // add a number of parameter
+{
+
+	va_list args;
+	va_start(args, seq);
+
+#ifdef DEBUG_EvalSol
+	cout << "seqFirst_Id = " << seq->getHead()->getClient()->getId() << endl;
+#endif
+
+	// feasibility evaluation for the concatenation of two sub-sequences
+	int totalLoad = 0 ;
+	totalLoad += seq->getDemand();
+
+	// cost evaluation for the concatenation of two sub-sequences (compute totalDistance resulting from the concatenation of seq and seqNext)
+
+	double totalDistance = 0;
+
+	// add first sequence distance to totalDistance
+	if(seq->getHead()->getClient()->getDemand() == 0)
+	{
+		totalDistance += seq->getDistance();
+	}
+	else
+	{
+		totalDistance += seq->getHead()->getClient()->getDistanceDepot() + seq->getDistance();
+	}
+
+	bool lastSeq1 = false;
+	SeqData* seqCopy = new SeqData(seq); // make a copy of the first sub-sequence
+
+	for(int i = 0; i < numSeq-1; i++)
+	{
+		SeqData *seq1 = va_arg(args, SeqData*);
+		totalLoad += seq1->getDemand();
+
+		if(totalLoad > tsp_data->getVehicleCap() + 0.0001)
+		{
+			return false;
+		}
+
+		// add second sequence distance to totalDistance
+		if(seq1->getTail()->getClient()->getDemand() == 0)
+		{
+			totalDistance += seq1->getDistance();
+			lastSeq1 = true;
+		}
+		else
+		{
+			totalDistance +=  seq1->getDistance();
+		}
+
+		// compute joinCost between seqCopy and seq1 and add it to totalDistance
+		if(lastSeq1 == true)
+		{
+			// compute distance between seq tail and seq1 head then add it to totalDistance
+			if(seqCopy->getTail() != seq1->getHead())
+			{
+				if(seqCopy->getTail()->getClient()->getDemand() == 0 && seq1->getHead()->getClient()->getDemand() != 0)
+				{
+					totalDistance += seq1->getHead()->getClient()->getDistanceDepot();
+				}
+				else if(seqCopy->getTail()->getClient()->getDemand() != 0 && seq1->getHead()->getClient()->getDemand() == 0)
+				{
+					totalDistance += seqCopy->getTail()->getClient()->getDistanceDepot();
+				}
+				else
+				{
+					totalDistance += seqCopy->getTail()->getClient()->getDistance(seq1->getHead()->getClient());
+				}
+			}
+		}
+		else
+		{
+			// compute distance between seq tail and seq1 head then add it to totalDistance
+			if(seqCopy->getTail() != seq1->getHead())
+			{
+				if(seqCopy->getTail()->getClient()->getDemand() == 0 && seq1->getHead()->getClient()->getDemand() != 0)
+				{
+					totalDistance += seq1->getHead()->getClient()->getDistanceDepot();
+				}
+				else if(seqCopy->getTail()->getClient()->getDemand() != 0 && seq1->getHead()->getClient()->getDemand() == 0)
+				{
+					totalDistance += seqCopy->getTail()->getClient()->getDistanceDepot();
+				}
+				else
+				{
+					totalDistance += seqCopy->getTail()->getClient()->getDistance(seq1->getHead()->getClient());
+				}
+			}
+			// move seqCopy tail to seq1 tail
+			seqCopy->setTail(seq1->getTail());
+		}
+	}
+
+	*cost = totalDistance;
+
+	va_end(args);
+
+	return true;
+}
+
 
 void Solution::CheckSolution()
 {
@@ -110,9 +264,9 @@ void Solution::CheckSolution()
 
 	if(tour[0] != 1)
 		cout << " Error : the first route should start with the first customer" << endl;
-
-//	cout << "numberOfRouteInSolution = " << numberOfRouteInSolution << endl;
-
+#ifdef DEBUG_CheckSol
+	cout << "numberOfRouteInSolution = " << numberOfRouteInSolution << endl;
+#endif
 	for(int i = 0; i < numberOfRouteInSolution; i++)
 	{
 		load = 0;
@@ -121,12 +275,15 @@ void Solution::CheckSolution()
 			end = tour[i+1];
 		else
 			end = encodage->getSize() +1; //encodage.size()+1;
-
-//		cout << "encodage->getSize() in Solution =" << encodage->getSize() << endl;
+#ifdef DEBUG_CheckSol
+		cout << "encodage->getSize() in Solution =" << encodage->getSize() << endl;
+#endif
 		for(int j = start; j < end; j++)
 		{
-//			cout << "numberOfRouteInSolution= " << numberOfRouteInSolution << endl;
-//			cout << "j= " << j << endl;
+#ifdef DEBUG_CheckSol
+			cout << "numberOfRouteInSolution= " << numberOfRouteInSolution << endl;
+			cout << "j= " << j << endl;
+#endif
 			load += encodage->find(j-1)->getClient()->getDemand(); //encodage[j-1]->getDemand();
 		}
 
@@ -209,19 +366,24 @@ void Solution::updateRoute(int numRoute, vector<Node*> rteSeq)
 
 void Solution::initRouteSetSubSeq()
 {
-	sequenceTab.resize(numberOfRouteInSolution);
+	routeForwardSeq.resize(numberOfRouteInSolution);
+	routeBackwardSeq.resize(numberOfRouteInSolution);
 	for(int i = 0; i < numberOfRouteInSolution; i++) // number of route
 	{
-		sequenceTab[i].resize(routeSeq[i].size()); //each route contains 2 dummy nodes
-		for(uint j = 0; j < sequenceTab[i].size()-1; j++) // number of nodes in a route
+		routeForwardSeq[i].resize(routeSeq[i].size()); //each route contains 2 dummy nodes depot-depot
+		routeBackwardSeq[i].resize(routeSeq[i].size());
+		for(uint j = 0; j < routeForwardSeq[i].size()-1; j++) // number of nodes in a route
 		{
 #ifdef DEBUG_Sol
 			cout << "this[" << i << "][" << j << "]= " << routeSeq[i][j]->getClient()->getId() << endl;
 #endif
 			SeqData* seq = new SeqData(routeSeq[i][j]); // first one visit sub-sequence
-			SeqData* ret = NULL;
-			sequenceTab[i][j].push_back(seq);
-			for(uint k = j+1; k < sequenceTab[i].size(); k++)
+			SeqData* retFor = NULL;
+			SeqData* retBack = NULL;
+
+			routeForwardSeq[i][j].push_back(seq);
+			routeBackwardSeq[i][j].push_back(seq);
+			for(uint k = j+1; k < routeForwardSeq[i].size(); k++)
 			{
 #ifdef DEBUG_Sol
 			cout << "seq[" << i << "][" << k << "]= " << routeSeq[i][k]->getClient()->getId() << " ";
@@ -229,30 +391,44 @@ void Solution::initRouteSetSubSeq()
 			SeqData* seqNext = new SeqData(routeSeq[i][k]); // all visits after seq
 
 			if(k == j+1)
-				 ret = seq->concatForWard(seqNext); // concatenate seq and seqNext
-			else
-				ret = ret->concatForWard(seqNext); // concatenate ret and seqNext
-			sequenceTab[i][j].push_back(ret);
+			{
+				retFor = seq->concatForWard(seqNext); // concatenate forward seq and seqNext
+				retBack = seq->concatBackWard(seqNext); // concatenate backward seq and seqNext
+
 			}
+			else
+			{
+				retFor = retFor->concatForWard(seqNext); // concatenate forward retFor and seqNext
+				retBack = retBack->concatBackWard(seqNext); // concatenate backward retFor and seqNext
+			}
+
+			routeForwardSeq[i][j].push_back(retFor);
+			routeBackwardSeq[i][j].push_back(retBack);
+
+			}
+#ifdef DEBUG_Sol
 			cout << endl;
+#endif
 		}
-		cout << endl;
+#ifdef DEBUG_Sol
+			cout << endl;
+#endif
 	}
 }
 
 void Solution::updateOneRouteSetSubSeq(int numRoute)
 {
-	for(uint j = 0; j < sequenceTab[numRoute].size()-1; j++) // number of nodes in a route
+	for(uint j = 0; j < routeForwardSeq[numRoute].size()-1; j++) // number of nodes in a route
 	{
-		sequenceTab[numRoute][j].clear(); // clear vector containing route nodes
+		routeForwardSeq[numRoute][j].clear(); // clear vector containing route nodes
 #ifdef DEBUG_Sol
 		// routeSeq[numRoute][j] is the updated route
 		cout << "this[" << i << "][" << j << "]= " << routeSeq[numRoute][j]->getClient()->getId() << endl;
 #endif
 		SeqData* seq = new SeqData(routeSeq[numRoute][j]); // first one visit sub-sequence
 		SeqData* ret = NULL;
-		sequenceTab[numRoute][j].push_back(seq);
-		for(uint k = j+1; k < sequenceTab[numRoute].size(); k++)
+		routeForwardSeq[numRoute][j].push_back(seq);
+		for(uint k = j+1; k < routeForwardSeq[numRoute].size(); k++)
 		{
 #ifdef DEBUG_Sol
 		cout << "seq[" << i << "][" << k << "]= " << routeSeq[numRoute][k]->getClient()->getId() << " ";
@@ -263,15 +439,20 @@ void Solution::updateOneRouteSetSubSeq(int numRoute)
 			 ret = seq->concatForWard(seqNext); // concatenate seq and seqNext
 		else
 			ret = ret->concatForWard(seqNext); // concatenate ret and seqNext don't work
-		sequenceTab[numRoute][j].push_back(ret);
+		routeForwardSeq[numRoute][j].push_back(ret);
 		}
 		cout << endl;
 	}
 }
 
-vector<vector<vector<SeqData*>>> Solution::getRouteSetSubSeq() // to test sequenceTab in the main method
+vector<vector<vector<SeqData*>>> Solution::getRouteForwSeq() // to test sequenceTab in the main method
 {
-	return sequenceTab;
+	return routeForwardSeq;
+}
+
+vector<vector<vector<SeqData*>>> Solution::getRouteBackSeq()
+{
+	return this->routeBackwardSeq;
 }
 
 vector<int> Solution::getTourStructure()

@@ -21,11 +21,15 @@ public:
 	LocalSearch(Solution *initSol); // solution to modify if improved
 	virtual ~LocalSearch();
 
+	// movements for indirect encoding, i.e, giant tour
 	bool Insert();
 	bool ArcInsert();
 	bool Swap();
 	bool SwapArcs();
 	bool SwapTwoArcs();
+
+	// movements for direct encoding
+	bool IntraRouteInsert();
 };
 
 #endif /* LOCALSEARCH_HPP_ */
