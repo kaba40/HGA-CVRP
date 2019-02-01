@@ -364,7 +364,7 @@ void Solution::updateRoute(int numRoute, vector<Node*> rteSeq)
 	routeSeq[numRoute] = rteSeq;
 }
 
-void Solution::initRouteSetSubSeq()
+void Solution::initRouteSetSubSeq() // to modify when routeSeq modified
 {
 	routeForwardSeq.resize(numberOfRouteInSolution);
 	routeBackwardSeq.resize(numberOfRouteInSolution);
@@ -416,18 +416,23 @@ void Solution::initRouteSetSubSeq()
 	}
 }
 
-void Solution::updateOneRouteSetSubSeq(int numRoute)
+void Solution::updateOneRouteSetSubSeq(int numRoute) // modify to update routeForwardSeq
 {
 	for(uint j = 0; j < routeForwardSeq[numRoute].size()-1; j++) // number of nodes in a route
 	{
 		routeForwardSeq[numRoute][j].clear(); // clear vector containing route nodes
+		routeBackwardSeq[numRoute][j].clear();
 #ifdef DEBUG_Sol
 		// routeSeq[numRoute][j] is the updated route
 		cout << "this[" << i << "][" << j << "]= " << routeSeq[numRoute][j]->getClient()->getId() << endl;
 #endif
 		SeqData* seq = new SeqData(routeSeq[numRoute][j]); // first one visit sub-sequence
-		SeqData* ret = NULL;
+		SeqData* retFor = NULL;
+		SeqData* retBack = NULL;
+
 		routeForwardSeq[numRoute][j].push_back(seq);
+		routeBackwardSeq[numRoute][j].push_back(seq);
+
 		for(uint k = j+1; k < routeForwardSeq[numRoute].size(); k++)
 		{
 #ifdef DEBUG_Sol
@@ -436,10 +441,20 @@ void Solution::updateOneRouteSetSubSeq(int numRoute)
 		SeqData* seqNext = new SeqData(routeSeq[numRoute][k]); // all visits after seq
 
 		if(k == j+1)
-			 ret = seq->concatForWard(seqNext); // concatenate seq and seqNext
+		{
+			retFor = seq->concatForWard(seqNext); // concatenate forward seq and seqNext
+			retBack = seq->concatBackWard(seqNext); // concatenate backward seq and seqNext
+
+		}
 		else
-			ret = ret->concatForWard(seqNext); // concatenate ret and seqNext don't work
-		routeForwardSeq[numRoute][j].push_back(ret);
+		{
+			retFor = retFor->concatForWard(seqNext); // concatenate forward retFor and seqNext
+			retBack = retBack->concatBackWard(seqNext); // concatenate backward retFor and seqNext
+		}
+
+		routeForwardSeq[numRoute][j].push_back(retFor);
+		routeBackwardSeq[numRoute][j].push_back(retBack);
+
 		}
 		cout << endl;
 	}

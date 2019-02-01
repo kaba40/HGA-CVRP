@@ -1126,17 +1126,6 @@ bool LocalSearch::IntraRouteInsert()
 	// initialize route sub-sequences
 	this->initSol->initRouteSetSubSeq();
 
-	for( uint r = 0; r < this->initSol->routeForwardSeq.size(); r++) // r = route
-	{
-		// determine each route cost
-		double routeCost = this->initSol->routeForwardSeq[r][0].back()->getDistance();
-		for( uint in = 1; in < this->initSol->routeForwardSeq[r].size()-1; in++) // in = insert node in a route except depot--depot
-		{
-			for(uint mn = 1; mn < this->initSol->routeForwardSeq[r].size()-1; mn++) // mn = moved node in a route except depot--depot
-			{
 
-			}
-		}
-	}
 	return true; // to change latter by false
 }
