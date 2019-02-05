@@ -41,6 +41,8 @@ void DLinkedList::addHead(Node *node)
 	this->head->setPrevious(node);
 	this->head = node;
 	this->head->setPrevious(NULL);
+
+	size++;
 }
 
 void DLinkedList::addTail(Node *node)
@@ -49,6 +51,8 @@ void DLinkedList::addTail(Node *node)
 	this->tail->setNext(node);
 	this->tail = node;
 	this->tail->setNext(NULL);
+
+	size++;
 }
 
 Node* DLinkedList::getHead()
@@ -278,6 +282,8 @@ void DLinkedList::removeNode(Node *node)
 
 	node->setPrevious(NULL);
 	node->setNext(NULL);
+
+	size--;
 }
 
 void DLinkedList::delete_list()

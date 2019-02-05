@@ -1114,18 +1114,18 @@ bool LocalSearch::SwapTwoArcs()
 
 // movements for direct encoding
 
-bool LocalSearch::IntraRouteInsert()
-{
-
-#ifdef DEBUG_IntraInsert
-	cout << endl;
-	cout << "local search IntraRouteInsert initial route = " ; this->initSol->PrintSolution() ;
-#endif
-
-
-	// initialize route sub-sequences
-	this->initSol->initRouteSetSubSeq();
-
-
-	return true; // to change latter by false
-}
+//bool LocalSearch::IntraRouteInsert()
+//{
+//
+//#ifdef DEBUG_IntraInsert
+//	cout << endl;
+//	cout << "local search IntraRouteInsert initial route = " ; this->initSol->PrintSolution() ;
+//#endif
+//
+//
+//	// initialize route sub-sequences
+//	this->initSol->initRouteSetSubSeq();
+//
+//
+//	return true; // to change latter by false
+//}

@@ -84,7 +84,7 @@ int SplitBellman::solve()
 #endif
 			}
 			current = current->getNext();
-			 i++;
+			i++;
 		}
 		tmp = tmp->getNext();
 

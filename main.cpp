@@ -51,9 +51,9 @@ int main()
 
 #ifdef DEBUG_Main
 
-	for(int i = 0; i< solution_tsp->getSequence()->getSize(); i++)
+	for(Node *custoNode = solution_tsp->getSequence()->getHead(); custoNode != NULL; custoNode = custoNode->getNext())
 	{
-		cout << "custo " << solution_tsp->getSequence()->find(i)->getClient()->getId() << " index " << solution_tsp->getSequence()->find(i)->getClient()->getIndex() << " demand " << solution_tsp->getSequence()->find(i)->getClient()->getDemand() << endl;
+		cout << "custo " << custoNode->getClient()->getId() << " index " << custoNode->getClient()->getIndex() << " demand " << custoNode->getClient()->getDemand() << endl;
 	}
 
 #endif
@@ -65,13 +65,70 @@ int main()
 		solution_tsp->PrintSolution();
 	}
 
+	vector<Node*> rteSeq = solution_tsp->getRouteSequence();
+	int numRoute = solution_tsp->getRoutesNumber();
 
-	LocalSearch* localAlgo = new LocalSearch(solution_tsp);
-
-	if(localAlgo->IntraRouteInsert())
+	for(int i = 0; i < numRoute; i++)
 	{
-		cout << "Insert" << endl;
+		cout << "route[" << i << "]= " ;
+		for( Node *tmp = rteSeq[i]; tmp != NULL; tmp = tmp->getNext())
+		{
+			cout <<  tmp->getClient()->getId() << "--";
+		}
+		cout << endl;
 	}
+
+
+	exit(-1);
+
+//	solution_tsp->initRouteSetSubSeq();
+//
+//	vector<vector<vector<SeqData*>>> routeForSubSeq = solution_tsp->getRouteForwSeq();
+//
+//	for(uint i = 0; i < routeForSubSeq.size(); i++)
+//	{
+//		cout << "route[" << i << "] " << "contain " << routeForSubSeq[i].size() << " element" << endl;
+//		//determine the cost of a route, last element of the vector routeSetSubSeq[i][0]
+//	//	cout << "route[" << i << "] " << "cost " << routeSetSubSeq[i][0].back()->getDistance() << " " << endl;
+//		for(uint j = 0; j < routeForSubSeq[i].size(); j++)
+//		{
+//			if(j == 0)
+//				cout << "route[" << i << "] " << "cost " << routeForSubSeq[i][j].back()->getDistance() << " " << endl;
+//			for(uint k = 0; k < routeForSubSeq[i][j].size(); k++)
+//			{
+//				cout << routeForSubSeq[i][j][k]->getHead()->getClient()->getId() << "--" <<routeForSubSeq[i][j][k]->getTail()->getClient()->getId() << " ";
+//				cout << "---->" << " dde = " << routeForSubSeq[i][j][k]->getDemand() << " dist = " << routeForSubSeq[i][j][k]->getDistance() << endl;
+//			}
+//		}
+//	}
+//
+//	exit(-1);
+//
+//	vector<vector<vector<SeqData*>>> routebackSubSeq = solution_tsp->getRouteBackSeq();
+//
+//	for(uint i = 0; i < routebackSubSeq.size(); i++)
+//	{
+//		cout << "route[" << i << "] " << "contain " << routebackSubSeq[i].size() << " element" << endl;
+//		//determine the cost of a route, last element of the vector routeSetSubSeq[i][0]
+//	//	cout << "route[" << i << "] " << "cost " << routeSetSubSeq[i][0].back()->getDistance() << " " << endl;
+//		for(uint j = 0; j < routebackSubSeq[i].size(); j++)
+//		{
+//			if(j == 0)
+//				cout << "routeInvert[" << i << "] " << "cost " << routebackSubSeq[i][j].back()->getDistance() << " " << endl;
+//			for(uint k = 0; k < routebackSubSeq[i][j].size(); k++)
+//			{
+//				cout << routebackSubSeq[i][j][k]->getHead()->getClient()->getId() << "--" <<routebackSubSeq[i][j][k]->getTail()->getClient()->getId() << " ";
+//				cout << "---->" << " dde = " << routebackSubSeq[i][j][k]->getDemand() << " dist = " << routebackSubSeq[i][j][k]->getDistance() << endl;
+//			}
+//		}
+//	}
+
+//	LocalSearch* localAlgo = new LocalSearch(solution_tsp);
+//
+//	if(localAlgo->IntraRouteInsert())
+//	{
+//		cout << "Insert" << endl;
+//	}
 //	if(localAlgo->Insert())
 //	{
 //		cout << "Insert" << endl;
