@@ -57,6 +57,7 @@ bool Solution::Decodage()
 		// count the number of routes -- numberOfRoutes
 		int nbTour = tsp_data->getNumberNodes()-1;
 		vector<int> pred = splitAlgo->getPredence();
+        vector<Node*> predNode = splitAlgo->getPredenceNode();
 		numberOfRouteInSolution = 0; // to remove
 		while(nbTour != 0)
 		{
@@ -67,17 +68,40 @@ bool Solution::Decodage()
 		// fill Tour vector containing indices of i where a tour start
 		nbTour = tsp_data->getNumberNodes()-1;
 		tour = vector<int>(numberOfRouteInSolution);
+        routeSeq = vector<Node*>(numberOfRouteInSolution);
+        std::cout << numberOfRouteInSolution << std::endl;
+        Node* last = encodage->getTail();
 		for (int i = numberOfRouteInSolution-1 ; i >= 0 ; i --)
 		{
+
+            Customer* depotCustomerFirst = new Customer("0",-1, 0, NULL); // depot customer
+            Customer* depotCustomerlast = new Customer("0",-1, 0, NULL); // depot customer
+            Node* depotNodeFirst = new Node(depotCustomerFirst); // depot associated node
+            Node* depotNodeLast = new Node(depotCustomerlast); // depot associated node
+            Node* tmp = predNode[nbTour]->getPrevious();
+
+            predNode[nbTour]->setPrevious(depotNodeFirst);
+            depotNodeFirst->setNext(predNode[nbTour]);
+
+            last->setPrevious(depotNodeLast);
+            depotNodeLast->setNext(last);
+
+            std::cout << predNode[nbTour]->getClient()->getId() << " " << last->getClient()->getId() << std::endl;
+
+            routeSeq[i] = depotNodeFirst;
+            last = tmp;
 			nbTour = pred[nbTour] ;
-			tour[i] = nbTour+1;
+            tour[i] = nbTour+1;
 		}
+
+        // kairaba: add new empty routes. Find first the upper bound of vehicle number
 	}
 #ifdef DEBUG_DecodSol
-	for(uint i = 0; i < tour.size(); i++)
+    for(uint i = 0; i < tour.size(); i++){
 		cout << "tour[ " << i << "] =" << tour[i] << endl;
+        cout << "routeSeq[ " << i << "] =" << routeSeq[i]->getClient()->getId() << endl;
+    }
 #endif
-
 	return returValue;
 
 }
@@ -325,7 +349,20 @@ void Solution::PrintSolution()
 	cout << "SOLUTION COST : " << std::setprecision(12) << solutionCost << endl ;
 	cout << "NB ROUTES : " << numberOfRouteInSolution << endl ;
 	int start, end;
-	routeSeq.resize(numberOfRouteInSolution);
+    routeSeq.resize(numberOfRouteInSolution);
+    for(int i = 0; i < routeSeq.size(); i++)
+    {
+        std::cout << "TOUR[" << i << "]: ";
+        Node* tmp;
+        for(tmp = routeSeq[i]; tmp->getNext() != NULL; tmp = tmp->getNext())
+        {
+            std::cout << tmp->getClient()->getId() << "<->" ;
+
+        }
+        std::cout << tmp->getClient()->getId() << std::endl;
+
+    }
+    /*
 	for(int i = 0; i < numberOfRouteInSolution; i++)
 	{
 
@@ -335,14 +372,6 @@ void Solution::PrintSolution()
 		else
 			end = encodage->getSize() +1; //encodage.size()+1;
 
-		// create depot customer and node
-		Customer* depotCustomer = new Customer("0",-1, 0, NULL); // depot customer
-		Node* depotNode = new Node(depotCustomer); // depot associated node
-		Node* dNodeFirst = depotNode;
-		Node* dNodeLast = depotNode;
-
-		routeSeq[i] = new Node();
-//		routeSeq[i]->push_back(depotNode);
 
 		cout << "TOUR[" << i << "] = {" ;
 		cout << "encodage.size = " << encodage->getSize() << endl;
@@ -380,6 +409,7 @@ void Solution::PrintSolution()
 		cout << "}"  << endl;
 
 	}
+    */
 	cout << "------------------------------------" << endl ;
 	cout << endl ;
 }

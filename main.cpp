@@ -61,10 +61,10 @@ int main()
 
 	if(solution_tsp->Decodage())
 	{
-		solution_tsp->CheckSolution();
+        //solution_tsp->CheckSolution();
 		solution_tsp->PrintSolution();
 	}
-
+    exit(0);
 	vector<Node*> rteSeq = solution_tsp->getRouteSequence();
 	int numRoute = solution_tsp->getRoutesNumber();
 

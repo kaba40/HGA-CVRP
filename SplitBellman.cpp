@@ -24,15 +24,18 @@ int SplitBellman::solve()
 {
 	double load, distance, cost;
 #ifdef DEBUG
+    std::cout << "SPLIT" << std::endl;
 	for(int i = 0; i < tspData->getNumberNodes()-1; i++)
 	{
 		cout << "encod[" << i << "]= " << encod->find(i)->getClient()->getId() << endl;
 	}
 #endif
 
-	//initialization of vectors
+    //initialization of vectors
+
 	pathCost = vector<double>(tspData->getNumberNodes(), 1.e30);
 	pred = vector<int>(tspData->getNumberNodes(), -1);
+    predNode = vector<Node*>(tspData->getNumberNodes(), NULL);
 
 	pathCost[0] = 0.0; //depot
 
@@ -78,6 +81,7 @@ int SplitBellman::solve()
 			{
 				pathCost[i] = pathCost[t] + cost;
 				pred[i] = t;
+                predNode[i] = tmp;
 #ifdef SPLIT_ALGORITHM_DEBUG
 				cout << "pathCost[" << i << "]= " << pathCost[t] + cost << endl;
 				cout << "pred[" << i << "]= " << t << endl;
@@ -96,8 +100,15 @@ int SplitBellman::solve()
 		throw string ("ERROR : no Split solution has been propagated until the last node");
 	}
 #ifdef SPLIT_ALGORITHM_DEBUG
-	for(int i = 0; i < tspData->getNumberNodes(); i++)
+    for(int i = 0; i < tspData->getNumberNodes(); i++){
 		cout<< "pred[" << i << "]" << pred[i] << endl;
+        if (predNode[i]){
+            cout<< "predNode[" << i << "]" << predNode[i]->getClient()->getId() << endl;
+        } else {
+            cout<< "predNode[" << i << "] NULL"  << endl;
+        }
+
+    }
 	cout << "pathCost[" << tspData->getNumberNodes()-1 << "]= " << pathCost[tspData->getNumberNodes()-1] << endl;
 #endif
 	return 1;
@@ -112,4 +123,9 @@ vector<double>& SplitBellman::getPathCost(void)
 vector<int>& SplitBellman::getPredence(void)
 {
 	return pred;
+}
+
+vector<Node*>& SplitBellman::getPredenceNode(void)
+{
+    return predNode;
 }

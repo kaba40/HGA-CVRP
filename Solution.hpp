@@ -45,7 +45,8 @@ private:
 	vector<vector<vector<SeqData*>>> routeBackwardSeq;
 	vector<int> tour;
 //	vector<vector<Node*>> routeSeq; // direct encoding
-	vector<Node*> routeSeq;
+    //vector<std::pair<Node*,uint>> routeSeq;
+    vector<Node*> routeSeq;
 	double solutionCost; //objective_value
 	int numberOfRouteInSolution;
 	DataAP *tsp_data;

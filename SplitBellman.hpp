@@ -20,12 +20,14 @@ private:
 	DLinkedList* encod;
 	vector<double> pathCost; //cost of the shortest path
 	vector<int> pred; //index of the predecessor
+    vector<Node*> predNode; //index of the predecessor
 public:
 	SplitBellman(DataAP* tspDat, DLinkedList* enc);
 	virtual ~SplitBellman();
 	int solve();
 	vector<double>& getPathCost(void);
 	vector<int>& getPredence(void);
+    vector<Node*>& getPredenceNode(void);
 };
 
 #endif /* SPLITBELLMAN_HPP_ */
