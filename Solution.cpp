@@ -40,7 +40,7 @@ void Solution::setRandomSequence()
 }
 
 
-bool Solution::Decodage()
+bool Solution::Decodage(bool useDecoDirect)
 {
 	bool returValue = false;
 	SplitBellman *splitAlgo;
@@ -67,44 +67,88 @@ bool Solution::Decodage()
 
 		// fill Tour vector containing indices of i where a tour start
 		nbTour = tsp_data->getNumberNodes()-1;
-		tour = vector<int>(numberOfRouteInSolution);
-        routeSeq = vector<Node*>(numberOfRouteInSolution);
-        std::cout << numberOfRouteInSolution << std::endl;
-        Node* last = encodage->getTail();
-		for (int i = numberOfRouteInSolution-1 ; i >= 0 ; i --)
+
+		if(useDecoDirect)
 		{
+//	        routeSeq = vector<Node*>(numberOfRouteInSolution);
+	        routeSeq = vector<pair<Node*, uint>>(numberOfRouteInSolution);
 
-            Customer* depotCustomerFirst = new Customer("0",-1, 0, NULL); // depot customer
-            Customer* depotCustomerlast = new Customer("0",-1, 0, NULL); // depot customer
-            Node* depotNodeFirst = new Node(depotCustomerFirst); // depot associated node
-            Node* depotNodeLast = new Node(depotCustomerlast); // depot associated node
-            Node* tmp = predNode[nbTour]->getPrevious();
+	        Node* last = encodage->getTail(); // to record the last element of the route
 
-            predNode[nbTour]->setPrevious(depotNodeFirst);
-            depotNodeFirst->setNext(predNode[nbTour]);
+			for (int i = numberOfRouteInSolution-1 ; i >= 0 ; i --)
+			{
 
-            last->setPrevious(depotNodeLast);
-            depotNodeLast->setNext(last);
+	            Customer* depotCustomerFirst = new Customer("0",-1, 0, NULL); // depot customer
+	            Customer* depotCustomerlLast = new Customer("0",-1, 0, NULL); // depot customer
 
-            std::cout << predNode[nbTour]->getClient()->getId() << " " << last->getClient()->getId() << std::endl;
+	            Node* depotNodeFirst = new Node(depotCustomerFirst); // depot associated node
+	            Node* depotNodeLast = new Node(depotCustomerlLast); // depot associated node
 
-            routeSeq[i] = depotNodeFirst;
-            last = tmp;
-			nbTour = pred[nbTour] ;
-            tour[i] = nbTour+1;
+	            Node* tmp = predNode[nbTour]->getPrevious();
+
+	            predNode[nbTour]->setPrevious(depotNodeFirst);
+	            depotNodeFirst->setNext(predNode[nbTour]);
+
+	            last->setNext(depotNodeLast); // not last->setPrevious(depotNodeLast);
+	            depotNodeLast->setPrevious(last); // not depotNodeLast->setNext(last);
+	#ifdef DEBUG_DecodSol
+	            std::cout << predNode[nbTour]->getClient()->getId() << " " << last->getClient()->getId() << std::endl;
+	#endif
+//	            routeSeq[i] = depotNodeFirst; // routeSeq[i].make_pair(depotNodeFirst, last.index-predNode.index+1)
+	            routeSeq[i].first = depotNodeFirst;
+	            last = tmp;
+
+				nbTour = pred[nbTour] ;
+
+			}
+
+			// kairaba: add new empty routes. Find first the upper bound of vehicle number
+			routeSeq.resize(tsp_data->getNumberNodes() -1);
+			for(int i = numberOfRouteInSolution; i < tsp_data->getNumberNodes() -1; i++)
+			{
+	            Customer* depotCustomerFirst = new Customer("0",-1, 0, NULL); // depot customer
+	            Customer* depotCustomerlLast = new Customer("0",-1, 0, NULL); // depot customer
+
+	            Node* depotNodeFirst = new Node(depotCustomerFirst); // depot associated node
+	            Node* depotNodeLast = new Node(depotCustomerlLast); // depot associated node
+
+	            depotNodeFirst->setNext(depotNodeLast);
+	            depotNodeLast->setPrevious(depotNodeFirst);
+
+	            routeSeq[i].first = depotNodeFirst;
+			}
+		}
+		else
+		{
+			tour = vector<int>(numberOfRouteInSolution);
+			for (int i = numberOfRouteInSolution-1 ; i >= 0 ; i --)
+			{
+				nbTour = pred[nbTour] ;
+				tour[i] = nbTour+1;
+			}
 		}
 
-        // kairaba: add new empty routes. Find first the upper bound of vehicle number
-	}
 #ifdef DEBUG_DecodSol
-    for(uint i = 0; i < tour.size(); i++){
-		cout << "tour[ " << i << "] =" << tour[i] << endl;
-        cout << "routeSeq[ " << i << "] =" << routeSeq[i]->getClient()->getId() << endl;
-    }
+		if(useDecoDirect)
+		{
+		    for(uint i = 0; i < routeSeq.size(); i++){
+		        cout << "routeSeq[ " << i << "] =" << routeSeq[i].first->getClient()->getId() << endl;
+		    }
+		}
+		else
+		{
+		    for(uint i = 0; i < tour.size(); i++){
+				cout << "tour[ " << i << "] =" << tour[i] << endl;
+		    }
+		}
 #endif
-	return returValue;
 
+	}
+
+	return returValue;
 }
+
+
 
 bool Solution::EVAL2(double *cost, SeqData *seq1, SeqData *seq2)
 {
@@ -280,55 +324,99 @@ bool Solution::EVALN(double *cost, int numSeq, SeqData *seq, ...) // add a numbe
 }
 
 
-void Solution::CheckSolution()
+void Solution::CheckSolution(bool useDecoDirect)
 {
-	int start, end;
-	double load;
+
+	double load ;
 	double distance = 0;
 
-	if(tour[0] != 1)
-		cout << " Error : the first route should start with the first customer" << endl;
-#ifdef DEBUG_CheckSol
-	cout << "numberOfRouteInSolution = " << numberOfRouteInSolution << endl;
-#endif
-	for(int i = 0; i < numberOfRouteInSolution; i++)
+	if(useDecoDirect)
 	{
-		load = 0;
-		start = tour[i];
-		if( i < numberOfRouteInSolution-1)
-			end = tour[i+1];
-		else
-			end = encodage->getSize() +1; //encodage.size()+1;
-#ifdef DEBUG_CheckSol
-		cout << "encodage->getSize() in Solution =" << encodage->getSize() << endl;
-#endif
+//		cout << "routeSeq.size() = " << routeSeq.size() << endl;
+	    for(uint i = 0; i < routeSeq.size(); i++)
+	    {
+	    	load = 0;
 
-		Node *routeStartNodeFirst = encodage->find(start-1);
-		for(int j = start; j < end; j++)
+	    	int j = 0;
+	        for( Node* routeNode = routeSeq[i].first; routeNode != NULL; routeNode = routeNode->getNext())
+	        {
+	        	j++;
+	        	if(routeNode->getClient()->getDemand() != 0 && routeNode->getNext()->getClient()->getDemand() != 0 )
+	        	{
+//	        		cout << "routeNode = " << routeNode->getClient()->getId() << endl;
+//	        		cout << "routeNode->getNext() = " << routeNode->getNext()->getClient()->getId() << endl;
+	        		distance += routeNode->getClient()->getDistance(routeNode->getNext()->getClient());
+	        	}
+	        	else
+	        	{
+	        		if(routeNode->getNext() != NULL)
+	        		{
+		        		if(routeNode->getClient()->getDemand() == 0 && routeNode->getNext()->getClient()->getDemand() != 0 )
+		        		{
+		        			distance += routeNode->getNext()->getClient()->getDistanceDepot();
+		        		}
+		        		else if(routeNode->getClient()->getDemand() != 0 && routeNode->getNext()->getClient()->getDemand() == 0 )
+		        		{
+		        			distance += routeNode->getClient()->getDistanceDepot();
+		        		}
+	        		}
+	        	}
+	        	load += routeNode->getClient()->getDemand();
+	        }
+	        routeSeq[i].second = j;
+
+			if(load > tsp_data->getVehicleCap() + 0.0001)
+			{
+				cout << "ERROR : One route is exceeding the capacity limit" << endl ;
+				throw string("ERROR : One route is exceeding the capacity limit");
+			}
+	    }
+	}
+	else
+	{
+		int start, end;
+
+		if(tour[0] != 1)
+			cout << " Error : the first route should start with the first customer" << endl;
+	#ifdef DEBUG_CheckSol
+		cout << "numberOfRouteInSolution = " << numberOfRouteInSolution << endl;
+	#endif
+		for(int i = 0; i < numberOfRouteInSolution; i++)
 		{
-#ifdef DEBUG_CheckSol
-			cout << "numberOfRouteInSolution= " << numberOfRouteInSolution << endl;
-			cout << "j= " << j << endl;
-#endif
-			load += routeStartNodeFirst->getClient()->getDemand(); //encodage->find(j-1);
-			routeStartNodeFirst = routeStartNodeFirst->getNext();
-		}
+			load = 0;
+			start = tour[i];
+			if( i < numberOfRouteInSolution-1)
+				end = tour[i+1];
+			else
+				end = encodage->getSize() +1; //encodage.size()+1;
+	#ifdef DEBUG_CheckSol
+			cout << "encodage->getSize() in Solution =" << encodage->getSize() << endl;
+	#endif
 
+			Node *routeStartNodeFirst = encodage->find(start-1);
+			for(int j = start; j < end; j++)
+			{
+	#ifdef DEBUG_CheckSol
+				cout << "numberOfRouteInSolution= " << numberOfRouteInSolution << endl;
+				cout << "j= " << j << endl;
+	#endif
+				load += routeStartNodeFirst->getClient()->getDemand(); //encodage->find(j-1);
+				routeStartNodeFirst = routeStartNodeFirst->getNext();
+			}
 
-		Node *routeStartNodeSecond = encodage->find(start-1);
-		distance +=  routeStartNodeSecond->getClient()->getDistanceDepot() + encodage->find(end-2)->getClient()->getDistanceDepot();//encodage[start-1]->getDistanceDepot() + encodage[end-2]->getDistanceDepot();
-		for(int j = start; j < end-1; j++)
-		{
-//			int k = j-1;
-//			int ksuiv = k+1;
-			distance += routeStartNodeSecond->getClient()->getDistance(routeStartNodeSecond->getNext()->getClient());//encodage->find(k)->getClient()->getDistance(encodage->find(ksuiv)->getClient());
-			routeStartNodeSecond = routeStartNodeSecond->getNext();
-		}
+			if(load > tsp_data->getVehicleCap() + 0.0001)
+			{
+				cout << "ERROR : One route is exceeding the capacity limit" << endl ;
+				throw string("ERROR : One route is exceeding the capacity limit");
+			}
 
-		if(load > tsp_data->getVehicleCap() + 0.0001)
-		{
-			cout << "ERROR : One route is exceeding the capacity limit" << endl ;
-			throw string("ERROR : One route is exceeding the capacity limit");
+			Node *routeStartNodeSecond = encodage->find(start-1);
+			distance +=  routeStartNodeSecond->getClient()->getDistanceDepot() + encodage->find(end-2)->getClient()->getDistanceDepot();//encodage[start-1]->getDistanceDepot() + encodage[end-2]->getDistanceDepot();
+			for(int j = start; j < end-1; j++)
+			{
+				distance += routeStartNodeSecond->getClient()->getDistance(routeStartNodeSecond->getNext()->getClient());//encodage->find(k)->getClient()->getDistance(encodage->find(ksuiv)->getClient());
+				routeStartNodeSecond = routeStartNodeSecond->getNext();
+			}
 		}
 	}
 
@@ -340,76 +428,53 @@ void Solution::CheckSolution()
 	}
 }
 
-
-void Solution::PrintSolution()
+void Solution::PrintSolution(bool useDecoDirect)
 {
 
 	cout << endl ;
 	cout << "------------------------------------" << endl ;
 	cout << "SOLUTION COST : " << std::setprecision(12) << solutionCost << endl ;
 	cout << "NB ROUTES : " << numberOfRouteInSolution << endl ;
-	int start, end;
-    routeSeq.resize(numberOfRouteInSolution);
-    for(int i = 0; i < routeSeq.size(); i++)
-    {
-        std::cout << "TOUR[" << i << "]: ";
-        Node* tmp;
-        for(tmp = routeSeq[i]; tmp->getNext() != NULL; tmp = tmp->getNext())
-        {
-            std::cout << tmp->getClient()->getId() << "<->" ;
 
-        }
-        std::cout << tmp->getClient()->getId() << std::endl;
-
-    }
-    /*
-	for(int i = 0; i < numberOfRouteInSolution; i++)
+	if(useDecoDirect)
 	{
+	    for(uint i = 0; i < routeSeq.size(); i++)
+	    {
+	    	if(routeSeq[i].second > 2)
+	    	{
+		        cout << "TOUR[" << i << "]: ";
+		        Node* tmp;
 
-		start = tour[i];
-		if( i < numberOfRouteInSolution-1)
-			end = tour[i+1];
-		else
-			end = encodage->getSize() +1; //encodage.size()+1;
-
-
-		cout << "TOUR[" << i << "] = {" ;
-		cout << "encodage.size = " << encodage->getSize() << endl;
-		Node *routeStartNode = encodage->find(start-1);
-		cout << "routeStartNode1 = " << routeStartNode->getClient()->getId() << endl;
-		Node *routeNodeFirst = routeStartNode;
-		cout << "routeSNode1 = " << routeNodeFirst->getClient()->getId() << endl;
-		dNodeFirst->setNext(routeNodeFirst);
-		routeNodeFirst->setPrevious(dNodeFirst);
-		for(int j = start; j < end; j++)
-		{
-
-	//		cout << encodage->find(j-1)->getClient()->getId() << " " ;//cout << encodage[j-1]->getId() << " " ;
-			cout << routeStartNode->getClient()->getId() << " " << endl;
-
-//			routeSeq[i]->push_back(copyNode); // add dummy depot node at the beginning and end of routeSeq
-
-			routeStartNode = routeStartNode->getNext();
-		}
-		Node *routeNodeLast = routeStartNode->getPrevious();
-//		routeNodeLast->setNext(dNodeLast);
-//		dNodeLast->setPrevious(routeNodeFirst);
-		//cut the link
-		cout << "routeStartNode2 = " << routeStartNode->getClient()->getId() << endl;
-		cout << "routeStartNode2Next = " << routeStartNode->getNext()->getClient()->getId() << endl;
-		routeNodeLast->setNext(NULL);
-		routeStartNode->setPrevious(NULL);
-
-		routeNodeLast->setNext(dNodeLast);
-		dNodeLast->setPrevious(routeNodeLast);
-
-
-		routeSeq[i] = dNodeFirst;
-
-		cout << "}"  << endl;
-
+		        for( tmp = routeSeq[i].first; tmp->getNext() != NULL; tmp = tmp->getNext())
+		        {
+		            cout << tmp->getClient()->getId() << "--" ;
+		        }
+		        cout << tmp->getClient()->getId() << " contains " <<  routeSeq[i].second  <<  endl;
+	    	}
+	    }
 	}
-    */
+	else
+	{
+		int start, end;
+		for(int i = 0; i < numberOfRouteInSolution; i++)
+		{
+			start = tour[i];
+			if( i < numberOfRouteInSolution-1)
+				end = tour[i+1];
+			else
+				end = encodage->getSize() +1;
+			cout << "TOUR[" << i << "] = {" ;
+			Node *routeStartNode = encodage->find(start-1);
+			for(int j = start; j < end-1; j++)
+			{
+				cout << routeStartNode->getClient()->getId() << "--";
+
+				routeStartNode = routeStartNode->getNext();
+			}
+			cout << routeStartNode->getClient()->getId() ;
+			cout << "}"  << endl;
+		}
+	}
 	cout << "------------------------------------" << endl ;
 	cout << endl ;
 }
@@ -419,125 +484,111 @@ DLinkedList* Solution::getSequence()
 	return encodage;
 }
 
-vector<Node*> Solution::getRouteSequence()
+vector<pair<Node*,uint>> Solution::getRouteSequence()
 {
 	return routeSeq;
 }
 
-void Solution::updateRoute(int numRoute, Node* rteSeq)
+void Solution::updateRoute(int numRoute, pair<Node*,uint> rteSeq)
 {
 	routeSeq[numRoute] = rteSeq;
 }
 
-//void Solution::initRouteSetSubSeq() // to modify when routeSeq modified
-//{
-//	routeForwardSeq.resize(numberOfRouteInSolution);
-//	routeBackwardSeq.resize(numberOfRouteInSolution);
-//	for(int i = 0; i < numberOfRouteInSolution; i++) // number of route
-//	{
-//		routeForwardSeq[i].resize(routeSeq[i]->getSize()); //each route contains 2 dummy nodes depot-depot
-//		routeBackwardSeq[i].resize(routeSeq[i]->getSize());
-//
-//		int j = 0;
-//		for(Node *seqNode = routeSeq[i]->getHead(); seqNode != NULL; seqNode = seqNode->getNext())
-////		for(uint j = 0; j < routeForwardSeq[i].size(); j++) // number of nodes in a route
-//		{
-//
-//#ifdef DEBUG_Sol
-//			cout << "this[" << i << "][" << j << "]= " << seqNode->getClient()->getId() << endl;
-//#endif
-////			SeqData* seq = new SeqData(routeSeq[i][j]); // first one visit sub-sequence
-//			SeqData* seq = new SeqData(seqNode);
-//			SeqData* retFor = NULL;
-//			SeqData* retBack = NULL;
-//
-//			routeForwardSeq[i][j].push_back(seq);
-//			routeBackwardSeq[i][j].push_back(seq);
-//
-////			int k = j+1;
-//			for(Node *seqNodeNext = seqNode->getNext(); seqNodeNext != NULL; seqNodeNext = seqNodeNext->getNext())
-////			for(uint k = j+1; k < routeForwardSeq[i].size(); k++)
-//			{
-//#ifdef DEBUG_Sol
-//				cout << "seq[" << i << "][" << j+1 << "]= " << seqNodeNext->getClient()->getId() << " ";
-//#endif
-//				SeqData* seqNext = new SeqData(seqNodeNext); // all visits after seq
-//
-//				if(seqNodeNext == seqNode->getNext())//if(k == j+1)
-//				{
-//					retFor = seq->concatForWard(seqNext); // concatenate forward seq and seqNext
-//					retBack = seq->concatBackWard(seqNext); // concatenate backward seq and seqNext
-//
-//				}
-//				else
-//				{
-//					retFor = retFor->concatForWard(seqNext); // concatenate forward retFor and seqNext
-//					retBack = retBack->concatBackWard(seqNext); // concatenate backward retFor and seqNext
-//				}
-//
-//				routeForwardSeq[i][j].push_back(retFor);
-//				routeBackwardSeq[i][j].push_back(retBack);
-//
-////				k++;
-//			}
-//#ifdef DEBUG_Sol
-//			cout << endl;
-//#endif
-//			j++;
-//		}
-//#ifdef DEBUG_Sol
-//			cout << endl;
-//#endif
-//	}
-//}
-//
-//void Solution::updateOneRouteSetSubSeq(int numRoute) // modify to update routeForwardSeq
-//{
-//	int j = 0;
-//	for(Node *seqNode = routeSeq[numRoute]; seqNode != NULL; seqNode = seqNode->getNext())
-////	for(uint j = 0; j < routeForwardSeq[numRoute].size()-1; j++) // number of nodes in a route
-//	{
-//		routeForwardSeq[numRoute][j].clear(); // clear vector containing route nodes
-//		routeBackwardSeq[numRoute][j].clear();
-//#ifdef DEBUG_Sol
-//		// routeSeq[numRoute][j] is the updated route
-//		cout << "this[" << numRoute << "][" << j << "]= " << seqNode->getClient()->getId() << endl;
-//#endif
-//		SeqData* seq = new SeqData(seqNode); // first one visit sub-sequence
-//		SeqData* retFor = NULL;
-//		SeqData* retBack = NULL;
-//
-//		routeForwardSeq[numRoute][j].push_back(seq);
-//		routeBackwardSeq[numRoute][j].push_back(seq);
-//
-//		for(Node *seqNodeNext = seqNode->getNext(); seqNodeNext != NULL; seqNodeNext = seqNodeNext->getNext())
-////		for(uint k = j+1; k < routeForwardSeq[numRoute].size(); k++)
-//		{
-//#ifdef DEBUG_Sol
-//		cout << "seq[" << numRoute << "][" << j+1 << "]= " << seqNodeNext->getClient()->getId() << " ";
-//#endif
-//		SeqData* seqNext = new SeqData(seqNodeNext); // all visits after seq
-//
-//		if(seqNodeNext == seqNode->getNext())//if(k == j+1)
-//		{
-//			retFor = seq->concatForWard(seqNext); // concatenate forward seq and seqNext
-//			retBack = seq->concatBackWard(seqNext); // concatenate backward seq and seqNext
-//
-//		}
-//		else
-//		{
-//			retFor = retFor->concatForWard(seqNext); // concatenate forward retFor and seqNext
-//			retBack = retBack->concatBackWard(seqNext); // concatenate backward retFor and seqNext
-//		}
-//
-//		routeForwardSeq[numRoute][j].push_back(retFor);
-//		routeBackwardSeq[numRoute][j].push_back(retBack);
-//
-//		}
-//		cout << endl;
-//		j++;
-//	}
-//}
+void Solution::initRouteSetSubSeq() // to modify when routeSeq modified
+{
+	routeForwardSeq.resize(routeSeq.size());
+	routeBackwardSeq.resize(routeSeq.size());
+	for(uint i = 0; i < routeSeq.size(); i++) // number of route
+	{
+		routeForwardSeq[i].resize(routeSeq[i].second); //each route contains 2 dummy nodes depot-depot
+		routeBackwardSeq[i].resize(routeSeq[i].second);
+
+		int j = 0;
+		for(Node *seqNode = routeSeq[i].first; seqNode != NULL; seqNode = seqNode->getNext())
+		{
+#ifdef DEBUG_Sol
+			cout << "this[" << i << "][" << j << "]= " << seqNode->getClient()->getId() << endl;
+#endif
+			SeqData* seq = new SeqData(seqNode);
+			SeqData* retFor = NULL;
+			SeqData* retBack = NULL;
+
+			routeForwardSeq[i][j].push_back(seq);
+			routeBackwardSeq[i][j].push_back(seq);
+
+			for(Node *seqNodeNext = seqNode->getNext(); seqNodeNext != NULL; seqNodeNext = seqNodeNext->getNext())
+			{
+#ifdef DEBUG_Sol
+				cout << "seq[" << i << "][" << j+1 << "]= " << seqNodeNext->getClient()->getId() << " ";
+#endif
+				SeqData* seqNext = new SeqData(seqNodeNext); // all visits after seq
+
+				if(seqNodeNext == seqNode->getNext())
+				{
+					retFor = seq->concatForWard(seqNext); // concatenate forward seq and seqNext
+					retBack = seq->concatBackWard(seqNext); // concatenate backward seq and seqNext
+				}
+				else
+				{
+					retFor = retFor->concatForWard(seqNext); // concatenate forward retFor and seqNext
+					retBack = retBack->concatBackWard(seqNext); // concatenate backward retFor and seqNext
+				}
+				routeForwardSeq[i][j].push_back(retFor);
+				routeBackwardSeq[i][j].push_back(retBack);
+			}
+#ifdef DEBUG_Sol
+			cout << endl;
+#endif
+			j++;
+		}
+#ifdef DEBUG_Sol
+			cout << endl;
+#endif
+	}
+}
+
+void Solution::updateOneRouteSetSubSeq(int numRoute)
+{
+	int j = 0;
+	for(Node *seqNode = routeSeq[numRoute].first; seqNode != NULL; seqNode = seqNode->getNext())// number of nodes in a route
+	{
+		routeForwardSeq[numRoute][j].clear(); // clear vector containing route nodes
+		routeBackwardSeq[numRoute][j].clear();
+#ifdef DEBUG_Sol
+		// routeSeq[numRoute][j] is the updated route
+		cout << "this[" << numRoute << "][" << j << "]= " << seqNode->getClient()->getId() << endl;
+#endif
+		SeqData* seq = new SeqData(seqNode); // first one visit sub-sequence
+		SeqData* retFor = NULL;
+		SeqData* retBack = NULL;
+
+		routeForwardSeq[numRoute][j].push_back(seq);
+		routeBackwardSeq[numRoute][j].push_back(seq);
+
+		for(Node *seqNodeNext = seqNode->getNext(); seqNodeNext != NULL; seqNodeNext = seqNodeNext->getNext())
+		{
+#ifdef DEBUG_Sol
+			cout << "seq[" << numRoute << "][" << j+1 << "]= " << seqNodeNext->getClient()->getId() << " ";
+#endif
+			SeqData* seqNext = new SeqData(seqNodeNext); // all visits after seq
+
+			if(seqNodeNext == seqNode->getNext())
+			{
+				retFor = seq->concatForWard(seqNext); // concatenate forward seq and seqNext
+				retBack = seq->concatBackWard(seqNext); // concatenate backward seq and seqNext
+			}
+			else
+			{
+				retFor = retFor->concatForWard(seqNext); // concatenate forward retFor and seqNext
+				retBack = retBack->concatBackWard(seqNext); // concatenate backward retFor and seqNext
+			}
+			routeForwardSeq[numRoute][j].push_back(retFor);
+			routeBackwardSeq[numRoute][j].push_back(retBack);
+		}
+		cout << endl;
+		j++;
+	}
+}
 
 vector<vector<vector<SeqData*>>> Solution::getRouteForwSeq() // to test sequenceTab in the main method
 {

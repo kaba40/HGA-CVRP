@@ -45,8 +45,9 @@ private:
 	vector<vector<vector<SeqData*>>> routeBackwardSeq;
 	vector<int> tour;
 //	vector<vector<Node*>> routeSeq; // direct encoding
-    //vector<std::pair<Node*,uint>> routeSeq;
-    vector<Node*> routeSeq;
+//	vector<Node*> routeSeq;
+    vector<pair<Node*,uint>> routeSeq;
+
 	double solutionCost; //objective_value
 	int numberOfRouteInSolution;
 	DataAP *tsp_data;
@@ -55,11 +56,11 @@ public:
 	virtual ~Solution();
 
 	// evaluator methods
-	bool Decodage();
+	bool Decodage(bool useDecoDirect);
 	bool EVAL2(double *cost, SeqData *seq1, SeqData *seq2);
 	bool EVALN(double *cost, int numSeq, SeqData *seq,...);
-	void CheckSolution();
-	void PrintSolution();
+	void CheckSolution(bool useDecoDirect);
+	void PrintSolution(bool useDecoDirect);
 
 	// getter methods
 	vector<int> getTourStructure();
@@ -67,7 +68,8 @@ public:
 	int getRoutesNumber();
 	DLinkedList* getSequence(); // to delete may be
 //	vector<vector<Node*>> getRouteSequence(); // to delete may be
-	vector<Node*> getRouteSequence(); // to delete may be
+//	vector<Node*> getRouteSequence(); // to delete may be
+	vector<pair<Node*,uint>> getRouteSequence();
 	vector<vector<vector<SeqData*>>> getRouteForwSeq();
 	vector<vector<vector<SeqData*>>> getRouteBackSeq();
 
@@ -76,7 +78,8 @@ public:
 
 	//updater methods
 //	void updateRoute(int numRoute, vector<Node*> rteSeq); // update each route modify by a move
-	void updateRoute(int numRoute, Node* rteSeq);
+//	void updateRoute(int numRoute, Node* rteSeq);
+	void updateRoute(int numRoute, pair<Node*,uint> rteSeq);
 	void updateOneRouteSetSubSeq(int numRoute);
 
 	//setter methods

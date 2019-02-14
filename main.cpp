@@ -47,7 +47,7 @@ int main()
 	solution_tsp = new Solution(data_instance, data_instance->getCustomerList());
 
 
-//	solution_tsp->setRandomSequence();
+	solution_tsp->setRandomSequence();
 
 #ifdef DEBUG_Main
 
@@ -58,119 +58,57 @@ int main()
 
 #endif
 
-
-	if(solution_tsp->Decodage())
+	// true means we use direct encoding to do local search
+	if(solution_tsp->Decodage(true))
 	{
-        //solution_tsp->CheckSolution();
-		solution_tsp->PrintSolution();
-	}
-    exit(0);
-	vector<Node*> rteSeq = solution_tsp->getRouteSequence();
-	int numRoute = solution_tsp->getRoutesNumber();
-
-	for(int i = 0; i < numRoute; i++)
-	{
-		cout << "route[" << i << "]= " ;
-		for( Node *tmp = rteSeq[i]; tmp != NULL; tmp = tmp->getNext())
-		{
-			cout <<  tmp->getClient()->getId() << "--";
-		}
-		cout << endl;
+        solution_tsp->CheckSolution(true);
+		solution_tsp->PrintSolution(true);
 	}
 
+	LocalSearch* localAlgo = new LocalSearch(solution_tsp);
 
-	exit(-1);
+	if(localAlgo->IntraRouteInsert())
+	{
+		cout << "IntraRouteInsert" << endl;
+	}
 
-//	solution_tsp->initRouteSetSubSeq();
-//
-//	vector<vector<vector<SeqData*>>> routeForSubSeq = solution_tsp->getRouteForwSeq();
-//
-//	for(uint i = 0; i < routeForSubSeq.size(); i++)
-//	{
-//		cout << "route[" << i << "] " << "contain " << routeForSubSeq[i].size() << " element" << endl;
-//		//determine the cost of a route, last element of the vector routeSetSubSeq[i][0]
-//	//	cout << "route[" << i << "] " << "cost " << routeSetSubSeq[i][0].back()->getDistance() << " " << endl;
-//		for(uint j = 0; j < routeForSubSeq[i].size(); j++)
-//		{
-//			if(j == 0)
-//				cout << "route[" << i << "] " << "cost " << routeForSubSeq[i][j].back()->getDistance() << " " << endl;
-//			for(uint k = 0; k < routeForSubSeq[i][j].size(); k++)
-//			{
-//				cout << routeForSubSeq[i][j][k]->getHead()->getClient()->getId() << "--" <<routeForSubSeq[i][j][k]->getTail()->getClient()->getId() << " ";
-//				cout << "---->" << " dde = " << routeForSubSeq[i][j][k]->getDemand() << " dist = " << routeForSubSeq[i][j][k]->getDistance() << endl;
-//			}
-//		}
-//	}
-//
-//	exit(-1);
-//
-//	vector<vector<vector<SeqData*>>> routebackSubSeq = solution_tsp->getRouteBackSeq();
-//
-//	for(uint i = 0; i < routebackSubSeq.size(); i++)
-//	{
-//		cout << "route[" << i << "] " << "contain " << routebackSubSeq[i].size() << " element" << endl;
-//		//determine the cost of a route, last element of the vector routeSetSubSeq[i][0]
-//	//	cout << "route[" << i << "] " << "cost " << routeSetSubSeq[i][0].back()->getDistance() << " " << endl;
-//		for(uint j = 0; j < routebackSubSeq[i].size(); j++)
-//		{
-//			if(j == 0)
-//				cout << "routeInvert[" << i << "] " << "cost " << routebackSubSeq[i][j].back()->getDistance() << " " << endl;
-//			for(uint k = 0; k < routebackSubSeq[i][j].size(); k++)
-//			{
-//				cout << routebackSubSeq[i][j][k]->getHead()->getClient()->getId() << "--" <<routebackSubSeq[i][j][k]->getTail()->getClient()->getId() << " ";
-//				cout << "---->" << " dde = " << routebackSubSeq[i][j][k]->getDemand() << " dist = " << routebackSubSeq[i][j][k]->getDistance() << endl;
-//			}
-//		}
-//	}
-
-//	LocalSearch* localAlgo = new LocalSearch(solution_tsp);
-//
-//	if(localAlgo->IntraRouteInsert())
-//	{
-//		cout << "Insert" << endl;
-//	}
 //	if(localAlgo->Insert())
 //	{
 //		cout << "Insert" << endl;
-//		solution_tsp->CheckSolution();
-//		solution_tsp->PrintSolution();
+//		solution_tsp->PrintSolution(false);
 //		solution_tsp->getSequence()->show();
 //	}
 //
 //	if(localAlgo->ArcInsert())
 //	{
 //		cout << "ArcInsert" << endl;
-//		solution_tsp->CheckSolution();
-//		solution_tsp->PrintSolution();
+//		solution_tsp->PrintSolution(false);
 //		solution_tsp->getSequence()->show();
 //	}
 //
 //	if(localAlgo->Swap())
 //	{
 //		cout << "Swap" << endl;
-//		solution_tsp->CheckSolution();
-//		solution_tsp->PrintSolution();
+//		solution_tsp->PrintSolution(false);
 //		solution_tsp->getSequence()->show();
 //	}
 //
 //	if(localAlgo->SwapArcs())
 //	{
 //		cout << "SwapArcs" << endl;
-//		solution_tsp->CheckSolution();
-//		solution_tsp->PrintSolution();
+//		solution_tsp->PrintSolution(false);
 //		solution_tsp->getSequence()->show();
 //	}
-//
 //
 //	if(localAlgo->SwapTwoArcs())
 //	{
 //		cout << "SwapTwoArcs" << endl;
-//		solution_tsp->CheckSolution();
-//		solution_tsp->PrintSolution();
+//		solution_tsp->CheckSolution(false);
+//		solution_tsp->PrintSolution(false);
 //		solution_tsp->getSequence()->show();
 //	}
-//
-//	delete localAlgo;
+
+	delete localAlgo;
 	delete data_instance;
 	delete solution_tsp;
 

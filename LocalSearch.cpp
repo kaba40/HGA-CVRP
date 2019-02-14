@@ -103,10 +103,10 @@ bool LocalSearch::Insert()
 			}
 
 			// decode the list
-			if(this->initSol->Decodage())
+			if(this->initSol->Decodage(false))
 			{
 #ifdef DEBUG_Insert
-				this->initSol->CheckSolution();
+				this->initSol->CheckSolution(false);
 #endif
 				newObjVal = this->initSol->getObjVal();
 			}
@@ -275,10 +275,10 @@ bool LocalSearch::ArcInsert()
 				}
 
 				// decode the list
-				if(this->initSol->Decodage())
+				if(this->initSol->Decodage(false))
 				{
 #ifdef DEBUG_ArcInsert
-					this->initSol->CheckSolution();
+					this->initSol->CheckSolution(false);
 #endif
 					newObjVal = this->initSol->getObjVal();
 				}
@@ -481,10 +481,10 @@ bool LocalSearch::Swap()
 			}
 
 			// decode the list
-			if(this->initSol->Decodage())
+			if(this->initSol->Decodage(false))
 			{
 #ifdef DEBUG_Swap
-				this->initSol->CheckSolution();
+				this->initSol->CheckSolution(false);
 #endif
 				newObjVal = this->initSol->getObjVal();
 			}
@@ -754,10 +754,10 @@ bool LocalSearch::SwapArcs()
 
 					// decode the list
 
-					if(this->initSol->Decodage())
+					if(this->initSol->Decodage(false))
 					{
 #ifdef DEBUG_SwapArcs
-						this->initSol->CheckSolution();
+						this->initSol->CheckSolution(false);
 #endif
 						newObjVal = this->initSol->getObjVal();
 					}
@@ -1023,10 +1023,10 @@ bool LocalSearch::SwapTwoArcs()
 					}
 
 					// decode the list
-					if(this->initSol->Decodage())
+					if(this->initSol->Decodage(false))
 					{
 #ifdef DEBUG_SwapTwoArcs
-						this->initSol->CheckSolution();
+						this->initSol->CheckSolution(false);
 #endif
 						newObjVal = this->initSol->getObjVal();
 					}

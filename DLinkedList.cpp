@@ -35,6 +35,7 @@ void DLinkedList::setTail(Node *node)
 	this->tail = node;
 }
 
+// don't increment the list because the node is moved then added
 void DLinkedList::addHead(Node *node)
 {
 	node->setNext(this->head);
@@ -42,9 +43,10 @@ void DLinkedList::addHead(Node *node)
 	this->head = node;
 	this->head->setPrevious(NULL);
 
-	size++;
+//	size++;
 }
 
+// don't increment the list because the node is moved then added
 void DLinkedList::addTail(Node *node)
 {
 	node->setPrevious(this->tail);
@@ -52,7 +54,7 @@ void DLinkedList::addTail(Node *node)
 	this->tail = node;
 	this->tail->setNext(NULL);
 
-	size++;
+//	size++;
 }
 
 Node* DLinkedList::getHead()
@@ -264,6 +266,7 @@ Node* DLinkedList::pop_position(int position)
 	return tmp;
 }
 
+// don't decrement the list with this method because the node is inserted after
 void DLinkedList::removeNode(Node *node)
 {
 	// remove insertNode from the list
@@ -283,7 +286,7 @@ void DLinkedList::removeNode(Node *node)
 	node->setPrevious(NULL);
 	node->setNext(NULL);
 
-	size--;
+//	size--;
 }
 
 void DLinkedList::delete_list()
