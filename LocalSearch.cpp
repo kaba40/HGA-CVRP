@@ -1122,6 +1122,8 @@ bool LocalSearch::IntraRouteInsert()
 	cout << "local search IntraRouteInsert initial route = " ; this->initSol->PrintSolution(true) ;
 #endif
 
+	// return value
+	bool retVal = false;
 
 	// initialize route sub-sequences
 	this->initSol->initRouteSetSubSeq();
@@ -1139,6 +1141,7 @@ bool LocalSearch::IntraRouteInsert()
 			routeCost = this->initSol->getRouteForwSeq()[r][0].back()->getDistance();
 			if(this->initSol->getRouteBackSeq()[r][0].back()->getDistance() < routeCost - 0.0001)
 			{
+
 				// apply the move
 				Node *insertNodePrev = NULL;
 				Node *insertNodeNext = NULL;
@@ -1178,18 +1181,19 @@ bool LocalSearch::IntraRouteInsert()
 
 				// update objective function
 #ifdef DEBUG_IntraInsert
-								cout << " newCostR = " << this->initSol->getRouteBackSeq()[r][0].back()->getDistance() << endl;
+				cout << " newCostR = " << this->initSol->getRouteBackSeq()[r][0].back()->getDistance() << endl;
 #endif
-								double restCout = this->initSol->getObjVal() - routeCost;
+				double restCout = this->initSol->getObjVal() - routeCost;
 #ifdef DEBUG_IntraInsert
-								cout << "restCout = " << restCout << endl;
+				cout << "restCout = " << restCout << endl;
 #endif
-								double newObjVal = restCout + this->initSol->getRouteBackSeq()[r][0].back()->getDistance();
+				double newObjVal = restCout + this->initSol->getRouteBackSeq()[r][0].back()->getDistance();
 #ifdef DEBUG_IntraInsert
-								cout << "newObjVal = " << newObjVal << endl;
+				cout << "newObjVal = " << newObjVal << endl;
 #endif
-								this->initSol->setObjVal(newObjVal);
+				this->initSol->setObjVal(newObjVal);
 
+				retVal = true;
 			}
 		}
 		else if((this->initSol->getRouteForwSeq()[r].size()-2) == 3)
@@ -1202,9 +1206,14 @@ bool LocalSearch::IntraRouteInsert()
 			Node *insertNodePrev = NULL;
 			Node *insertNodeNext = NULL;
 
+			bool brekIfImprove = false;
 			uint in = 1;
 			for(Node *insertNode = this->initSol->getRouteSequence()[r].first->getNext(); insertNode->getClient()->getDemand() != 0; insertNode = insertNode->getNext())
 			{
+				if(brekIfImprove)
+				{
+					break;
+				}
 #ifdef DEBUG_IntraInsert
 				cout << "----------- insertNode " << " " << " = " << insertNode->getClient()->getId() << " ----------" <<  " in = " << in << endl;
 #endif
@@ -1238,7 +1247,9 @@ bool LocalSearch::IntraRouteInsert()
 						if(addAfter)
 						{
 							seq1 = this->initSol->getRouteForwSeq()[r][0][in-1];
+#ifdef DEBUG_IntraInsert
 							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+#endif
 							if(in+1 ==  mn)
 							{
 								seq2 = this->initSol->getRouteBackSeq()[r][in][mn-in];
@@ -1247,9 +1258,9 @@ bool LocalSearch::IntraRouteInsert()
 							{
 								seq2 = this->initSol->getRouteForwSeq()[r][in+1][mn-(in+1)];
 							}
-
+#ifdef DEBUG_IntraInsert
 							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
-
+#endif
 							if( (in == 1) && (mn == this->initSol->getRouteForwSeq()[r].size()-2))
 							{
 								seq3 = this->initSol->getRouteBackSeq()[r][in-1][in];
@@ -1265,8 +1276,9 @@ bool LocalSearch::IntraRouteInsert()
 									seq3 = this->initSol->getRouteForwSeq()[r][mn+1][mn-in];
 								}
 							}
-
+#ifdef DEBUG_IntraInsert
 							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
 						}
 						else
 						{
@@ -1278,9 +1290,9 @@ bool LocalSearch::IntraRouteInsert()
 							{
 								seq1 = this->initSol->getRouteForwSeq()[r][0][mn-1];
 							}
-
+#ifdef DEBUG_IntraInsert
 							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
-
+#endif
 							if(in == mn+1)
 							{
 								seq2 = this->initSol->getRouteBackSeq()[r][mn][in-mn];
@@ -1289,9 +1301,9 @@ bool LocalSearch::IntraRouteInsert()
 							{
 								seq2 = this->initSol->getRouteForwSeq()[r][mn][(in-1)-mn]; // to verify
 							}
-
+#ifdef DEBUG_IntraInsert
 							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
-
+#endif
 							if(in == this->initSol->getRouteForwSeq()[r].size()-2)
 							{
 								seq3 = this->initSol->getRouteForwSeq()[r][in+1][0];
@@ -1300,8 +1312,9 @@ bool LocalSearch::IntraRouteInsert()
 							{
 								seq3 = this->initSol->getRouteForwSeq()[r][in+1][in-mn];
 							}
-
+#ifdef DEBUG_IntraInsert
 							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
 						}
 
 						// evaluate the feasibility for the concatenation of the 3 sub-sequences
@@ -1311,6 +1324,7 @@ bool LocalSearch::IntraRouteInsert()
 							// compare the cost of the new route to the former one
 							if(newCostR < routeCost - 0.0001)
 							{
+
 								// apply the move
 								if(addAfter)
 								{
@@ -1354,19 +1368,19 @@ bool LocalSearch::IntraRouteInsert()
 								cout << "newObjVal = " << newObjVal << endl;
 #endif
 								this->initSol->setObjVal(newObjVal);
-								break;
 
+								retVal = true;
+
+								brekIfImprove = true;
+
+								break;
 							}
 						}
 					}
-
 					mn++;
 				}
-
 				in++;
 			}
-
-
 		}
 		else if((this->initSol->getRouteForwSeq()[r].size()-2) > 3)
 		{// route contains more than 3 clients
@@ -1378,9 +1392,14 @@ bool LocalSearch::IntraRouteInsert()
 			Node *insertNodePrev = NULL;
 			Node *insertNodeNext = NULL;
 
+			bool brekIfImprove = false;
 			uint in = 1;
 			for(Node *insertNode = this->initSol->getRouteSequence()[r].first->getNext(); insertNode->getClient()->getDemand() != 0; insertNode = insertNode->getNext())
 			{
+				if(brekIfImprove)
+				{
+					break;
+				}
 #ifdef DEBUG_IntraInsert
 				cout << "----------- insertNode " << " " << " = " << insertNode->getClient()->getId() << " ----------" <<  " in = " << in << endl;
 #endif
@@ -1416,7 +1435,9 @@ bool LocalSearch::IntraRouteInsert()
 						if(addAfter)
 						{
 							seq1 = this->initSol->getRouteForwSeq()[r][0][in-1];
-
+#ifdef DEBUG_IntraInsert
+							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+#endif
 							if(in+1 == mn)
 							{
 								seq2 = this->initSol->getRouteBackSeq()[r][in][mn-in];
@@ -1425,13 +1446,17 @@ bool LocalSearch::IntraRouteInsert()
 							{
 								seq2 = this->initSol->getRouteForwSeq()[r][in+1][mn-(in+1)];
 							}
-
+#ifdef DEBUG_IntraInsert
+							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+#endif
 							// we have subSeq seq3 under some conditions
 							if(((in+1) != mn) && ( in != 1 || mn != this->initSol->getRouteForwSeq()[r].size()-2))
 							{
 								seq3 = this->initSol->getRouteForwSeq()[r][in][0];
 							}
-
+#ifdef DEBUG_IntraInsert
+							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
 							if((in == 1) && (mn == this->initSol->getRouteForwSeq()[r].size()-2))
 							{
 								seq4 = this->initSol->getRouteBackSeq()[r][in-1][in];
@@ -1447,6 +1472,9 @@ bool LocalSearch::IntraRouteInsert()
 									seq4 = this->initSol->getRouteForwSeq()[r][mn+1][mn-in];
 								}
 							}
+#ifdef DEBUG_IntraInsert
+							cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
+#endif
 						}
 						else
 						{
@@ -1458,13 +1486,17 @@ bool LocalSearch::IntraRouteInsert()
 							{
 								seq1 = this->initSol->getRouteForwSeq()[r][0][mn-1];
 							}
-
+#ifdef DEBUG_IntraInsert
+							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+#endif
 							// we have subSeq seq2 under some conditions
 							if(((in+1) != mn) && ( in != 1 || mn != this->initSol->getRouteForwSeq()[r].size()-2))
 							{
 								seq2 = this->initSol->getRouteForwSeq()[r][in][0];
 							}
-
+#ifdef DEBUG_IntraInsert
+							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+#endif
 							if(in == mn+1)
 							{
 								seq3 = this->initSol->getRouteBackSeq()[r][mn][in-mn];
@@ -1473,7 +1505,9 @@ bool LocalSearch::IntraRouteInsert()
 							{
 								seq3 = this->initSol->getRouteForwSeq()[r][mn][(in-1)-mn]; // to verify
 							}
-
+#ifdef DEBUG_IntraInsert
+							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
 							if(in == this->initSol->getRouteForwSeq()[r].size()-2)
 							{
 								seq4 = this->initSol->getRouteForwSeq()[r][in+1][0];
@@ -1482,6 +1516,9 @@ bool LocalSearch::IntraRouteInsert()
 							{
 								seq4 = this->initSol->getRouteForwSeq()[r][in+1][in-mn];
 							}
+#ifdef DEBUG_IntraInsert
+							cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
+#endif
 						}
 
 						// evaluate the feasibility for the concatenation of the 3 sub-sequences
@@ -1524,6 +1561,11 @@ bool LocalSearch::IntraRouteInsert()
 										cout << "newObjVal = " << newObjVal << endl;
 #endif
 										this->initSol->setObjVal(newObjVal);
+
+										retVal = true;
+
+										brekIfImprove = true;
+
 										break;
 									}
 								}
@@ -1564,6 +1606,11 @@ bool LocalSearch::IntraRouteInsert()
 										cout << "newObjVal = " << newObjVal << endl;
 #endif
 										this->initSol->setObjVal(newObjVal);
+
+										retVal = true;
+
+										brekIfImprove = true;
+
 										break;
 									}
 								}
@@ -1607,6 +1654,11 @@ bool LocalSearch::IntraRouteInsert()
 										cout << "newObjVal = " << newObjVal << endl;
 #endif
 										this->initSol->setObjVal(newObjVal);
+
+										retVal = true;
+
+										brekIfImprove = true;
+
 										break;
 									}
 								}
@@ -1647,6 +1699,11 @@ bool LocalSearch::IntraRouteInsert()
 										cout << "newObjVal = " << newObjVal << endl;
 #endif
 										this->initSol->setObjVal(newObjVal);
+
+										retVal = true;
+
+										brekIfImprove = true;
+
 										break;
 									}
 								}
@@ -1655,11 +1712,10 @@ bool LocalSearch::IntraRouteInsert()
 					}
 				}
 				mn++;
-			} // move
+			}
 			in++;
-		} // insert
-	} // > 3
+		}
+	}
 
-
-	return true; // to change latter by false
+	return retVal;
 }

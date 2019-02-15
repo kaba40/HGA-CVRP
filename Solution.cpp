@@ -332,7 +332,9 @@ void Solution::CheckSolution(bool useDecoDirect)
 
 	if(useDecoDirect)
 	{
+#ifdef DEBUG_CheckSol
 		cout << "routeSeq.size() = " << routeSeq.size() << endl;
+#endif
 	    for(uint i = 0; i < routeSeq.size(); i++)
 	    {
 	    	load = 0;
@@ -343,8 +345,10 @@ void Solution::CheckSolution(bool useDecoDirect)
 	        	j++;
 	        	if(routeNode->getClient()->getDemand() != 0 && routeNode->getNext()->getClient()->getDemand() != 0 )
 	        	{
+#ifdef DEBUG_CheckSol
 	        		cout << "routeNode = " << routeNode->getClient()->getId() << endl;
 	        		cout << "routeNode->getNext() = " << routeNode->getNext()->getClient()->getId() << endl;
+#endif
 	        		distance += routeNode->getClient()->getDistance(routeNode->getNext()->getClient());
 	        	}
 	        	else
