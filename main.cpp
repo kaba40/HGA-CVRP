@@ -70,6 +70,8 @@ int main()
 	if(localAlgo->IntraRouteInsert())
 	{
 		cout << "IntraRouteInsert" << endl;
+		solution_tsp->CheckSolution(true);
+		solution_tsp->PrintSolution(true);
 	}
 
 //	if(localAlgo->Insert())

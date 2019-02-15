@@ -1114,18 +1114,552 @@ bool LocalSearch::SwapTwoArcs()
 
 // movements for direct encoding
 
-//bool LocalSearch::IntraRouteInsert()
-//{
-//
-//#ifdef DEBUG_IntraInsert
-//	cout << endl;
-//	cout << "local search IntraRouteInsert initial route = " ; this->initSol->PrintSolution() ;
-//#endif
-//
-//
-//	// initialize route sub-sequences
-//	this->initSol->initRouteSetSubSeq();
-//
-//
-//	return true; // to change latter by false
-//}
+bool LocalSearch::IntraRouteInsert()
+{
+
+#ifdef DEBUG_IntraInsert
+	cout << endl;
+	cout << "local search IntraRouteInsert initial route = " ; this->initSol->PrintSolution(true) ;
+#endif
+
+
+	// initialize route sub-sequences
+	this->initSol->initRouteSetSubSeq();
+
+	for(uint r = 0; r < this->initSol->getRouteForwSeq().size(); r++)
+	{
+		// record each route cost
+		double routeCost;
+		if((this->initSol->getRouteForwSeq()[r].size()-2) == 0 || (this->initSol->getRouteForwSeq()[r].size()-2) == 1)
+		{
+			cout << "empty route or a route containing only one client" << endl;
+		}
+		else if((this->initSol->getRouteForwSeq()[r].size()-2) == 2)
+		{// route contains 2 clients
+			routeCost = this->initSol->getRouteForwSeq()[r][0].back()->getDistance();
+			if(this->initSol->getRouteBackSeq()[r][0].back()->getDistance() < routeCost - 0.0001)
+			{
+				// apply the move
+				Node *insertNodePrev = NULL;
+				Node *insertNodeNext = NULL;
+				for(Node *insertNode = this->initSol->getRouteSequence()[r].first->getNext(); insertNode->getClient()->getDemand() != 0; insertNode = insertNode->getNext())
+				{
+#ifdef DEBUG_IntraInsert
+		cout << "--------------------insertNode " << " " << " = " << insertNode->getClient()->getId() << " -----------------------" << endl;
+#endif
+					insertNodePrev = insertNode->getPrevious();
+					insertNodeNext = insertNode->getNext();
+#ifdef DEBUG_IntraInsert
+		if(insertNodePrev != NULL)
+			cout << "insertNodePrev = " << insertNodePrev->getClient()->getId() << " ;" ;
+		if(insertNodeNext != NULL)
+			cout << " insertNodeNext = " << insertNodeNext->getClient()->getId() << endl;
+#endif
+					for(Node *moveNode = insertNode->getNext(); moveNode->getClient()->getDemand() != 0; moveNode = moveNode->getNext())
+					{
+#ifdef DEBUG_IntraInsert
+			cout << "-------------------------- moveNode " << " " << " = " << moveNode->getClient()->getId() << " ------------------- " << endl;
+#endif					// remove insertNode
+						insertNode->getPrevious()->setNext(insertNode->getNext());
+						insertNode->getNext()->setPrevious(insertNode->getPrevious());
+						insertNode->setPrevious(NULL);
+						insertNode->setNext(NULL);
+
+						// insert insertNode after moveNode
+						moveNode->insertAfter(insertNode);
+					}
+				}
+
+				// update the route sequences
+				this->initSol->updateRoute(r,make_pair(this->initSol->getRouteSequence()[r].first, this->initSol->getRouteSequence()[r].second));
+
+				// update sub-sequences of the route
+				this->initSol->updateOneRouteSetSubSeq(r);
+
+				// update objective function
+#ifdef DEBUG_IntraInsert
+								cout << " newCostR = " << this->initSol->getRouteBackSeq()[r][0].back()->getDistance() << endl;
+#endif
+								double restCout = this->initSol->getObjVal() - routeCost;
+#ifdef DEBUG_IntraInsert
+								cout << "restCout = " << restCout << endl;
+#endif
+								double newObjVal = restCout + this->initSol->getRouteBackSeq()[r][0].back()->getDistance();
+#ifdef DEBUG_IntraInsert
+								cout << "newObjVal = " << newObjVal << endl;
+#endif
+								this->initSol->setObjVal(newObjVal);
+
+			}
+		}
+		else if((this->initSol->getRouteForwSeq()[r].size()-2) == 3)
+		{// route contains 3 clients
+
+			routeCost = this->initSol->getRouteForwSeq()[r][0].back()->getDistance();
+#ifdef DEBUG_IntraInsert
+			cout << "route[" << r << "]" << " cost = " << routeCost << endl;
+#endif
+			Node *insertNodePrev = NULL;
+			Node *insertNodeNext = NULL;
+
+			uint in = 1;
+			for(Node *insertNode = this->initSol->getRouteSequence()[r].first->getNext(); insertNode->getClient()->getDemand() != 0; insertNode = insertNode->getNext())
+			{
+#ifdef DEBUG_IntraInsert
+				cout << "----------- insertNode " << " " << " = " << insertNode->getClient()->getId() << " ----------" <<  " in = " << in << endl;
+#endif
+				insertNodePrev = insertNode->getPrevious();
+				insertNodeNext = insertNode->getNext();
+#ifdef DEBUG_IntraInsert
+				if(insertNodePrev != NULL)
+					cout << "insertNodePrev = " << insertNodePrev->getClient()->getId() << " ;" ;
+				if(insertNodeNext != NULL)
+					cout << " insertNodeNext = " << insertNodeNext->getClient()->getId() << endl;
+#endif
+				bool addAfter = false;
+				uint mn = 1;
+				for(Node *moveNode = this->initSol->getRouteSequence()[r].first->getNext(); moveNode->getClient()->getDemand() != 0; moveNode = moveNode->getNext())
+				{
+#ifdef DEBUG_IntraInsert
+			cout << "---------- moveNode " << " " << " = " << moveNode->getClient()->getId() << " ---------- " << " mn = " << "" << mn << endl;
+#endif
+					if(in == mn)
+					{
+						addAfter = true;
+					}
+					else
+					{
+						//find sub-sequences used to form the new route
+
+						SeqData *seq1 = NULL;
+						SeqData *seq2 = NULL;
+						SeqData *seq3 = NULL;
+
+						if(addAfter)
+						{
+							seq1 = this->initSol->getRouteForwSeq()[r][0][in-1];
+							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+							if(in+1 ==  mn)
+							{
+								seq2 = this->initSol->getRouteBackSeq()[r][in][mn-in];
+							}
+							else
+							{
+								seq2 = this->initSol->getRouteForwSeq()[r][in+1][mn-(in+1)];
+							}
+
+							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+
+							if( (in == 1) && (mn == this->initSol->getRouteForwSeq()[r].size()-2))
+							{
+								seq3 = this->initSol->getRouteBackSeq()[r][in-1][in];
+							}
+							else
+							{
+								if(mn == this->initSol->getRouteForwSeq()[r].size()-2)
+								{
+									seq3 = this->initSol->getRouteForwSeq()[r][mn+1][0];
+								}
+								else
+								{
+									seq3 = this->initSol->getRouteForwSeq()[r][mn+1][mn-in];
+								}
+							}
+
+							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+						}
+						else
+						{
+							if((in == this->initSol->getRouteForwSeq()[r].size()-2) && (mn == 1))
+							{
+								seq1 = this->initSol->getRouteBackSeq()[r][in][mn];
+							}
+							else
+							{
+								seq1 = this->initSol->getRouteForwSeq()[r][0][mn-1];
+							}
+
+							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+
+							if(in == mn+1)
+							{
+								seq2 = this->initSol->getRouteBackSeq()[r][mn][in-mn];
+							}
+							else
+							{
+								seq2 = this->initSol->getRouteForwSeq()[r][mn][(in-1)-mn]; // to verify
+							}
+
+							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+
+							if(in == this->initSol->getRouteForwSeq()[r].size()-2)
+							{
+								seq3 = this->initSol->getRouteForwSeq()[r][in+1][0];
+							}
+							else
+							{
+								seq3 = this->initSol->getRouteForwSeq()[r][in+1][in-mn];
+							}
+
+							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+						}
+
+						// evaluate the feasibility for the concatenation of the 3 sub-sequences
+						double newCostR;
+						if(this->initSol->EVALN(&newCostR,3, seq1, seq2, seq3))
+						{
+							// compare the cost of the new route to the former one
+							if(newCostR < routeCost - 0.0001)
+							{
+								// apply the move
+								if(addAfter)
+								{
+									// remove insertNode
+									insertNode->getPrevious()->setNext(insertNode->getNext());
+									insertNode->getNext()->setPrevious(insertNode->getPrevious());
+									insertNode->setPrevious(NULL);
+									insertNode->setNext(NULL);
+
+									// insert insertNode after moveNode
+									moveNode->insertAfter(insertNode);
+								}
+								else
+								{
+									// remove insertNode
+									insertNode->getPrevious()->setNext(insertNode->getNext());
+									insertNode->getNext()->setPrevious(insertNode->getPrevious());
+									insertNode->setPrevious(NULL);
+									insertNode->setNext(NULL);
+
+									// insert insertNode before moveNode
+									moveNode->insertBefore(insertNode);
+								}
+
+								// update the route sequences
+								this->initSol->updateRoute(r,make_pair(this->initSol->getRouteSequence()[r].first, this->initSol->getRouteSequence()[r].second));
+
+								// update sub-sequences of the route
+								this->initSol->updateOneRouteSetSubSeq(r);
+
+								// update objective functions
+#ifdef DEBUG_IntraInsert
+								cout << " newCostR = " << newCostR << endl;
+#endif
+								double restCout = this->initSol->getObjVal() - routeCost;
+#ifdef DEBUG_IntraInsert
+								cout << "restCout = " << restCout << endl;
+#endif
+								double newObjVal = restCout + newCostR;
+#ifdef DEBUG_IntraInsert
+								cout << "newObjVal = " << newObjVal << endl;
+#endif
+								this->initSol->setObjVal(newObjVal);
+								break;
+
+							}
+						}
+					}
+
+					mn++;
+				}
+
+				in++;
+			}
+
+
+		}
+		else if((this->initSol->getRouteForwSeq()[r].size()-2) > 3)
+		{// route contains more than 3 clients
+
+			routeCost = this->initSol->getRouteForwSeq()[r][0].back()->getDistance();
+#ifdef DEBUG_IntraInsert
+			cout << "route[" << r << "]" << " cost = " << routeCost << endl;
+#endif
+			Node *insertNodePrev = NULL;
+			Node *insertNodeNext = NULL;
+
+			uint in = 1;
+			for(Node *insertNode = this->initSol->getRouteSequence()[r].first->getNext(); insertNode->getClient()->getDemand() != 0; insertNode = insertNode->getNext())
+			{
+#ifdef DEBUG_IntraInsert
+				cout << "----------- insertNode " << " " << " = " << insertNode->getClient()->getId() << " ----------" <<  " in = " << in << endl;
+#endif
+				insertNodePrev = insertNode->getPrevious();
+				insertNodeNext = insertNode->getNext();
+#ifdef DEBUG_IntraInsert
+				if(insertNodePrev != NULL)
+					cout << "insertNodePrev = " << insertNodePrev->getClient()->getId() << " ;" ;
+				if(insertNodeNext != NULL)
+					cout << " insertNodeNext = " << insertNodeNext->getClient()->getId() << endl;
+#endif
+				bool addAfter = false;
+				uint mn = 1;
+				for(Node *moveNode = this->initSol->getRouteSequence()[r].first->getNext(); moveNode->getClient()->getDemand() != 0; moveNode = moveNode->getNext())
+				{
+#ifdef DEBUG_IntraInsert
+					cout << "---------- moveNode " << " " << " = " << moveNode->getClient()->getId() << " ---------- " << " mn = " << "" << mn << endl;
+#endif
+
+					if(in == mn)
+					{
+						addAfter = true;
+					}
+					else
+					{
+						//find sub-sequences used to form the new route
+
+						SeqData *seq1 = NULL;
+						SeqData *seq2 = NULL;
+						SeqData *seq3 = NULL;
+						SeqData *seq4 = NULL;
+
+						if(addAfter)
+						{
+							seq1 = this->initSol->getRouteForwSeq()[r][0][in-1];
+
+							if(in+1 == mn)
+							{
+								seq2 = this->initSol->getRouteBackSeq()[r][in][mn-in];
+							}
+							else
+							{
+								seq2 = this->initSol->getRouteForwSeq()[r][in+1][mn-(in+1)];
+							}
+
+							// we have subSeq seq3 under some conditions
+							if(((in+1) != mn) && ( in != 1 || mn != this->initSol->getRouteForwSeq()[r].size()-2))
+							{
+								seq3 = this->initSol->getRouteForwSeq()[r][in][0];
+							}
+
+							if((in == 1) && (mn == this->initSol->getRouteForwSeq()[r].size()-2))
+							{
+								seq4 = this->initSol->getRouteBackSeq()[r][in-1][in];
+							}
+							else
+							{
+								if(mn == this->initSol->getRouteForwSeq()[r].size()-2)
+								{
+									seq4 = this->initSol->getRouteForwSeq()[r][mn+1][0];
+								}
+								else
+								{
+									seq4 = this->initSol->getRouteForwSeq()[r][mn+1][mn-in];
+								}
+							}
+						}
+						else
+						{
+							if((in == this->initSol->getRouteForwSeq()[r].size()-2) && (mn == 1))
+							{
+								seq1 = this->initSol->getRouteBackSeq()[r][in][mn];
+							}
+							else
+							{
+								seq1 = this->initSol->getRouteForwSeq()[r][0][mn-1];
+							}
+
+							// we have subSeq seq2 under some conditions
+							if(((in+1) != mn) && ( in != 1 || mn != this->initSol->getRouteForwSeq()[r].size()-2))
+							{
+								seq2 = this->initSol->getRouteForwSeq()[r][in][0];
+							}
+
+							if(in == mn+1)
+							{
+								seq3 = this->initSol->getRouteBackSeq()[r][mn][in-mn];
+							}
+							else
+							{
+								seq3 = this->initSol->getRouteForwSeq()[r][mn][(in-1)-mn]; // to verify
+							}
+
+							if(in == this->initSol->getRouteForwSeq()[r].size()-2)
+							{
+								seq4 = this->initSol->getRouteForwSeq()[r][in+1][0];
+							}
+							else
+							{
+								seq4 = this->initSol->getRouteForwSeq()[r][in+1][in-mn];
+							}
+						}
+
+						// evaluate the feasibility for the concatenation of the 3 sub-sequences
+						double newCostR;
+						if(addAfter)
+						{
+							if(((in+1) != mn) && ( in != 1 || mn != this->initSol->getRouteForwSeq()[r].size()-2))
+							{
+								if(this->initSol->EVALN(&newCostR, 4, seq1, seq2, seq3, seq4))
+								{
+									// compare the cost of the new route to the former one
+									if(newCostR < routeCost - 0.0001)
+									{// Apply the move
+
+										// remove insertNode
+										insertNode->getPrevious()->setNext(insertNode->getNext());
+										insertNode->getNext()->setPrevious(insertNode->getPrevious());
+										insertNode->setPrevious(NULL);
+										insertNode->setNext(NULL);
+
+										// insert insertNode after moveNode
+										moveNode->insertAfter(insertNode);
+
+										// update the route sequences
+										this->initSol->updateRoute(r,make_pair(this->initSol->getRouteSequence()[r].first, this->initSol->getRouteSequence()[r].second));
+
+										// update sub-sequences of the route
+										this->initSol->updateOneRouteSetSubSeq(r);
+
+										// update objective functions
+#ifdef DEBUG_IntraInsert
+										cout << " newCostR = " << newCostR << endl;
+#endif
+										double restCout = this->initSol->getObjVal() - routeCost;
+#ifdef DEBUG_IntraInsert
+										cout << "restCout = " << restCout << endl;
+#endif
+										double newObjVal = restCout + newCostR;
+#ifdef DEBUG_IntraInsert
+										cout << "newObjVal = " << newObjVal << endl;
+#endif
+										this->initSol->setObjVal(newObjVal);
+										break;
+									}
+								}
+							}
+							else
+							{
+								if(this->initSol->EVALN(&newCostR, 3, seq1, seq2, seq4))
+								{
+									// compare the cost of the new route to the former one
+									if(newCostR < routeCost - 0.0001)
+									{// Apply the move
+
+										// remove insertNode
+										insertNode->getPrevious()->setNext(insertNode->getNext());
+										insertNode->getNext()->setPrevious(insertNode->getPrevious());
+										insertNode->setPrevious(NULL);
+										insertNode->setNext(NULL);
+
+										// insert insertNode after moveNode
+										moveNode->insertAfter(insertNode);
+
+										// update the route sequences
+										this->initSol->updateRoute(r,make_pair(this->initSol->getRouteSequence()[r].first, this->initSol->getRouteSequence()[r].second));
+
+										// update sub-sequences of the route
+										this->initSol->updateOneRouteSetSubSeq(r);
+
+										// update objective functions
+#ifdef DEBUG_IntraInsert
+										cout << " newCostR = " << newCostR << endl;
+#endif
+										double restCout = this->initSol->getObjVal() - routeCost;
+#ifdef DEBUG_IntraInsert
+										cout << "restCout = " << restCout << endl;
+#endif
+										double newObjVal = restCout + newCostR;
+#ifdef DEBUG_IntraInsert
+										cout << "newObjVal = " << newObjVal << endl;
+#endif
+										this->initSol->setObjVal(newObjVal);
+										break;
+									}
+								}
+							}
+						}
+						else
+						{
+							if(((in+1) != mn) && ( in != 1 || mn != this->initSol->getRouteForwSeq()[r].size()-2))
+							{
+								if(this->initSol->EVALN(&newCostR, 4, seq1, seq2, seq3, seq4))
+								{
+									// compare the cost of the new route to the former one
+									if(newCostR < routeCost - 0.0001)
+									{// Apply the move
+
+										// remove insertNode
+										insertNode->getPrevious()->setNext(insertNode->getNext());
+										insertNode->getNext()->setPrevious(insertNode->getPrevious());
+										insertNode->setPrevious(NULL);
+										insertNode->setNext(NULL);
+
+										// insert insertNode after moveNode
+										moveNode->insertAfter(insertNode);
+
+										// update the route sequences
+										this->initSol->updateRoute(r,make_pair(this->initSol->getRouteSequence()[r].first, this->initSol->getRouteSequence()[r].second));
+
+										// update sub-sequences of the route
+										this->initSol->updateOneRouteSetSubSeq(r);
+
+										// update objective functions
+#ifdef DEBUG_IntraInsert
+										cout << " newCostR = " << newCostR << endl;
+#endif
+										double restCout = this->initSol->getObjVal() - routeCost;
+#ifdef DEBUG_IntraInsert
+										cout << "restCout = " << restCout << endl;
+#endif
+										double newObjVal = restCout + newCostR;
+#ifdef DEBUG_IntraInsert
+										cout << "newObjVal = " << newObjVal << endl;
+#endif
+										this->initSol->setObjVal(newObjVal);
+										break;
+									}
+								}
+							}
+							else
+							{
+								if(this->initSol->EVALN(&newCostR, 3, seq1, seq3, seq4))
+								{
+									// compare the cost of the new route to the former one
+									if(newCostR < routeCost - 0.0001)
+									{// Apply the move
+
+										// remove insertNode
+										insertNode->getPrevious()->setNext(insertNode->getNext());
+										insertNode->getNext()->setPrevious(insertNode->getPrevious());
+										insertNode->setPrevious(NULL);
+										insertNode->setNext(NULL);
+
+										// insert insertNode after moveNode
+										moveNode->insertAfter(insertNode);
+
+										// update the route sequences
+										this->initSol->updateRoute(r,make_pair(this->initSol->getRouteSequence()[r].first, this->initSol->getRouteSequence()[r].second));
+
+										// update sub-sequences of the route
+										this->initSol->updateOneRouteSetSubSeq(r);
+
+										// update objective functions
+#ifdef DEBUG_IntraInsert
+										cout << " newCostR = " << newCostR << endl;
+#endif
+										double restCout = this->initSol->getObjVal() - routeCost;
+#ifdef DEBUG_IntraInsert
+										cout << "restCout = " << restCout << endl;
+#endif
+										double newObjVal = restCout + newCostR;
+#ifdef DEBUG_IntraInsert
+										cout << "newObjVal = " << newObjVal << endl;
+#endif
+										this->initSol->setObjVal(newObjVal);
+										break;
+									}
+								}
+							}
+						}
+					}
+				}
+				mn++;
+			} // move
+			in++;
+		} // insert
+	} // > 3
+
+
+	return true; // to change latter by false
+}

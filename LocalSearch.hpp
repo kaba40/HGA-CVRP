@@ -11,6 +11,7 @@
 #include<stdio.h>
 
 #include "DLinkedList.hpp"
+#include "SeqData.hpp"
 #include "Solution.hpp"
 class LocalSearch
 {

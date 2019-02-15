@@ -332,7 +332,7 @@ void Solution::CheckSolution(bool useDecoDirect)
 
 	if(useDecoDirect)
 	{
-//		cout << "routeSeq.size() = " << routeSeq.size() << endl;
+		cout << "routeSeq.size() = " << routeSeq.size() << endl;
 	    for(uint i = 0; i < routeSeq.size(); i++)
 	    {
 	    	load = 0;
@@ -343,8 +343,8 @@ void Solution::CheckSolution(bool useDecoDirect)
 	        	j++;
 	        	if(routeNode->getClient()->getDemand() != 0 && routeNode->getNext()->getClient()->getDemand() != 0 )
 	        	{
-//	        		cout << "routeNode = " << routeNode->getClient()->getId() << endl;
-//	        		cout << "routeNode->getNext() = " << routeNode->getNext()->getClient()->getId() << endl;
+	        		cout << "routeNode = " << routeNode->getClient()->getId() << endl;
+	        		cout << "routeNode->getNext() = " << routeNode->getNext()->getClient()->getId() << endl;
 	        		distance += routeNode->getClient()->getDistance(routeNode->getNext()->getClient());
 	        	}
 	        	else
@@ -443,13 +443,13 @@ void Solution::PrintSolution(bool useDecoDirect)
 	    	if(routeSeq[i].second > 2)
 	    	{
 		        cout << "TOUR[" << i << "]: ";
-		        Node* tmp;
+		        Node* routeNode;
 
-		        for( tmp = routeSeq[i].first; tmp->getNext() != NULL; tmp = tmp->getNext())
+		        for( routeNode = routeSeq[i].first; routeNode->getNext() != NULL; routeNode = routeNode->getNext())
 		        {
-		            cout << tmp->getClient()->getId() << "--" ;
+		            cout << routeNode->getClient()->getId() << "--" ;
 		        }
-		        cout << tmp->getClient()->getId() << " contains " <<  routeSeq[i].second  <<  endl;
+		        cout << routeNode->getClient()->getId() << " contains " <<  routeSeq[i].second  <<  endl;
 	    	}
 	    }
 	}
