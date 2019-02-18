@@ -23,12 +23,12 @@ Node::Node()
 	this->previous = NULL;
 }
 
-Node::Node(Node *node)
-{
-	this->client = node->getClient();
-	this->next = node->getNext(); //NULL
-	this->previous = node->getPrevious(); //NULL
-}
+//Node::Node(Node *node)
+//{
+//	this->client = node->getClient();
+//	this->next = node->getNext(); //NULL
+//	this->previous = node->getPrevious(); //NULL
+//}
 //Node::Node(Node *nxt, Node *prev, Customer *clt)
 //{
 //	this->next = nxt;
@@ -40,6 +40,16 @@ Node::Node(Node *node)
 Node::~Node()
 {
 	// TODO Auto-generated destructor stub
+}
+
+bool Node::isDepot()
+{
+	if(this->getPrevious() == NULL || this->getNext() == NULL)
+	{
+		return true;
+	}
+
+	return false;
 }
 
 Node* Node::getNext()

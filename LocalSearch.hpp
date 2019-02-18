@@ -19,7 +19,7 @@ private:
 	Solution *initSol;
 
 public:
-	LocalSearch(Solution *initSol); // solution to modify if improved
+	LocalSearch(Solution *initSol, bool direct = true); // solution to modify if improved
 	virtual ~LocalSearch();
 
 	// movements for indirect encoding, i.e, giant tour

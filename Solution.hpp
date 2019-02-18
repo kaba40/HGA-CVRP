@@ -44,9 +44,7 @@ private:
 	vector<vector<vector<SeqData*>>> routeForwardSeq;
 	vector<vector<vector<SeqData*>>> routeBackwardSeq;
 	vector<int> tour;
-//	vector<vector<Node*>> routeSeq; // direct encoding
-//	vector<Node*> routeSeq;
-    vector<pair<Node*,uint>> routeSeq;
+    vector<pair<Node*,uint>> routes; // each route is considered as a pair of list of nodes and the number of nodes
 
 	double solutionCost; //objective_value
 	int numberOfRouteInSolution;
@@ -66,10 +64,9 @@ public:
 	vector<int> getTourStructure();
 	double getObjVal();
 	int getRoutesNumber();
+	int getNbClientsForRoute(int r);
 	DLinkedList* getSequence(); // to delete may be
-//	vector<vector<Node*>> getRouteSequence(); // to delete may be
-//	vector<Node*> getRouteSequence(); // to delete may be
-	vector<pair<Node*,uint>> getRouteSequence();
+	vector<pair<Node*,uint>> getRoutes();
 	vector<vector<vector<SeqData*>>> getRouteForwSeq();
 	vector<vector<vector<SeqData*>>> getRouteBackSeq();
 
@@ -77,9 +74,7 @@ public:
 	void initRouteSetSubSeq();
 
 	//updater methods
-//	void updateRoute(int numRoute, vector<Node*> rteSeq); // update each route modify by a move
-//	void updateRoute(int numRoute, Node* rteSeq);
-	void updateRoute(int numRoute, pair<Node*,uint> rteSeq);
+//	void updateRoute(int numRoute, pair<Node*,uint> rteSeq);
 	void updateOneRouteSetSubSeq(int numRoute);
 
 	//setter methods

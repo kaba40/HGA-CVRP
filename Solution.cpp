@@ -71,7 +71,7 @@ bool Solution::Decodage(bool useDecoDirect)
 		if(useDecoDirect)
 		{
 //	        routeSeq = vector<Node*>(numberOfRouteInSolution);
-	        routeSeq = vector<pair<Node*, uint>>(numberOfRouteInSolution);
+	        routes = vector<pair<Node*, uint>>(numberOfRouteInSolution);
 
 	        Node* last = encodage->getTail(); // to record the last element of the route
 
@@ -95,7 +95,7 @@ bool Solution::Decodage(bool useDecoDirect)
 	            std::cout << predNode[nbTour]->getClient()->getId() << " " << last->getClient()->getId() << std::endl;
 	#endif
 //	            routeSeq[i] = depotNodeFirst; // routeSeq[i].make_pair(depotNodeFirst, last.index-predNode.index+1)
-	            routeSeq[i].first = depotNodeFirst;
+	            routes[i].first = depotNodeFirst;
 	            last = tmp;
 
 				nbTour = pred[nbTour] ;
@@ -103,7 +103,7 @@ bool Solution::Decodage(bool useDecoDirect)
 			}
 
 			// kairaba: add new empty routes. Find first the upper bound of vehicle number
-			routeSeq.resize(tsp_data->getNumberNodes() -1);
+			routes.resize(tsp_data->getNumberNodes() -1);
 			for(int i = numberOfRouteInSolution; i < tsp_data->getNumberNodes() -1; i++)
 			{
 	            Customer* depotCustomerFirst = new Customer("0",-1, 0, NULL); // depot customer
@@ -115,7 +115,7 @@ bool Solution::Decodage(bool useDecoDirect)
 	            depotNodeFirst->setNext(depotNodeLast);
 	            depotNodeLast->setPrevious(depotNodeFirst);
 
-	            routeSeq[i].first = depotNodeFirst;
+	            routes[i].first = depotNodeFirst;
 			}
 		}
 		else
@@ -131,8 +131,8 @@ bool Solution::Decodage(bool useDecoDirect)
 #ifdef DEBUG_DecodSol
 		if(useDecoDirect)
 		{
-		    for(uint i = 0; i < routeSeq.size(); i++){
-		        cout << "routeSeq[ " << i << "] =" << routeSeq[i].first->getClient()->getId() << endl;
+		    for(uint i = 0; i < routes.size(); i++){
+		        cout << "routeSeq[ " << i << "] =" << routes[i].first->getClient()->getId() << endl;
 		    }
 		}
 		else
@@ -333,14 +333,14 @@ void Solution::CheckSolution(bool useDecoDirect)
 	if(useDecoDirect)
 	{
 #ifdef DEBUG_CheckSol
-		cout << "routeSeq.size() = " << routeSeq.size() << endl;
+		cout << "routeSeq.size() = " << routes.size() << endl;
 #endif
-	    for(uint i = 0; i < routeSeq.size(); i++)
+	    for(uint i = 0; i < routes.size(); i++)
 	    {
 	    	load = 0;
 
 	    	int j = 0;
-	        for( Node* routeNode = routeSeq[i].first; routeNode != NULL; routeNode = routeNode->getNext())
+	        for( Node* routeNode = routes[i].first; routeNode != NULL; routeNode = routeNode->getNext())
 	        {
 	        	j++;
 	        	if(routeNode->getClient()->getDemand() != 0 && routeNode->getNext()->getClient()->getDemand() != 0 )
@@ -367,7 +367,7 @@ void Solution::CheckSolution(bool useDecoDirect)
 	        	}
 	        	load += routeNode->getClient()->getDemand();
 	        }
-	        routeSeq[i].second = j;
+	        routes[i].second = j;
 
 			if(load > tsp_data->getVehicleCap() + 0.0001)
 			{
@@ -442,18 +442,18 @@ void Solution::PrintSolution(bool useDecoDirect)
 
 	if(useDecoDirect)
 	{
-	    for(uint i = 0; i < routeSeq.size(); i++)
+	    for(uint i = 0; i < routes.size(); i++)
 	    {
-	    	if(routeSeq[i].second > 2)
+	    	if(routes[i].second > 2)
 	    	{
-		        cout << "TOUR[" << i << "]: ";
+		        cout << "Route[" << i << "]: ";
 		        Node* routeNode;
 
-		        for( routeNode = routeSeq[i].first; routeNode->getNext() != NULL; routeNode = routeNode->getNext())
+		        for( routeNode = routes[i].first; routeNode->getNext() != NULL; routeNode = routeNode->getNext())
 		        {
 		            cout << routeNode->getClient()->getId() << "--" ;
 		        }
-		        cout << routeNode->getClient()->getId() << " contains " <<  routeSeq[i].second  <<  endl;
+		        cout << routeNode->getClient()->getId() << " contains " <<  routes[i].second  << " nodes" << endl;
 	    	}
 	    }
 	}
@@ -483,32 +483,64 @@ void Solution::PrintSolution(bool useDecoDirect)
 	cout << endl ;
 }
 
+// getter methods
+
 DLinkedList* Solution::getSequence()
 {
 	return encodage;
 }
 
-vector<pair<Node*,uint>> Solution::getRouteSequence()
+vector<pair<Node*,uint>> Solution::getRoutes()
 {
-	return routeSeq;
+	return routes;
 }
 
-void Solution::updateRoute(int numRoute, pair<Node*,uint> rteSeq)
+vector<vector<vector<SeqData*>>> Solution::getRouteForwSeq() // to test sequenceTab in the main method
 {
-	routeSeq[numRoute] = rteSeq;
+	return routeForwardSeq;
 }
 
-void Solution::initRouteSetSubSeq() // to modify when routeSeq modified
+vector<vector<vector<SeqData*>>> Solution::getRouteBackSeq()
 {
-	routeForwardSeq.resize(routeSeq.size());
-	routeBackwardSeq.resize(routeSeq.size());
-	for(uint i = 0; i < routeSeq.size(); i++) // number of route
+	return this->routeBackwardSeq;
+}
+
+vector<int> Solution::getTourStructure()
+{
+	return tour;
+}
+
+double Solution::getObjVal()
+{
+	return solutionCost;
+}
+
+int Solution::getRoutesNumber()
+{
+	return numberOfRouteInSolution;
+}
+
+int Solution::getNbClientsForRoute(int r)
+{
+	return routes[r].second-2;
+}
+
+//void Solution::updateRoute(int numRoute, pair<Node*,uint> rteSeq)
+//{
+//	routes[numRoute] = rteSeq;
+//}
+
+void Solution::initRouteSetSubSeq()
+{
+	routeForwardSeq.resize(routes.size());
+	routeBackwardSeq.resize(routes.size());
+	for(uint i = 0; i < routes.size(); i++) // number of routes
 	{
-		routeForwardSeq[i].resize(routeSeq[i].second); //each route contains 2 dummy nodes depot-depot
-		routeBackwardSeq[i].resize(routeSeq[i].second);
+		routeForwardSeq[i].resize(routes[i].second); //each route contains 2 dummy nodes depot-depot
+		routeBackwardSeq[i].resize(routes[i].second);
 
 		int j = 0;
-		for(Node *seqNode = routeSeq[i].first; seqNode != NULL; seqNode = seqNode->getNext())
+		for(Node *seqNode = routes[i].first; seqNode != NULL; seqNode = seqNode->getNext(), j++)
 		{
 #ifdef DEBUG_Sol
 			cout << "this[" << i << "][" << j << "]= " << seqNode->getClient()->getId() << endl;
@@ -543,7 +575,6 @@ void Solution::initRouteSetSubSeq() // to modify when routeSeq modified
 #ifdef DEBUG_Sol
 			cout << endl;
 #endif
-			j++;
 		}
 #ifdef DEBUG_Sol
 			cout << endl;
@@ -554,7 +585,7 @@ void Solution::initRouteSetSubSeq() // to modify when routeSeq modified
 void Solution::updateOneRouteSetSubSeq(int numRoute)
 {
 	int j = 0;
-	for(Node *seqNode = routeSeq[numRoute].first; seqNode != NULL; seqNode = seqNode->getNext())// number of nodes in a route
+	for(Node *seqNode = routes[numRoute].first; seqNode != NULL; seqNode = seqNode->getNext(), j++)// number of nodes in a route
 	{
 		routeForwardSeq[numRoute][j].clear(); // clear vector containing route nodes
 		routeBackwardSeq[numRoute][j].clear();
@@ -589,35 +620,13 @@ void Solution::updateOneRouteSetSubSeq(int numRoute)
 			routeForwardSeq[numRoute][j].push_back(retFor);
 			routeBackwardSeq[numRoute][j].push_back(retBack);
 		}
-		cout << endl;
-		j++;
+#ifdef DEBUG_Sol
+			cout << endl;
+#endif
 	}
 }
 
-vector<vector<vector<SeqData*>>> Solution::getRouteForwSeq() // to test sequenceTab in the main method
-{
-	return routeForwardSeq;
-}
-
-vector<vector<vector<SeqData*>>> Solution::getRouteBackSeq()
-{
-	return this->routeBackwardSeq;
-}
-
-vector<int> Solution::getTourStructure()
-{
-	return tour;
-}
-
-double Solution::getObjVal()
-{
-	return solutionCost;
-}
-
-int Solution::getRoutesNumber()
-{
-	return numberOfRouteInSolution;
-}
+// setter methods
 
 void Solution::setObjVal(double objVal)
 {

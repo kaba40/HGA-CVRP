@@ -23,7 +23,6 @@ using namespace std;
 
 int main()
 {
-
 	string name_data = "Data/E-n7.vrp";
 	const char* data_vrp = name_data.c_str();
 
@@ -47,7 +46,7 @@ int main()
 	solution_tsp = new Solution(data_instance, data_instance->getCustomerList());
 
 
-	solution_tsp->setRandomSequence();
+//	solution_tsp->setRandomSequence();
 
 #ifdef DEBUG_Main
 

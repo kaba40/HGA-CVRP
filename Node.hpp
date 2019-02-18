@@ -19,10 +19,11 @@ private:
 public:
 	Node(Customer *clt);
 	Node();
-	Node(Node *node);
+//	Node(Node *node);
 //	Node(Node *nxt, Node *prev, Customer *clt);
 	virtual ~Node();
 
+	bool isDepot();
 	Node* getNext();
 	Node* getPrevious();
 	void setNext(Node *nxt);
