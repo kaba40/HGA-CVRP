@@ -46,7 +46,7 @@ int main()
 	solution_tsp = new Solution(data_instance, data_instance->getCustomerList());
 
 
-//	solution_tsp->setRandomSequence();
+	solution_tsp->setRandomSequence();
 
 #ifdef DEBUG_Main
 
@@ -66,7 +66,14 @@ int main()
 
 	LocalSearch* localAlgo = new LocalSearch(solution_tsp);
 
-	if(localAlgo->IntraRouteInsert())
+//	if(localAlgo->IntraRouteInsert())
+//	{
+//		cout << "IntraRouteInsert" << endl;
+//		solution_tsp->CheckSolution(true);
+//		solution_tsp->PrintSolution(true);
+//	}
+
+	if(localAlgo->IntraRouteArcInsert())
 	{
 		cout << "IntraRouteInsert" << endl;
 		solution_tsp->CheckSolution(true);
