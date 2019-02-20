@@ -32,6 +32,7 @@ public:
 	// movements for direct encoding
 	bool IntraRouteInsert();
 	bool IntraRouteArcInsert();
+	bool IntraRouteSwap();
 };
 
 #endif /* LOCALSEARCH_HPP_ */

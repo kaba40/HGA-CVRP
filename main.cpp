@@ -73,7 +73,14 @@ int main()
 //		solution_tsp->PrintSolution(true);
 //	}
 
-	if(localAlgo->IntraRouteArcInsert())
+//	if(localAlgo->IntraRouteArcInsert())
+//	{
+//		cout << "IntraRouteInsert" << endl;
+//		solution_tsp->CheckSolution(true);
+//		solution_tsp->PrintSolution(true);
+//	}
+
+	if(localAlgo->IntraRouteSwap())
 	{
 		cout << "IntraRouteInsert" << endl;
 		solution_tsp->CheckSolution(true);
