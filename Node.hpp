@@ -32,6 +32,7 @@ public:
 	void insertAfter(Node *node);
 	void insertBefore(Node *node);
 	void insertBetween(Node *nodePrev, Node *nodeNext);
+	void removeNode();
 
 	Customer* getClient();
 };

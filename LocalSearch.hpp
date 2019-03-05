@@ -33,6 +33,7 @@ public:
 	bool IntraRouteInsert();
 	bool IntraRouteArcInsert();
 	bool IntraRouteSwap();
+	bool IntraRouteArcSwap();
 };
 
 #endif /* LOCALSEARCH_HPP_ */

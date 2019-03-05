@@ -99,6 +99,15 @@ void Node::insertBetween(Node *nodePrev, Node *nodeNext)
 	nodeNext->setPrevious(this);
 }
 
+void Node::removeNode()
+{
+	// remove a node (this)
+	this->getPrevious()->setNext(this->getNext());
+	this->getNext()->setPrevious(this->getPrevious());
+	this->setPrevious(NULL);
+	this->setNext(NULL);
+}
+
 Customer* Node::getClient()
 {
 	return this->client;

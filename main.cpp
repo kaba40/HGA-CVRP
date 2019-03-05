@@ -24,6 +24,7 @@ using namespace std;
 int main()
 {
 	string name_data = "Data/E-n7.vrp";
+//	string name_data = "Data/E-n13-k4.vrp";
 	const char* data_vrp = name_data.c_str();
 
 	int numVeh = 1;
@@ -72,20 +73,30 @@ int main()
 //		solution_tsp->CheckSolution(true);
 //		solution_tsp->PrintSolution(true);
 //	}
-
+//
 //	if(localAlgo->IntraRouteArcInsert())
 //	{
-//		cout << "IntraRouteInsert" << endl;
+//		cout << "IntraRouteArcInsert" << endl;
+//		solution_tsp->CheckSolution(true);
+//		solution_tsp->PrintSolution(true);
+//	}
+//
+//	if(localAlgo->IntraRouteSwap())
+//	{
+//		cout << "IntraRouteSwap" << endl;
 //		solution_tsp->CheckSolution(true);
 //		solution_tsp->PrintSolution(true);
 //	}
 
-	if(localAlgo->IntraRouteSwap())
+	if(localAlgo->IntraRouteArcSwap())
 	{
-		cout << "IntraRouteInsert" << endl;
+		cout << "IntraRouteArcSwap" << endl;
 		solution_tsp->CheckSolution(true);
 		solution_tsp->PrintSolution(true);
 	}
+
+
+
 
 //	if(localAlgo->Insert())
 //	{
