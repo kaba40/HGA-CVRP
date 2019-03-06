@@ -29,11 +29,14 @@ public:
 	bool SwapArcs();
 	bool SwapTwoArcs();
 
-	// movements for direct encoding
+	// intra route movements for direct encoding, i.e, feasible solution
 	bool IntraRouteInsert();
 	bool IntraRouteArcInsert();
 	bool IntraRouteSwap();
 	bool IntraRouteArcSwap();
+	bool IntraRoute2ArcSwap();
+
+	// inter-route movements
 };
 
 #endif /* LOCALSEARCH_HPP_ */

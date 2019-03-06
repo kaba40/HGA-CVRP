@@ -1139,11 +1139,8 @@ bool LocalSearch::IntraRouteInsert()
 		bool breakIfImproved = false; // stop insertion move for a route if improved
 
 		// no movement if the route contains only one client
-		if(this->initSol->getNbClientsForRoute(r) == 1)
-		{
-//			cout << "empty route or a route containing only one client" << endl;
-		}
-		else if(this->initSol->getNbClientsForRoute(r) == 2)
+		// intraRouteInsert movement start with more than 2 customers
+		if(this->initSol->getNbClientsForRoute(r) == 2)
 		{// route contains 2 clients, move is necessary in case of multi-depot or asymetric distance
 			routeCost = this->initSol->getRouteForwSeq()[r][0].back()->getDistance();
 			if(this->initSol->getRouteBackSeq()[r][0].back()->getDistance() < routeCost - 0.0001)
@@ -1154,10 +1151,7 @@ bool LocalSearch::IntraRouteInsert()
 				Node *moveNode = insertNode->getNext();
 
 				// remove insertNode
-				insertNode->getPrevious()->setNext(insertNode->getNext());
-				insertNode->getNext()->setPrevious(insertNode->getPrevious());
-				insertNode->setPrevious(NULL);
-				insertNode->setNext(NULL);
+				insertNode->removeNode();
 
 				// insert insertNode after moveNode
 				moveNode->insertAfter(insertNode);
@@ -1297,10 +1291,7 @@ bool LocalSearch::IntraRouteInsert()
 							// apply the move
 
 							// remove insertNode
-							insertNode->getPrevious()->setNext(insertNode->getNext());
-							insertNode->getNext()->setPrevious(insertNode->getPrevious());
-							insertNode->setPrevious(NULL);
-							insertNode->setNext(NULL);
+							insertNode->removeNode();
 
 							if(addAfter)
 							{
@@ -1477,10 +1468,7 @@ bool LocalSearch::IntraRouteInsert()
 								{// Apply the move
 
 									// remove insertNode
-									insertNode->getPrevious()->setNext(insertNode->getNext());
-									insertNode->getNext()->setPrevious(insertNode->getPrevious());
-									insertNode->setPrevious(NULL);
-									insertNode->setNext(NULL);
+									insertNode->removeNode();
 
 									// insert insertNode after moveNode
 									moveNode->insertAfter(insertNode);
@@ -1515,10 +1503,7 @@ bool LocalSearch::IntraRouteInsert()
 								{// Apply the move
 
 									// remove insertNode
-									insertNode->getPrevious()->setNext(insertNode->getNext());
-									insertNode->getNext()->setPrevious(insertNode->getPrevious());
-									insertNode->setPrevious(NULL);
-									insertNode->setNext(NULL);
+									insertNode->removeNode();
 
 									// insert insertNode after moveNode
 									moveNode->insertAfter(insertNode);
@@ -1556,10 +1541,7 @@ bool LocalSearch::IntraRouteInsert()
 								{// Apply the move
 
 									// remove insertNode
-									insertNode->getPrevious()->setNext(insertNode->getNext());
-									insertNode->getNext()->setPrevious(insertNode->getPrevious());
-									insertNode->setPrevious(NULL);
-									insertNode->setNext(NULL);
+									insertNode->removeNode();
 
 									// insert insertNode after moveNode
 									moveNode->insertAfter(insertNode);
@@ -1595,10 +1577,7 @@ bool LocalSearch::IntraRouteInsert()
 								{// Apply the move
 
 									// remove insertNode
-									insertNode->getPrevious()->setNext(insertNode->getNext());
-									insertNode->getNext()->setPrevious(insertNode->getPrevious());
-									insertNode->setPrevious(NULL);
-									insertNode->setNext(NULL);
+									insertNode->removeNode();
 
 									// insert insertNode after moveNode
 									moveNode->insertAfter(insertNode);
@@ -1748,16 +1727,9 @@ bool LocalSearch::IntraRouteArcInsert()
 								// apply the move
 
 								// remove insertNodeFirst
-								insertNodeFirst->getPrevious()->setNext(insertNodeFirst->getNext());
-								insertNodeFirst->getNext()->setPrevious(insertNodeFirst->getPrevious());
-								insertNodeFirst->setPrevious(NULL);
-								insertNodeFirst->setNext(NULL);
-
+								insertNodeFirst->removeNode();
 								// remove insertNodeLast
-								insertNodeLast->getPrevious()->setNext(insertNodeLast->getNext());
-								insertNodeLast->getNext()->setPrevious(insertNodeLast->getPrevious());
-								insertNodeLast->setPrevious(NULL);
-								insertNodeLast->setNext(NULL);
+								insertNodeLast->removeNode();
 
 								if(addAfter)
 								{
@@ -1905,16 +1877,9 @@ bool LocalSearch::IntraRouteArcInsert()
 								// apply the move
 
 								// remove insertNodeFirst
-								insertNodeFirst->getPrevious()->setNext(insertNodeFirst->getNext());
-								insertNodeFirst->getNext()->setPrevious(insertNodeFirst->getPrevious());
-								insertNodeFirst->setPrevious(NULL);
-								insertNodeFirst->setNext(NULL);
-
+								insertNodeFirst->removeNode();
 								// remove insertNodeLast
-								insertNodeLast->getPrevious()->setNext(insertNodeLast->getNext());
-								insertNodeLast->getNext()->setPrevious(insertNodeLast->getPrevious());
-								insertNodeLast->setPrevious(NULL);
-								insertNodeLast->setNext(NULL);
+								insertNodeLast->removeNode();
 
 								if(addAfter)
 								{
@@ -2020,16 +1985,9 @@ bool LocalSearch::IntraRouteSwap()
 							if(newCostR < routeCost - 0.0001)
 							{
 								// remove swapNodeFirst
-								swapNodeFirst->getPrevious()->setNext(swapNodeFirst->getNext());
-								swapNodeFirst->getNext()->setPrevious(swapNodeFirst->getPrevious());
-								swapNodeFirst->setPrevious(NULL);
-								swapNodeFirst->setNext(NULL);
-
+								swapNodeFirst->removeNode();
 								// remove swapNodeSecond
-								swapNodeSecond->getPrevious()->setNext(swapNodeSecond->getNext());
-								swapNodeSecond->getNext()->setPrevious(swapNodeSecond->getPrevious());
-								swapNodeSecond->setPrevious(NULL);
-								swapNodeSecond->setNext(NULL);
+								swapNodeSecond->removeNode();
 
 								// insert swapNodeSecond after swapNodeFirstPrev
 								swapNodeFirstPrev->insertAfter(swapNodeSecond);
@@ -2082,16 +2040,9 @@ bool LocalSearch::IntraRouteSwap()
 							if(this->initSol->EVALN(&newCostR,3, seq1, seq2, seq3) && newCostR < routeCost - 0.0001)
 							{
 								// remove swapNodeFirst
-								swapNodeFirst->getPrevious()->setNext(swapNodeFirst->getNext());
-								swapNodeFirst->getNext()->setPrevious(swapNodeFirst->getPrevious());
-								swapNodeFirst->setPrevious(NULL);
-								swapNodeFirst->setNext(NULL);
-
+								swapNodeFirst->removeNode();
 								// remove swapNodeSecond
-								swapNodeSecond->getPrevious()->setNext(swapNodeSecond->getNext());
-								swapNodeSecond->getNext()->setPrevious(swapNodeSecond->getPrevious());
-								swapNodeSecond->setPrevious(NULL);
-								swapNodeSecond->setNext(NULL);
+								swapNodeSecond->removeNode();
 
 								// insert swapNodeSecond after swapNodeFirstPrev
 								swapNodeFirstPrev->insertAfter(swapNodeSecond);
@@ -2185,16 +2136,9 @@ bool LocalSearch::IntraRouteSwap()
 							if(this->initSol->EVALN(&newCostR,3, seq1, seq2, seq3) && newCostR < routeCost - 0.0001)
 							{
 								// remove swapNodeFirst
-								swapNodeFirst->getPrevious()->setNext(swapNodeFirst->getNext());
-								swapNodeFirst->getNext()->setPrevious(swapNodeFirst->getPrevious());
-								swapNodeFirst->setPrevious(NULL);
-								swapNodeFirst->setNext(NULL);
-
+								swapNodeFirst->removeNode();
 								// remove swapNodeSecond
-								swapNodeSecond->getPrevious()->setNext(swapNodeSecond->getNext());
-								swapNodeSecond->getNext()->setPrevious(swapNodeSecond->getPrevious());
-								swapNodeSecond->setPrevious(NULL);
-								swapNodeSecond->setNext(NULL);
+								swapNodeSecond->removeNode();
 
 								// insert swapNodeSecond after swapNodeFirstPrev
 								swapNodeFirstPrev->insertAfter(swapNodeSecond);
@@ -2241,16 +2185,9 @@ bool LocalSearch::IntraRouteSwap()
 							if(this->initSol->EVALN(&newCostR,3, seq1, seq2, seq3) && newCostR < routeCost - 0.0001)
 							{
 								// remove swapNodeFirst
-								swapNodeFirst->getPrevious()->setNext(swapNodeFirst->getNext());
-								swapNodeFirst->getNext()->setPrevious(swapNodeFirst->getPrevious());
-								swapNodeFirst->setPrevious(NULL);
-								swapNodeFirst->setNext(NULL);
-
+								swapNodeFirst->removeNode();
 								// remove swapNodeSecond
-								swapNodeSecond->getPrevious()->setNext(swapNodeSecond->getNext());
-								swapNodeSecond->getNext()->setPrevious(swapNodeSecond->getPrevious());
-								swapNodeSecond->setPrevious(NULL);
-								swapNodeSecond->setNext(NULL);
+								swapNodeSecond->removeNode();
 
 								// insert swapNodeSecond after swapNodeFirstPrev
 								swapNodeFirstPrev->insertAfter(swapNodeSecond);
@@ -2305,16 +2242,9 @@ bool LocalSearch::IntraRouteSwap()
 							if(this->initSol->EVALN(&newCostR,5, seq1, seq2, seq3, seq4, seq5) && newCostR < routeCost - 0.0001)
 							{
 								// remove swapNodeFirst
-								swapNodeFirst->getPrevious()->setNext(swapNodeFirst->getNext());
-								swapNodeFirst->getNext()->setPrevious(swapNodeFirst->getPrevious());
-								swapNodeFirst->setPrevious(NULL);
-								swapNodeFirst->setNext(NULL);
-
+								swapNodeFirst->removeNode();
 								// remove swapNodeSecond
-								swapNodeSecond->getPrevious()->setNext(swapNodeSecond->getNext());
-								swapNodeSecond->getNext()->setPrevious(swapNodeSecond->getPrevious());
-								swapNodeSecond->setPrevious(NULL);
-								swapNodeSecond->setNext(NULL);
+								swapNodeSecond->removeNode();
 
 								// insert swapNodeSecond after swapNodeFirstPrev
 								swapNodeFirstPrev->insertAfter(swapNodeSecond);
@@ -2613,22 +2543,13 @@ bool LocalSearch::IntraRouteArcSwap()
 									if(this->initSol->EVALN(&newCostR,4, seq1, seq2, seq3,seq4) && newCostR < routeCost - 0.0001)
 									{
 										// remove arcFirstNode
-										arcFirstNode->getPrevious()->setNext(arcFirstNode->getNext());
-										arcFirstNode->getNext()->setPrevious(arcFirstNode->getPrevious());
-										arcFirstNode->setPrevious(NULL);
-										arcFirstNode->setNext(NULL);
+										arcFirstNode->removeNode();
 
 										// remove arcLastNode
-										arcLastNode->getPrevious()->setNext(arcLastNode->getNext());
-										arcLastNode->getNext()->setPrevious(arcLastNode->getPrevious());
-										arcLastNode->setPrevious(NULL);
-										arcLastNode->setNext(NULL);
+										arcLastNode->removeNode();
 
 										// remove swapNode
-										swapNode->getPrevious()->setNext(swapNode->getNext());
-										swapNode->getNext()->setPrevious(swapNode->getPrevious());
-										swapNode->setPrevious(NULL);
-										swapNode->setNext(NULL);
+										swapNode->removeNode();
 
 										// insert arcFirstNode before swapNodeNext
 										swapNodeNext->insertBefore(arcFirstNode);
@@ -2677,22 +2598,13 @@ bool LocalSearch::IntraRouteArcSwap()
 									if(this->initSol->EVALN(&newCostR,3, seq1, seq2, seq3) && newCostR < routeCost - 0.0001)
 									{
 										// remove arcFirstNode
-										arcFirstNode->getPrevious()->setNext(arcFirstNode->getNext());
-										arcFirstNode->getNext()->setPrevious(arcFirstNode->getPrevious());
-										arcFirstNode->setPrevious(NULL);
-										arcFirstNode->setNext(NULL);
+										arcFirstNode->removeNode();
 
 										// remove arcLastNode
-										arcLastNode->getPrevious()->setNext(arcLastNode->getNext());
-										arcLastNode->getNext()->setPrevious(arcLastNode->getPrevious());
-										arcLastNode->setPrevious(NULL);
-										arcLastNode->setNext(NULL);
+										arcLastNode->removeNode();
 
 										// remove swapNode
-										swapNode->getPrevious()->setNext(swapNode->getNext());
-										swapNode->getNext()->setPrevious(swapNode->getPrevious());
-										swapNode->setPrevious(NULL);
-										swapNode->setNext(NULL);
+										swapNode->removeNode();
 
 										// insert arcFirstNode before swapNodeNext
 										swapNodeNext->insertBefore(arcFirstNode);
@@ -2748,23 +2660,13 @@ bool LocalSearch::IntraRouteArcSwap()
 									if(this->initSol->EVALN(&newCostR,4, seq1, seq2, seq3,seq4) && newCostR < routeCost - 0.0001)
 									{
 										// remove arcFirstNode
-										arcFirstNode->getPrevious()->setNext(arcFirstNode->getNext());
-										arcFirstNode->getNext()->setPrevious(arcFirstNode->getPrevious());
-										arcFirstNode->setPrevious(NULL);
-										arcFirstNode->setNext(NULL);
+										arcFirstNode->removeNode();
 
 										// remove arcLastNode
-										arcLastNode->getPrevious()->setNext(arcLastNode->getNext());
-										arcLastNode->getNext()->setPrevious(arcLastNode->getPrevious());
-										arcLastNode->setPrevious(NULL);
-										arcLastNode->setNext(NULL);
+										arcLastNode->removeNode();
 
 										// remove swapNode
-										swapNode->getPrevious()->setNext(swapNode->getNext());
-										swapNode->getNext()->setPrevious(swapNode->getPrevious());
-										swapNode->setPrevious(NULL);
-										swapNode->setNext(NULL);
-
+										swapNode->removeNode();
 
 										// insert arcFirstNode after swapNodePrev
 										swapNodePrev->insertAfter(arcFirstNode);
@@ -2812,22 +2714,13 @@ bool LocalSearch::IntraRouteArcSwap()
 									if(this->initSol->EVALN(&newCostR,3, seq1, seq2, seq3) && newCostR < routeCost - 0.0001)
 									{
 										// remove arcFirstNode
-										arcFirstNode->getPrevious()->setNext(arcFirstNode->getNext());
-										arcFirstNode->getNext()->setPrevious(arcFirstNode->getPrevious());
-										arcFirstNode->setPrevious(NULL);
-										arcFirstNode->setNext(NULL);
+										arcFirstNode->removeNode();
 
 										// remove arcLastNode
-										arcLastNode->getPrevious()->setNext(arcLastNode->getNext());
-										arcLastNode->getNext()->setPrevious(arcLastNode->getPrevious());
-										arcLastNode->setPrevious(NULL);
-										arcLastNode->setNext(NULL);
+										arcLastNode->removeNode();
 
 										// remove swapNode
-										swapNode->getPrevious()->setNext(swapNode->getNext());
-										swapNode->getNext()->setPrevious(swapNode->getPrevious());
-										swapNode->setPrevious(NULL);
-										swapNode->setNext(NULL);
+										swapNode->removeNode();
 
 										// insert arcFirstNode after swapNodePrev
 										swapNodePrev->insertAfter(arcFirstNode);
@@ -3002,23 +2895,13 @@ bool LocalSearch::IntraRouteArcSwap()
 									if(this->initSol->EVALN(&newCostR,4, seq1, seq2, seq3,seq4) && newCostR < routeCost - 0.0001)
 									{
 										// remove arcFirstNode
-										arcFirstNode->getPrevious()->setNext(arcFirstNode->getNext());
-										arcFirstNode->getNext()->setPrevious(arcFirstNode->getPrevious());
-										arcFirstNode->setPrevious(NULL);
-										arcFirstNode->setNext(NULL);
+										arcFirstNode->removeNode();
 
 										// remove arcLastNode
-										arcLastNode->getPrevious()->setNext(arcLastNode->getNext());
-										arcLastNode->getNext()->setPrevious(arcLastNode->getPrevious());
-										arcLastNode->setPrevious(NULL);
-										arcLastNode->setNext(NULL);
+										arcLastNode->removeNode();
 
 										// remove swapNode
-										swapNode->getPrevious()->setNext(swapNode->getNext());
-										swapNode->getNext()->setPrevious(swapNode->getPrevious());
-										swapNode->setPrevious(NULL);
-										swapNode->setNext(NULL);
-
+										swapNode->removeNode();
 
 										// insert arcFirstNode before swapNodeNext
 										swapNodeNext->insertBefore(arcFirstNode);
@@ -3054,22 +2937,13 @@ bool LocalSearch::IntraRouteArcSwap()
 									if(this->initSol->EVALN(&newCostR,5, seq1, seq2, seq3,seq4,seq5) && newCostR < routeCost - 0.0001)
 									{
 										// remove arcFirstNode
-										arcFirstNode->getPrevious()->setNext(arcFirstNode->getNext());
-										arcFirstNode->getNext()->setPrevious(arcFirstNode->getPrevious());
-										arcFirstNode->setPrevious(NULL);
-										arcFirstNode->setNext(NULL);
+										arcFirstNode->removeNode();
 
 										// remove arcLastNode
-										arcLastNode->getPrevious()->setNext(arcLastNode->getNext());
-										arcLastNode->getNext()->setPrevious(arcLastNode->getPrevious());
-										arcLastNode->setPrevious(NULL);
-										arcLastNode->setNext(NULL);
+										arcLastNode->removeNode();
 
 										// remove swapNode
-										swapNode->getPrevious()->setNext(swapNode->getNext());
-										swapNode->getNext()->setPrevious(swapNode->getPrevious());
-										swapNode->setPrevious(NULL);
-										swapNode->setNext(NULL);
+										swapNode->removeNode();
 
 										// insert arcFirstNode before swapNodeNext
 										swapNodeNext->insertBefore(arcFirstNode);
@@ -3172,22 +3046,13 @@ bool LocalSearch::IntraRouteArcSwap()
 									if(this->initSol->EVALN(&newCostR,4, seq1, seq2, seq3,seq4) && newCostR < routeCost - 0.0001)
 									{
 										// remove arcFirstNode
-										arcFirstNode->getPrevious()->setNext(arcFirstNode->getNext());
-										arcFirstNode->getNext()->setPrevious(arcFirstNode->getPrevious());
-										arcFirstNode->setPrevious(NULL);
-										arcFirstNode->setNext(NULL);
+										arcFirstNode->removeNode();
 
 										// remove arcLastNode
-										arcLastNode->getPrevious()->setNext(arcLastNode->getNext());
-										arcLastNode->getNext()->setPrevious(arcLastNode->getPrevious());
-										arcLastNode->setPrevious(NULL);
-										arcLastNode->setNext(NULL);
+										arcLastNode->removeNode();
 
 										// remove swapNode
-										swapNode->getPrevious()->setNext(swapNode->getNext());
-										swapNode->getNext()->setPrevious(swapNode->getPrevious());
-										swapNode->setPrevious(NULL);
-										swapNode->setNext(NULL);
+										swapNode->removeNode();
 
 										// insert arcFirstNode after swapNodePrev
 										swapNodePrev->insertAfter(arcFirstNode);
@@ -3223,22 +3088,13 @@ bool LocalSearch::IntraRouteArcSwap()
 									if(this->initSol->EVALN(&newCostR,5, seq1, seq2, seq3,seq4,seq5) && newCostR < routeCost - 0.0001)
 									{
 										// remove arcFirstNode
-										arcFirstNode->getPrevious()->setNext(arcFirstNode->getNext());
-										arcFirstNode->getNext()->setPrevious(arcFirstNode->getPrevious());
-										arcFirstNode->setPrevious(NULL);
-										arcFirstNode->setNext(NULL);
+										arcFirstNode->removeNode();
 
 										// remove arcLastNode
-										arcLastNode->getPrevious()->setNext(arcLastNode->getNext());
-										arcLastNode->getNext()->setPrevious(arcLastNode->getPrevious());
-										arcLastNode->setPrevious(NULL);
-										arcLastNode->setNext(NULL);
+										arcLastNode->removeNode();
 
 										// remove swapNode
-										swapNode->getPrevious()->setNext(swapNode->getNext());
-										swapNode->getNext()->setPrevious(swapNode->getPrevious());
-										swapNode->setPrevious(NULL);
-										swapNode->setNext(NULL);
+										swapNode->removeNode();
 
 										// insert arcFirstNode after swapNodePrev
 										swapNodePrev->insertAfter(arcFirstNode);
@@ -3276,5 +3132,221 @@ bool LocalSearch::IntraRouteArcSwap()
 
 		}
 	}
+	return retVal;
+}
+
+bool LocalSearch::IntraRoute2ArcSwap()
+{
+#ifdef DEBUG_Intra2ArcSwap
+	cout << endl;
+	cout << "local search IntraRoute2ArcSwap initial route = " ; this->initSol->PrintSolution(true) ;
+#endif
+
+	// return value
+	bool retVal = false;
+
+	for(int r = 0; r < this->initSol->getRoutesNumber(); r++)
+	{
+		// record each route cost
+		double routeCost;
+		bool breakIfImproved = false; // stop insertion move for a route if improved
+
+		// if a route contains less than 4 customers then no move
+		// intraRoute2ArcSwap movement start with more than 4 customers
+		if(this->initSol->getNbClientsForRoute(r) >= 4)
+		{
+			routeCost = this->initSol->getRouteForwSeq()[r][0].back()->getDistance();
+#ifdef DEBUG_Intra2ArcSwap
+			cout << "route[" << r << "]" << " cost = " << routeCost << endl;
+#endif
+			Node *arcFirstNode = NULL; // the first node of the arc
+			Node *arcLastNode = NULL; // the last node of the arc
+
+			Node *arcFirstNodePrev = NULL;
+
+			int a1 = 1;
+			int a2 = a1+1; /* 0--b--c--d--0, a1 = 1, a2 = 2 --> a1--a2 = b--c   */
+			for(arcFirstNode = this->initSol->getRoutes()[r].first->getNext(); !arcFirstNode->isDepot() && breakIfImproved == false; arcFirstNode = arcFirstNode->getNext(), a1++, a2++)
+			{
+#ifdef DEBUG_Intra2ArcSwap
+				cout << endl;
+#endif
+				arcLastNode = arcFirstNode->getNext();
+#ifdef DEBUG_Intra2ArcSwap
+				cout << " ------ swap arc first = " << arcFirstNode->getClient()->getId() << "--" << arcLastNode->getClient()->getId() << " ----------" <<  " a1 = " << a1 << "---------- " << "a2 = " << a2  << endl;
+#endif
+				arcFirstNodePrev = arcFirstNode->getPrevious();
+
+#ifdef DEBUG_Intra2ArcSwap
+				if(arcFirstNodePrev != NULL)
+					cout << "arcFirstNodePrev = " << arcFirstNodePrev->getClient()->getId() <<  endl;
+#endif
+
+				Node *swapNodeFirst = NULL; // the first node of the second arc
+				Node *swapNodeSecond = NULL; // the last node of the second arc
+
+				Node *swapNodeSecondNext = NULL;
+
+				int s1 = a2+1;
+				int s2 = s1+1;
+				for(swapNodeFirst = arcLastNode->getNext(); !swapNodeFirst->isDepot() && breakIfImproved == false; swapNodeFirst = swapNodeFirst->getNext(), s1++, s2++)
+				{
+					swapNodeSecond = swapNodeFirst->getNext();
+					if(!swapNodeSecond->isDepot())
+					{
+#ifdef DEBUG_Intra2ArcSwap
+						cout << " ------ swap arc second = " << swapNodeFirst->getClient()->getId() << "--" << swapNodeSecond->getClient()->getId() << " ----------" <<  " s1 = " << s1 << "---------- " << " s2 = " << s2  << endl;
+#endif
+
+						swapNodeSecondNext = swapNodeSecond->getNext();
+#ifdef DEBUG_Intra2ArcSwap
+						if(swapNodeSecondNext != NULL)
+							cout << "swapNodeSecondNext = " << swapNodeSecondNext->getClient()->getId() <<  endl;
+#endif
+						// find sub-sequences
+						SeqData *seq1 = NULL;
+						SeqData *seq2 = NULL;
+						SeqData *seq3 = NULL;
+						SeqData *seq4 = NULL;
+						SeqData *seq5 = NULL;
+
+						double newCostR;
+
+						if(a2+1 == s1)
+						{
+							seq1 = this->initSol->getRouteForwSeq()[r][0][a1-1];
+#ifdef DEBUG_Intra2ArcSwap
+							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+#endif
+							seq2 = this->initSol->getRouteForwSeq()[r][s1][s2-s1];
+#ifdef DEBUG_Intra2ArcSwap
+							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+#endif
+							seq3 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
+#ifdef DEBUG_Intra2ArcSwap
+							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
+
+							int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
+							seq4 = this->initSol->getRouteForwSeq()[r][s2+1][indexLastNodeRoute-(s2+1)];
+#ifdef DEBUG_Intra2ArcSwap
+							cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
+#endif
+							// evaluate concatenation of the 4 sub-seqs then apply the move if the cost is improved
+							if(this->initSol->EVALN(&newCostR,4, seq1, seq2, seq3,seq4) && newCostR < routeCost - 0.0001)
+							{
+								// remove arcFirstNode
+								arcFirstNode->removeNode();
+								// remove arcLastNode
+								arcLastNode->removeNode();
+
+								// remove swapNodeFirst
+								swapNodeFirst->removeNode();
+								// remove swapNodeSecond
+								swapNodeSecond->removeNode();
+
+								// insert swapNodeFirst after arcFirstNodePrev
+								arcFirstNodePrev->insertAfter(swapNodeFirst);
+								// insert swapNodeSecond after swapNodeFirst
+								swapNodeFirst->insertAfter(swapNodeSecond);
+								// insert arcFirstNode before swapNodeSecondNext
+								swapNodeSecondNext->insertBefore(arcFirstNode);
+								// insert arcLastNode before swapNodeSecondNext
+								swapNodeSecondNext->insertBefore(arcLastNode);
+
+								// update sub-sequences of the route
+								this->initSol->updateOneRouteSetSubSeq(r);
+
+								// update objective functions
+#ifdef DEBUG_Intra2ArcSwap
+								cout << " newCostR = " << newCostR << endl;
+#endif
+								double restCout = this->initSol->getObjVal() - routeCost;
+#ifdef DEBUG_Intra2ArcSwap
+								cout << "restCout = " << restCout << endl;
+#endif
+								double newObjVal = restCout + newCostR;
+#ifdef DEBUG_Intra2ArcSwap
+								cout << "newObjVal = " << newObjVal << endl;
+#endif
+								this->initSol->setObjVal(newObjVal);
+
+								breakIfImproved = true;
+								retVal = true;
+							}
+						}
+						else
+						{
+							seq1 = this->initSol->getRouteForwSeq()[r][0][a1-1];
+#ifdef DEBUG_Intra2ArcSwap
+							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+#endif
+							seq2 = this->initSol->getRouteForwSeq()[r][s1][s2-s1];
+#ifdef DEBUG_Intra2ArcSwap
+							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+#endif
+							seq3 = this->initSol->getRouteForwSeq()[r][a2+1][(s1-1)-(a2+1)];
+#ifdef DEBUG_Intra2ArcSwap
+							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
+							seq4 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
+#ifdef DEBUG_Intra2ArcSwap
+							cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
+#endif
+
+							int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
+							seq5 = this->initSol->getRouteForwSeq()[r][s2+1][indexLastNodeRoute-(s2+1)];
+#ifdef DEBUG_Intra2ArcSwap
+							cout << seq5->getHead()->getClient()->getId() << "--" << seq5->getTail()->getClient()->getId() << endl;
+#endif
+							// evaluate concatenation of the 5 sub-seqs then apply the move if the cost is improved
+							if(this->initSol->EVALN(&newCostR,5, seq1, seq2, seq3,seq4, seq5) && newCostR < routeCost - 0.0001)
+							{
+								// remove arcFirstNode
+								arcFirstNode->removeNode();
+								// remove arcLastNode
+								arcLastNode->removeNode();
+
+								// remove swapNodeFirst
+								swapNodeFirst->removeNode();
+								// remove swapNodeSecond
+								swapNodeSecond->removeNode();
+
+								// insert swapNodeFirst after arcFirstNodePrev
+								arcFirstNodePrev->insertAfter(swapNodeFirst);
+								// insert swapNodeSecond after swapNodeFirst
+								swapNodeFirst->insertAfter(swapNodeSecond);
+								// insert arcFirstNode before swapNodeSecondNext
+								swapNodeSecondNext->insertBefore(arcFirstNode);
+								// insert arcLastNode before swapNodeSecondNext
+								swapNodeSecondNext->insertBefore(arcLastNode);
+
+								// update sub-sequences of the route
+								this->initSol->updateOneRouteSetSubSeq(r);
+
+								// update objective functions
+#ifdef DEBUG_Intra2ArcSwap
+								cout << " newCostR = " << newCostR << endl;
+#endif
+								double restCout = this->initSol->getObjVal() - routeCost;
+#ifdef DEBUG_Intra2ArcSwap
+								cout << "restCout = " << restCout << endl;
+#endif
+								double newObjVal = restCout + newCostR;
+#ifdef DEBUG_Intra2ArcSwap
+								cout << "newObjVal = " << newObjVal << endl;
+#endif
+								this->initSol->setObjVal(newObjVal);
+
+								breakIfImproved = true;
+								retVal = true;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	return retVal;
 }
