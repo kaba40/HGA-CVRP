@@ -97,7 +97,7 @@ int main()
 
 	if(localAlgo->IntraRoute2ArcSwap())
 	{
-		cout << "IntraRouteArcSwap" << endl;
+		cout << "IntraRoute2ArcSwap" << endl;
 		solution_tsp->CheckSolution(true);
 		solution_tsp->PrintSolution(true);
 	}

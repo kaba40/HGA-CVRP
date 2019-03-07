@@ -23,6 +23,8 @@ LocalSearch::~LocalSearch() {
 }
 
 // movements for indirect encoding, i.e, giant tour
+
+//////////////////////////////////////////// Insert ////////////////////////////////////////////////////////////////
 bool LocalSearch::Insert()
 {
 #ifdef DEBUG_Insert
@@ -173,6 +175,7 @@ bool LocalSearch::Insert()
 	return false;
 }
 
+//////////////////////////////////////////// ArcInsert ////////////////////////////////////////////////////////////////
 bool LocalSearch::ArcInsert()
 {
 #ifdef DEBUG_ArcInsert
@@ -352,7 +355,7 @@ bool LocalSearch::ArcInsert()
 	return false;
 }
 
-
+//////////////////////////////////////////// Swap ////////////////////////////////////////////////////////////////
 bool LocalSearch::Swap()
 {
 #ifdef DEBUG_Swap
@@ -569,6 +572,7 @@ bool LocalSearch::Swap()
 	return false;
 }
 
+//////////////////////////////////////////// SwapArcs ////////////////////////////////////////////////////////////////
 bool LocalSearch::SwapArcs()
 {
 #ifdef DEBUG_SwapArcs
@@ -856,6 +860,7 @@ bool LocalSearch::SwapArcs()
 	return false;
 }
 
+//////////////////////////////////////////// SwapTwoArcs ////////////////////////////////////////////////////////////////
 bool LocalSearch::SwapTwoArcs()
 {
 #ifdef DEBUG_SwapTwoArcs
@@ -1118,7 +1123,9 @@ bool LocalSearch::SwapTwoArcs()
 	return false;
 }
 
-// movements for direct encoding
+// movements for direct encoding, intraRoute movements
+
+//////////////////////////////////////////// IntraRouteInsert ////////////////////////////////////////////////////////////////
 
 bool LocalSearch::IntraRouteInsert()
 {
@@ -1186,7 +1193,7 @@ bool LocalSearch::IntraRouteInsert()
 			Node *insertNodePrev = NULL;
 			Node *insertNodeNext = NULL;
 
-
+			// in is the index of insertNode in the route r
 			int in = 1; /* 0--a--b--c--0, in = 1 --> in = a   */
 			for(Node *insertNode = this->initSol->getRoutes()[r].first->getNext(); !insertNode->isDepot() && breakIfImproved == false; insertNode = insertNode->getNext(), in++)
 			{
@@ -1202,12 +1209,15 @@ bool LocalSearch::IntraRouteInsert()
 					cout << " insertNodeNext = " << insertNodeNext->getClient()->getId() << endl;
 #endif
 				bool addAfter = false;
+				// mn is the index of moveNode in the route r
 				int mn = 1; /* 0--a--b--c--0, mn = 1 --> mn = a   */
 				for(Node *moveNode = this->initSol->getRoutes()[r].first->getNext(); !moveNode->isDepot() && breakIfImproved == false; moveNode = moveNode->getNext(), mn++)
 				{
 #ifdef DEBUG_IntraInsert
 					cout << "---------- moveNode " << " " << " = " << moveNode->getClient()->getId() << " ---------- " << " mn = " << "" << mn << endl;
 #endif
+					// if insertNode == moveNode do nothing and addAfter = true
+					// or if (in = mn ) do nothing and addAfter = true
 					if(in == mn)
 					{
 						addAfter = true;
@@ -1220,12 +1230,13 @@ bool LocalSearch::IntraRouteInsert()
 						SeqData *seq2 = NULL;
 						SeqData *seq3 = NULL;
 
-						if(addAfter)
+						if(addAfter) // if insertNode is before moveNode
 						{
 							seq1 = this->initSol->getRouteForwSeq()[r][0][in-1];
 #ifdef DEBUG_IntraInsert
 							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
 #endif
+							// if moveNode is the successor of insertNode
 							if(in+1 ==  mn) /* 0--a--b--c--0 , if in = 1 and mn = 2 */
 							{
 								seq2 = this->initSol->getRouteBackSeq()[r][in][mn-in];
@@ -1237,7 +1248,7 @@ bool LocalSearch::IntraRouteInsert()
 #ifdef DEBUG_IntraInsert
 							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
 #endif
-							//this->initSol->getRouteForwSeq()[r].size()-2
+							//if insertNode is the first client and moveNode is the last client in the route r
 							if( (in == 1) && (mn == this->initSol->getNbClientsForRoute(r))) /* 0--a--b--c--0 , if in = 1 and mn = 3 */
 							{
 								seq3 = this->initSol->getRouteBackSeq()[r][in-1][in];
@@ -1251,8 +1262,9 @@ bool LocalSearch::IntraRouteInsert()
 							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
 #endif
 						}
-						else
+						else // if insertNode is after moveNode
 						{
+							//if insertNode is the last client and moveNode is the first client in the route r
 							if((in == this->initSol->getNbClientsForRoute(r)) && (mn == 1))
 							{
 								seq1 = this->initSol->getRouteBackSeq()[r][in][mn];
@@ -1264,13 +1276,14 @@ bool LocalSearch::IntraRouteInsert()
 #ifdef DEBUG_IntraInsert
 							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
 #endif
+							// if insertNode is the immediate successor of moveNode
 							if(in == mn+1)
 							{
 								seq2 = this->initSol->getRouteBackSeq()[r][mn][in-mn];
 							}
 							else
 							{
-								seq2 = this->initSol->getRouteForwSeq()[r][mn][(in-1)-mn]; // to verify
+								seq2 = this->initSol->getRouteForwSeq()[r][mn][(in-1)-mn];
 							}
 #ifdef DEBUG_IntraInsert
 							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
@@ -1338,7 +1351,7 @@ bool LocalSearch::IntraRouteInsert()
 			Node *insertNodePrev = NULL;
 			Node *insertNodeNext = NULL;
 
-			int in = 1;
+			int in = 1; // see above comment
 			for(Node *insertNode = this->initSol->getRoutes()[r].first->getNext(); !insertNode->isDepot() && breakIfImproved == false; insertNode = insertNode->getNext(), in++)
 			{
 
@@ -1354,13 +1367,13 @@ bool LocalSearch::IntraRouteInsert()
 					cout << " insertNodeNext = " << insertNodeNext->getClient()->getId() << endl;
 #endif
 				bool addAfter = false;
-				int mn = 1;
+				int mn = 1; // see above comment
 				for(Node *moveNode = this->initSol->getRoutes()[r].first->getNext(); !moveNode->isDepot() && breakIfImproved == false; moveNode = moveNode->getNext(), mn++)
 				{
 #ifdef DEBUG_IntraInsert
 					cout << "---------- moveNode " << " " << " = " << moveNode->getClient()->getId() << " ---------- " << " mn = " << "" << mn << endl;
 #endif
-
+					// see above comment
 					if(in == mn)
 					{
 						addAfter = true;
@@ -1380,6 +1393,7 @@ bool LocalSearch::IntraRouteInsert()
 #ifdef DEBUG_IntraInsert
 							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
 #endif
+							// see above comment
 							if(in+1 == mn)
 							{
 								seq2 = this->initSol->getRouteBackSeq()[r][in][mn-in];
@@ -1400,7 +1414,7 @@ bool LocalSearch::IntraRouteInsert()
 							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
 #endif
 							}
-
+							// see above comment
 							if((in == 1) && (mn == this->initSol->getNbClientsForRoute(r)))
 							{
 								seq4 = this->initSol->getRouteBackSeq()[r][in-1][in];
@@ -1614,6 +1628,7 @@ bool LocalSearch::IntraRouteInsert()
 	return retVal;
 }
 
+//////////////////////////////////////////// IntraRouteArcInsert ////////////////////////////////////////////////////////////////
 bool LocalSearch::IntraRouteArcInsert()
 {
 #ifdef DEBUG_IntraArcInsert
@@ -1638,14 +1653,14 @@ bool LocalSearch::IntraRouteArcInsert()
 #ifdef DEBUG_IntraArcInsert
 			cout << "route[" << r << "]" << " cost = " << routeCost << endl;
 #endif
-			Node *insertNodeFirstPrev = NULL;
-			Node *insertNodeLastNext = NULL;
+			Node *insertNodeFirstPrev = NULL; // insert arc first node predecessor
+			Node *insertNodeLastNext = NULL; // insert arc second node successor
 
-			Node *insertNodeFirst = NULL;
-			Node *insertNodeLast = NULL;
+			Node *insertNodeFirst = NULL; // insert arc first node
+			Node *insertNodeLast = NULL; // insert arc second node
 
-			int in1 = 1;
-			int in2 = in1+1; /* 0--a--b--c--0, in1 = 1, in2 = 2 --> in1-in2 = a-b   */
+			int in1 = 1; /* n1 is the index of the arc first client in the route, n2 is the one of the arc second client */
+			int in2 = in1+1; /* 0--a--b--c--0, in1 = 1, in2 = 2 --> in1-in2 = a--b   */
 			for(Node *insertNode = this->initSol->getRoutes()[r].first->getNext(); !insertNode->isDepot() && breakIfImproved == false; insertNode = insertNode->getNext(), in1++,in2++)
 			{
 				insertNodeFirst = insertNode;
@@ -1666,6 +1681,7 @@ bool LocalSearch::IntraRouteArcInsert()
 					cout << endl;
 #endif
 					bool addAfter = false;
+					// mn is the index of moveNode in the route
 					int mn = 1; /* 0--a--b--c--0, mn = 1 --> mn = a   */
 					for(Node *moveNode = this->initSol->getRoutes()[r].first->getNext(); !moveNode->isDepot() && breakIfImproved == false; moveNode = moveNode->getNext(), mn++)
 					{
@@ -1772,7 +1788,7 @@ bool LocalSearch::IntraRouteArcInsert()
 			}
 
 		}
-		else if(this->initSol->getNbClientsForRoute(r) > 3)
+		else if(this->initSol->getNbClientsForRoute(r) > 3) // route contains more than 3 customers
 		{
 			routeCost = this->initSol->getRouteForwSeq()[r][0].back()->getDistance();
 #ifdef DEBUG_IntraArcInsert
@@ -1784,8 +1800,8 @@ bool LocalSearch::IntraRouteArcInsert()
 			Node *insertNodeFirst = NULL;
 			Node *insertNodeLast = NULL;
 
-			int in1 = 1;
-			int in2 = in1+1; /* 0--a--b--c--d--0, in1 = 1, in2 = 2 --> in1-in2 = a-b   */
+			int in1 = 1; // see above comment
+			int in2 = in1+1; /* 0--a--b--c--d--0, in1 = 1, in2 = 2 --> in1-in2 = a--b   */
 			for(Node *insertNode = this->initSol->getRoutes()[r].first->getNext(); !insertNode->isDepot() && breakIfImproved == false; insertNode = insertNode->getNext(), in1++,in2++)
 			{
 				insertNodeFirst = insertNode;
@@ -1927,6 +1943,7 @@ bool LocalSearch::IntraRouteArcInsert()
 	return retVal;
 }
 
+//////////////////////////////////////////// IntraRouteSwap ////////////////////////////////////////////////////////////////
 bool LocalSearch::IntraRouteSwap()
 {
 #ifdef DEBUG_IntraSwap
@@ -1952,8 +1969,8 @@ bool LocalSearch::IntraRouteSwap()
 			cout << "route[" << r << "]" << " cost = " << routeCost << endl;
 #endif
 			Node *swapNodeFirstPrev = NULL;
-
-			int s1 = 1;
+			/* s1 is the index in the route (0--a--b--c--0) of the first client to swap */
+			int s1 = 1; /* 0--a--b--c--0, s1 = 1 --> s1 = a */
 			for(Node *swapNodeFirst = this->initSol->getRoutes()[r].first->getNext(); !swapNodeFirst->isDepot() && breakIfImproved == false; swapNodeFirst = swapNodeFirst->getNext(), s1++)
 			{
 #ifdef DEBUG_IntraSwap
@@ -1965,8 +1982,8 @@ bool LocalSearch::IntraRouteSwap()
 						cout << "swapNodeFirstPrev = " << swapNodeFirstPrev->getClient()->getId() << endl ;
 #endif
 					Node *swapNodeSecondNext = NULL;
-
-					int s2 = s1+1;
+					/* s1 is the index in the route (0--a--b--c--0) of the second client to swap */
+					int s2 = s1+1; /* 0--a--b--c--0, s2 = 2 --> s2 = b */
 					for(Node *swapNodeSecond = swapNodeFirst->getNext(); !swapNodeSecond->isDepot() && breakIfImproved == false; swapNodeSecond = swapNodeSecond->getNext(), s2++)
 					{
 #ifdef DEBUG_IntraSwap
@@ -2016,7 +2033,7 @@ bool LocalSearch::IntraRouteSwap()
 
 							}
 						}
-						else if( (s1+1 == s2) || (s1+1 == s2-1))
+						else if( (s1+1 == s2) || (s1+1 == s2-1)) // if swapNodeFirst is the immediate predecessor of swapNodeSecond or the successor of swapNodeFirst is the predecessor of swapNodeSecond
 						{
 							SeqData *seq1 = NULL;
 							SeqData *seq2 = NULL;
@@ -2075,7 +2092,7 @@ bool LocalSearch::IntraRouteSwap()
 
 			}
 		}
-		else if(this->initSol->getNbClientsForRoute(r) > 3)
+		else if(this->initSol->getNbClientsForRoute(r) > 3) // if the route r contains more than 3 clients
 		{
 			routeCost = this->initSol->getRouteForwSeq()[r][0].back()->getDistance();
 #ifdef DEBUG_IntraSwap
@@ -2083,7 +2100,7 @@ bool LocalSearch::IntraRouteSwap()
 #endif
 			Node *swapNodeFirstPrev = NULL;
 
-			int s1 = 1;
+			int s1 = 1; // see above comment
 			for(Node *swapNodeFirst = this->initSol->getRoutes()[r].first->getNext(); !swapNodeFirst->isDepot() && breakIfImproved == false; swapNodeFirst = swapNodeFirst->getNext(), s1++)
 			{
 #ifdef DEBUG_IntraSwap
@@ -2096,7 +2113,7 @@ bool LocalSearch::IntraRouteSwap()
 #endif
 					Node *swapNodeSecondNext = NULL;
 
-					int s2 = s1+1;
+					int s2 = s1+1; // see above comment
 					for(Node *swapNodeSecond = swapNodeFirst->getNext(); !swapNodeSecond->isDepot() && breakIfImproved == false; swapNodeSecond = swapNodeSecond->getNext(), s2++)
 					{
 #ifdef DEBUG_IntraSwap
@@ -2166,7 +2183,7 @@ bool LocalSearch::IntraRouteSwap()
 								retVal = true;
 							}
 						}
-						else if( (s1+1 == s2) || (s1+1 == s2-1))
+						else if( (s1+1 == s2) || (s1+1 == s2-1)) // see above comment
 						{
 							seq1 = this->initSol->getRouteForwSeq()[r][0][s1-1];
 #ifdef DEBUG_IntraSwap
@@ -2215,7 +2232,7 @@ bool LocalSearch::IntraRouteSwap()
 								retVal = true;
 							}
 						}
-						else if( s1+1 != s2-1)
+						else if( s1+1 != s2-1) // if the successor of swapNodeFirst is not the predecessor of swapNodeSecond
 						{
 							seq1 = this->initSol->getRouteForwSeq()[r][0][s1-1];
 #ifdef DEBUG_IntraSwap
@@ -2281,6 +2298,7 @@ bool LocalSearch::IntraRouteSwap()
 	return retVal;
 }
 
+//////////////////////////////////////////// IntraRouteArcSwap ////////////////////////////////////////////////////////////////
 bool LocalSearch::IntraRouteArcSwap()
 {
 #ifdef DEBUG_IntraArcSwap
@@ -2300,7 +2318,8 @@ bool LocalSearch::IntraRouteArcSwap()
 		// if a route contains less than 2 customers then no move
 		// intraRouteSwap movement start with more than 2 customers
 		if(this->initSol->getNbClientsForRoute(r) == 3)
-		{
+		{//if the number of clients in a route is equal 3
+
 			routeCost = this->initSol->getRouteForwSeq()[r][0].back()->getDistance();
 #ifdef DEBUG_IntraArcSwap
 			cout << "route[" << r << "]" << " cost = " << routeCost << endl;
@@ -2311,7 +2330,7 @@ bool LocalSearch::IntraRouteArcSwap()
 			Node *arcFirstNodePrev = NULL;
 			Node *arcLastNodeNext = NULL;
 
-			int a1 = 1; /* a1 is the index of first client in arc, a2 is the one of second one */
+			int a1 = 1; /* a1 is the index of the arc first client in the route, a2 is the one of the arc second client */
 			int a2 = a1+1; /* 0--b--c--d--0, a1 = 1, a2 = 2 --> a1--a2 = b--c   */
 			for(arcFirstNode = this->initSol->getRoutes()[r].first->getNext(); !arcFirstNode->isDepot() && breakIfImproved == false; arcFirstNode = arcFirstNode->getNext(), a1++, a2++)
 			{
@@ -2344,7 +2363,7 @@ bool LocalSearch::IntraRouteArcSwap()
 						cout << " ------ swapNode = " << swapNode->getClient()->getId() << " ----------" <<  " s = " << s << endl;
 #endif
 						if( a1 == s || a2 == s)
-						{
+						{ // the arc is before the swapNode
 							arcBefore = true;
 						}
 						else
@@ -2395,7 +2414,8 @@ bool LocalSearch::IntraRouteArcSwap()
 
 							double newCostR;
 							if(this->initSol->EVALN(&newCostR,3, seq1, seq2, seq3) && newCostR < routeCost - 0.0001)
-							{
+							{// if feasibility and optimality condition is respected then
+
 								// remove arcFirstNode
 								arcFirstNode->removeNode();
 
@@ -2454,7 +2474,7 @@ bool LocalSearch::IntraRouteArcSwap()
 
 		}
 		else if(this->initSol->getNbClientsForRoute(r) == 4)
-		{
+		{// if the number of clients in a route is equal 4
 			routeCost = this->initSol->getRouteForwSeq()[r][0].back()->getDistance();
 #ifdef DEBUG_IntraArcSwap
 			cout << "route[" << r << "]" << " cost = " << routeCost << endl;
@@ -2465,7 +2485,7 @@ bool LocalSearch::IntraRouteArcSwap()
 			Node *arcFirstNodePrev = NULL;
 			Node *arcLastNodeNext = NULL;
 
-			int a1 = 1;
+			int a1 = 1; // see above comment
 			int a2 = a1+1; /* 0--b--c--d--0, a1 = 1, a2 = 2 --> a1--a2 = b--c */
 			for(arcFirstNode = this->initSol->getRoutes()[r].first->getNext(); !arcFirstNode->isDepot() && breakIfImproved == false; arcFirstNode = arcFirstNode->getNext(), a1++, a2++)
 			{
@@ -2497,7 +2517,7 @@ bool LocalSearch::IntraRouteArcSwap()
 						cout << " ------ swapNode = " << swapNode->getClient()->getId() << " ----------" <<  " s = " << s << endl;
 #endif
 						if( a1 == s || a2 == s)
-						{
+						{// the arc is before the swapNode
 							arcBefore = true;
 						}
 						else
@@ -2517,8 +2537,10 @@ bool LocalSearch::IntraRouteArcSwap()
 							SeqData *seq4 = NULL;
 
 							double newCostR;
+							// the arc is before the swapNode
 							if(arcBefore)
 							{
+								// if the last client of the arc is the predecessor of the swapNode
 								if(a2+1 == s)
 								{
 									seq1 = this->initSol->getRouteForwSeq()[r][0][a1-1];
@@ -2579,7 +2601,7 @@ bool LocalSearch::IntraRouteArcSwap()
 										retVal = true;
 									}
 								}
-								else
+								else // if the last client of the arc is not the predecessor of the swapNode
 								{
 									seq1 = this->initSol->getRouteBackSeq()[r][a2+1][s-a2];
 #ifdef DEBUG_IntraArcSwap
@@ -2594,7 +2616,7 @@ bool LocalSearch::IntraRouteArcSwap()
 #ifdef DEBUG_IntraArcSwap
 							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
 #endif
-									// evaluate
+									// evaluate feasibility and optimality for the concatenation of seq1, seq2 and seq3
 									if(this->initSol->EVALN(&newCostR,3, seq1, seq2, seq3) && newCostR < routeCost - 0.0001)
 									{
 										// remove arcFirstNode
@@ -2635,8 +2657,9 @@ bool LocalSearch::IntraRouteArcSwap()
 									}
 								}
 							}
-							else
+							else // the arc is after the swapNode
 							{
+								// if the swapNode is the predecessor of the arcFirstNode
 								if(a1-1 == s)
 								{
 									seq1 = this->initSol->getRouteForwSeq()[r][0][a1-1];
@@ -2696,7 +2719,7 @@ bool LocalSearch::IntraRouteArcSwap()
 										retVal = true;
 									}
 								}
-								else
+								else // if the swapNode is not the predecessor of the arcFirstNode
 								{
 									seq1 = this->initSol->getRouteForwSeq()[r][0][s-1];
 #ifdef DEBUG_IntraArcSwap
@@ -2758,7 +2781,7 @@ bool LocalSearch::IntraRouteArcSwap()
 			}
 		}
 		else if( this->initSol->getNbClientsForRoute(r) > 4)
-		{
+		{// if the number of clients in a route is more than 4
 			routeCost = this->initSol->getRouteForwSeq()[r][0].back()->getDistance();
 #ifdef DEBUG_IntraArcSwap
 			cout << "route[" << r << "]" << " cost = " << routeCost << endl;
@@ -2769,7 +2792,7 @@ bool LocalSearch::IntraRouteArcSwap()
 			Node *arcFirstNodePrev = NULL;
 			Node *arcLastNodeNext = NULL;
 
-			int a1 = 1;
+			int a1 = 1; // see above comment
 			int a2 = a1+1; /* 0--b--c--d--0, a1 = 1, a2 = 2 --> a1--a2 = b--c   */
 			for(arcFirstNode = this->initSol->getRoutes()[r].first->getNext(); !arcFirstNode->isDepot() && breakIfImproved == false; arcFirstNode = arcFirstNode->getNext(), a1++, a2++)
 			{
@@ -2801,7 +2824,7 @@ bool LocalSearch::IntraRouteArcSwap()
 						cout << " ------ swapNode = " << swapNode->getClient()->getId() << " ----------" <<  " s = " << s << endl;
 #endif
 						if( a1 == s || a2 == s)
-						{
+						{// the arc is before the swapNode
 							arcBefore = true;
 						}
 						else
@@ -2822,8 +2845,10 @@ bool LocalSearch::IntraRouteArcSwap()
 							SeqData *seq5 = NULL;
 
 							double newCostR;
+							// the arc is before the swapNode
 							if(arcBefore)
 							{
+								// if arcFirstNode is the first client in the route r and swapNode the last one
 								if(a1 == 1 && s == this->initSol->getNbClientsForRoute(r))
 								{
 									int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
@@ -2844,7 +2869,7 @@ bool LocalSearch::IntraRouteArcSwap()
 							cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
 #endif
 								}
-								else if(a2+1 == s-1 || a2+1 == s)
+								else if(a2+1 == s-1 || a2+1 == s) // if arcLastNode is the predecessor of swapNode or swapNode predecessor's
 								{
 									seq1 = this->initSol->getRouteForwSeq()[r][0][a1-1];
 #ifdef DEBUG_IntraArcSwap
@@ -2974,8 +2999,9 @@ bool LocalSearch::IntraRouteArcSwap()
 									}
 								}
 							}
-							else
+							else // the arc is after the swapNode
 							{
+								// if swapNode is the first client in the route r and arcFirstNode the last one
 								if(s == 1 and a2 == this->initSol->getNbClientsForRoute(r))
 								{
 									seq1 = this->initSol->getRouteForwSeq()[r][0][s-1];
@@ -2995,7 +3021,7 @@ bool LocalSearch::IntraRouteArcSwap()
 							cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
 #endif
 								}
-								else if( a1-1 == s+1 || a1-1 == s)
+								else if( a1-1 == s+1 || a1-1 == s) // if swapNode or swapNode successor's is the predecessor of arcFirstNode
 								{
 									seq1 = this->initSol->getRouteForwSeq()[r][0][s-1];
 #ifdef DEBUG_IntraArcSwap
@@ -3135,6 +3161,7 @@ bool LocalSearch::IntraRouteArcSwap()
 	return retVal;
 }
 
+//////////////////////////////////////////// IntraRoute2ArcSwap ////////////////////////////////////////////////////////////////
 bool LocalSearch::IntraRoute2ArcSwap()
 {
 #ifdef DEBUG_Intra2ArcSwap
@@ -3149,7 +3176,7 @@ bool LocalSearch::IntraRoute2ArcSwap()
 	{
 		// record each route cost
 		double routeCost;
-		bool breakIfImproved = false; // stop insertion move for a route if improved
+		bool breakIfImproved = false; // stop 2ArcSwap move for a route if improved
 
 		// if a route contains less than 4 customers then no move
 		// intraRoute2ArcSwap movement start with more than 4 customers
@@ -3164,8 +3191,8 @@ bool LocalSearch::IntraRoute2ArcSwap()
 
 			Node *arcFirstNodePrev = NULL;
 
-			int a1 = 1;
-			int a2 = a1+1; /* 0--b--c--d--0, a1 = 1, a2 = 2 --> a1--a2 = b--c   */
+			int a1 = 1; /* a1 is the index of the first arc first client in the route, a2 is the one of the second one */
+			int a2 = a1+1; /* 0--b--c--d--e--0, a1 = 1, a2 = 2 --> a1--a2 = b--c   */
 			for(arcFirstNode = this->initSol->getRoutes()[r].first->getNext(); !arcFirstNode->isDepot() && breakIfImproved == false; arcFirstNode = arcFirstNode->getNext(), a1++, a2++)
 			{
 #ifdef DEBUG_Intra2ArcSwap
@@ -3187,8 +3214,8 @@ bool LocalSearch::IntraRoute2ArcSwap()
 
 				Node *swapNodeSecondNext = NULL;
 
-				int s1 = a2+1;
-				int s2 = s1+1;
+				int s1 = a2+1; /* s1 is the index of the second arc first client in the route, a2 is the one of the second one */
+				int s2 = s1+1; /* 0--b--c--d--e--0, s1 = 3, s2 = 4 --> s1--s2 = d--e   */
 				for(swapNodeFirst = arcLastNode->getNext(); !swapNodeFirst->isDepot() && breakIfImproved == false; swapNodeFirst = swapNodeFirst->getNext(), s1++, s2++)
 				{
 					swapNodeSecond = swapNodeFirst->getNext();
@@ -3211,7 +3238,7 @@ bool LocalSearch::IntraRoute2ArcSwap()
 						SeqData *seq5 = NULL;
 
 						double newCostR;
-
+						// if the last client of the first arc is the predecessor of the first client of the second arc
 						if(a2+1 == s1)
 						{
 							seq1 = this->initSol->getRouteForwSeq()[r][0][a1-1];
@@ -3275,7 +3302,7 @@ bool LocalSearch::IntraRoute2ArcSwap()
 								retVal = true;
 							}
 						}
-						else
+						else // if the last client of the first arc is not the predecessor of the first client of the second arc
 						{
 							seq1 = this->initSol->getRouteForwSeq()[r][0][a1-1];
 #ifdef DEBUG_Intra2ArcSwap
@@ -3349,4 +3376,12 @@ bool LocalSearch::IntraRoute2ArcSwap()
 	}
 
 	return retVal;
+}
+
+// movements for direct encoding, interRoute movements
+
+//////////////////////////////////////////// InterRouteInsert ////////////////////////////////////////////////////////////////
+bool LocalSearch::InterRouteInsert()
+{
+
 }
