@@ -102,7 +102,7 @@ bool Solution::Decodage(bool useDecoDirect)
 
 			}
 
-			// kairaba: add new empty routes. Find first the upper bound of vehicle number
+			// add new empty routes. Find first the upper bound of vehicle number
 			routes.resize(tsp_data->getNumberNodes() -1);
 			for(int i = numberOfRouteInSolution; i < tsp_data->getNumberNodes() -1; i++)
 			{
@@ -201,6 +201,10 @@ bool Solution::EVAL2(double *cost, SeqData *seq1, SeqData *seq2)
 		else if(seq1->getTail()->getClient()->getDemand() != 0 && seq2->getHead()->getClient()->getDemand() == 0)
 		{
 			joinCost = seq1->getTail()->getClient()->getDistanceDepot();
+		}
+		else if(seq1->getTail()->getClient()->getDemand() == 0 && seq2->getHead()->getClient()->getDemand() == 0)
+		{
+			joinCost = 0;
 		}
 		else
 		{
@@ -438,14 +442,15 @@ void Solution::PrintSolution(bool useDecoDirect)
 	cout << endl ;
 	cout << "------------------------------------" << endl ;
 	cout << "SOLUTION COST : " << std::setprecision(12) << solutionCost << endl ;
-	cout << "NB ROUTES : " << numberOfRouteInSolution << endl ;
 
 	if(useDecoDirect)
 	{
+		int numRoute = 0;
 	    for(uint i = 0; i < routes.size(); i++)
 	    {
 	    	if(routes[i].second > 2)
 	    	{
+	    		numRoute++;
 		        cout << "Route[" << i << "]: ";
 		        Node* routeNode;
 
@@ -456,9 +461,11 @@ void Solution::PrintSolution(bool useDecoDirect)
 		        cout << routeNode->getClient()->getId() << " contains " <<  routes[i].second  << " nodes" << endl;
 	    	}
 	    }
+	    cout << "NB ROUTES : " << numRoute << endl;
 	}
 	else
 	{
+		cout << "NB ROUTES : " << numberOfRouteInSolution << endl;
 		int start, end;
 		for(int i = 0; i < numberOfRouteInSolution; i++)
 		{
@@ -488,6 +495,11 @@ void Solution::PrintSolution(bool useDecoDirect)
 DLinkedList* Solution::getSequence()
 {
 	return encodage;
+}
+
+DataAP* Solution::getDataAP()
+{
+	return tsp_data;
 }
 
 vector<pair<Node*,uint>> Solution::getRoutes()
@@ -581,12 +593,18 @@ void Solution::initRouteSetSubSeq()
 #endif
 	}
 }
+// update methods
 
 void Solution::updateOneRouteSetSubSeq(int numRoute)
 {
+	//resize the second dimension of routeForwardSeq to take into account the variation of the number of client in route numRoute
+	routeForwardSeq[numRoute].resize(routes[numRoute].second);
+	routeBackwardSeq[numRoute].resize(routes[numRoute].second);
+
 	int j = 0;
 	for(Node *seqNode = routes[numRoute].first; seqNode != NULL; seqNode = seqNode->getNext(), j++)// number of nodes in a route
 	{
+
 		routeForwardSeq[numRoute][j].clear(); // clear vector containing route nodes
 		routeBackwardSeq[numRoute][j].clear();
 #ifdef DEBUG_Sol
@@ -626,6 +644,10 @@ void Solution::updateOneRouteSetSubSeq(int numRoute)
 	}
 }
 
+void Solution::updateRouteNbNodes(int numRoute, int numNodes)
+{
+	this->routes[numRoute].second = numNodes;
+}
 // setter methods
 
 void Solution::setObjVal(double objVal)

@@ -3383,5 +3383,153 @@ bool LocalSearch::IntraRoute2ArcSwap()
 //////////////////////////////////////////// InterRouteInsert ////////////////////////////////////////////////////////////////
 bool LocalSearch::InterRouteInsert()
 {
+#ifdef DEBUG_InterRouteInsert
+	cout << endl;
+	cout << "local search InterRouteInsert initial route = " ; this->initSol->PrintSolution(true) ;
+#endif
 
+	// return value
+	bool retVal = false;
+	// r1 is the number of routes including the empty ones
+	for(int r1 = 0; r1 < this->initSol->getDataAP()->getNumberNodes()-1; r1++)
+	{
+		// record each route cost
+		double costR1 = this->initSol->getRouteForwSeq()[r1][0].back()->getDistance();
+#ifdef DEBUG_InterRouteInsert
+		cout << "costR1 = " << costR1 << endl;
+#endif
+		bool breakIfImproved = false; // stop InterRouteInsert move for a route if improved
+
+		for(int r2 = 0; r2 <  this->initSol->getDataAP()->getNumberNodes()-1; r2++)
+		{
+			if(r1 != r2)
+			{
+				double costR2 = this->initSol->getRouteForwSeq()[r2][0].back()->getDistance();
+#ifdef DEBUG_InterRouteInsert
+				cout << "costR2 = " << costR2 << endl;
+#endif
+				Node *insertNodeR1Prev = NULL;
+				int c1 = 1;
+				for(Node *insertNodeR1 = this->initSol->getRoutes()[r1].first->getNext(); !insertNodeR1->isDepot() && breakIfImproved == false; insertNodeR1 = insertNodeR1->getNext(), c1++)
+				{
+#ifdef DEBUG_InterRouteInsert
+				cout << "----------- insertNodeR1 " << " " << " = " << insertNodeR1->getClient()->getId() << " ----------" <<  " c1 = " << c1 << endl;
+#endif
+					insertNodeR1Prev = insertNodeR1->getPrevious();
+#ifdef DEBUG_InterRouteInsert
+						if(insertNodeR1Prev != NULL)
+							cout << "insertNodeR1Prev = " << insertNodeR1Prev->getClient()->getId() <<  endl;
+#endif
+
+					// find the 2 sub-sequences
+					SeqData *seq1 = NULL;
+					SeqData *seq2 = NULL;
+
+					seq1 = this->initSol->getRouteForwSeq()[r1][0][c1-1];
+#ifdef DEBUG_InterRouteInsert
+					cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+#endif
+					int indexLastNodeRouteR1 = this->initSol->getNbClientsForRoute(r1)+1;
+					seq2 = this->initSol->getRouteForwSeq()[r1][c1+1][indexLastNodeRouteR1 - (c1+1)];
+#ifdef DEBUG_InterRouteInsert
+					cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+#endif
+					double newCostR1, reduceCostR1; // double newCostR1;
+					if(this->initSol->EVAL2(&newCostR1, seq1, seq2))
+					{
+#ifdef DEBUG_InterRouteInsert
+						cout << "newCostR1 = " << newCostR1 << endl;
+#endif
+						reduceCostR1 = newCostR1 - costR1;
+#ifdef DEBUG_InterRouteInsert
+						cout << "reduceCostR1 = " << reduceCostR1 << endl;
+#endif
+					}
+
+					int c2 = 0;
+					for(Node *moveNodeR2 = this->initSol->getRoutes()[r2].first; !moveNodeR2->isLastDepot() && breakIfImproved == false; moveNodeR2 = moveNodeR2->getNext(), c2++)
+					{
+#ifdef DEBUG_InterRouteInsert
+					cout << "---------- moveNodeR2 " << " " << " = " << moveNodeR2->getClient()->getId() << " ---------- " << " c2 = " << "" << c2 << endl;
+#endif
+						// find the 3 sub-sequences
+						SeqData *seq3 = NULL;
+						SeqData *seq4 = NULL;
+						SeqData *seq5 = NULL;
+
+
+						seq3 = this->initSol->getRouteForwSeq()[r2][0][c2];
+#ifdef DEBUG_InterRouteInsert
+						cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
+						seq4 = this->initSol->getRouteForwSeq()[r1][c1][0];
+#ifdef DEBUG_InterRouteInsert
+						cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
+#endif
+						int indexLastNodeRouteR2 = this->initSol->getNbClientsForRoute(r2)+1;
+						seq5 = this->initSol->getRouteForwSeq()[r2][c2+1][indexLastNodeRouteR2 - (c2+1)];
+#ifdef DEBUG_InterRouteInsert
+						cout << seq5->getHead()->getClient()->getId() << "--" << seq5->getTail()->getClient()->getId() << endl;
+#endif
+						 double newCostR2, addCostR2, newObjVal; // double newCostR2,  newObjVal;
+						if(this->initSol->EVALN(&newCostR2, 3, seq3, seq4, seq5))
+						{
+#ifdef DEBUG_InterRouteInsert
+							cout << "newCostR2 = " << newCostR2 << endl;
+#endif
+							addCostR2 = newCostR2 - costR2;
+#ifdef DEBUG_InterRouteInsert
+							cout << "addCostR2 = " << addCostR2 << endl;
+							cout << "oldObjVal = " << this->initSol->getObjVal() << endl;
+#endif
+							newObjVal = this->initSol->getObjVal() + reduceCostR1 + addCostR2;
+#ifdef DEBUG_InterRouteInsert
+							cout << "newObjVal = " << newObjVal << endl;
+#endif
+							if(newObjVal < this->initSol->getObjVal() - 0.0001)
+							{
+								// remove insertNodeR1
+								insertNodeR1->removeNode();
+
+								// insert insertNodeR1 after moveNodeR2
+								moveNodeR2->insertAfter(insertNodeR1);
+								// update R1 number of nodes
+#ifdef DEBUG_InterRouteInsert
+								cout << " r1 = " << r1 << endl;
+								cout << "this->initSol->getRoutes()[ " << r1 << " ].second1 = " << this->initSol->getRoutes()[r1].second << endl;
+#endif
+								int numR1 = this->initSol->getRoutes()[r1].second -1;
+								this->initSol->updateRouteNbNodes(r1,numR1);
+#ifdef DEBUG_InterRouteInsert
+								cout << "this->initSol->getRoutes()[ " << r1 << " ].second2 = " << this->initSol->getRoutes()[r1].second << endl;
+#endif
+								// update R2 number of nodes
+#ifdef DEBUG_InterRouteInsert
+								cout << " r2 = " << r2 << endl;
+								cout << "this->initSol->getRoutes()[ " << r2 << " ].second1 = " << this->initSol->getRoutes()[r2].second << endl;
+#endif
+								int numR2 = this->initSol->getRoutes()[r2].second +1;
+								this->initSol->updateRouteNbNodes(r2,numR2);
+#ifdef DEBUG_InterRouteInsert
+								cout << "this->initSol->getRoutes()[ " << r2 << " ].second2 = " << this->initSol->getRoutes()[r2].second << endl;
+#endif
+
+								// update R1 and R2 route sub-sequences
+								this->initSol->updateOneRouteSetSubSeq(r1);
+								this->initSol->updateOneRouteSetSubSeq(r2);
+
+								// update objective value
+								this->initSol->setObjVal(newObjVal);
+
+								breakIfImproved = true;
+								retVal = true;
+
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return retVal;
 }

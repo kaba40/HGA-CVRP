@@ -24,6 +24,7 @@ public:
 	virtual ~Node();
 
 	bool isDepot();
+	bool isLastDepot();
 	Node* getNext();
 	Node* getPrevious();
 	void setNext(Node *nxt);

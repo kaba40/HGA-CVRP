@@ -66,6 +66,7 @@ public:
 	int getRoutesNumber();
 	int getNbClientsForRoute(int r);
 	DLinkedList* getSequence(); // to delete may be
+	DataAP* getDataAP();
 	vector<pair<Node*,uint>> getRoutes();
 	vector<vector<vector<SeqData*>>> getRouteForwSeq();
 	vector<vector<vector<SeqData*>>> getRouteBackSeq();
@@ -74,7 +75,7 @@ public:
 	void initRouteSetSubSeq();
 
 	//updater methods
-//	void updateRoute(int numRoute, pair<Node*,uint> rteSeq);
+	void updateRouteNbNodes(int numRoute, int numNodes);
 	void updateOneRouteSetSubSeq(int numRoute);
 
 	//setter methods

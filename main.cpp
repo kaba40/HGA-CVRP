@@ -95,14 +95,19 @@ int main()
 //		solution_tsp->PrintSolution(true);
 //	}
 
-	if(localAlgo->IntraRoute2ArcSwap())
+//	if(localAlgo->IntraRoute2ArcSwap())
+//	{
+//		cout << "IntraRoute2ArcSwap" << endl;
+//		solution_tsp->CheckSolution(true);
+//		solution_tsp->PrintSolution(true);
+//	}
+
+	if(localAlgo->InterRouteInsert())
 	{
-		cout << "IntraRoute2ArcSwap" << endl;
+		cout << "InterRouteInsert" << endl;
 		solution_tsp->CheckSolution(true);
 		solution_tsp->PrintSolution(true);
 	}
-
-
 
 //	if(localAlgo->Insert())
 //	{

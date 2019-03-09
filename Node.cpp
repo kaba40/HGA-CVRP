@@ -52,6 +52,16 @@ bool Node::isDepot()
 	return false;
 }
 
+bool Node::isLastDepot()
+{
+	if(this->getNext() == NULL)
+	{
+		return true;
+	}
+
+	return false;
+}
+
 Node* Node::getNext()
 {
 	return next;
