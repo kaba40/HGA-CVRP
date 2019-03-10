@@ -38,6 +38,7 @@ public:
 
 	// inter-route movements
 	bool InterRouteInsert();
+	bool InterRouteArcInsert();
 };
 
 #endif /* LOCALSEARCH_HPP_ */
