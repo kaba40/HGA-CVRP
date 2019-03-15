@@ -11,7 +11,6 @@ SeqData::SeqData()
 {
 	this->demand = 0;
 	this->distance = 0;
-//	this->client = NULL;
 	this->head = NULL;
 	this->tail = NULL;
 }
@@ -20,7 +19,6 @@ SeqData::SeqData(Node *node)
 {
 	this->demand = node->getClient()->getDemand();
 	this->distance = 0;
-//	this->client = clt;
 	this->head = node;
 	this->tail = node;
 
@@ -30,7 +28,6 @@ SeqData::SeqData(SeqData *seq)
 {
 	this->demand = seq->getDemand();
 	this->distance = seq->getDistance();
-//	this->client = clt;
 	this->head = seq->getHead();
 	this->tail = seq->getTail();
 

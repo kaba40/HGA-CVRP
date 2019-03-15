@@ -16,7 +16,6 @@ class SeqData
 private:
 	int demand;
 	double distance;
-//	Customer *client;
 	Node *head;
 	Node *tail;
 

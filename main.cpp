@@ -67,6 +67,7 @@ int main()
 
 	LocalSearch* localAlgo = new LocalSearch(solution_tsp);
 
+	///////////////////////////////// intraRoute movements //////////////////////////////////////////////////
 //	if(localAlgo->IntraRouteInsert())
 //	{
 //		cout << "IntraRouteInsert" << endl;
@@ -87,14 +88,14 @@ int main()
 //		solution_tsp->CheckSolution(true);
 //		solution_tsp->PrintSolution(true);
 //	}
-
+//
 //	if(localAlgo->IntraRouteArcSwap())
 //	{
 //		cout << "IntraRouteArcSwap" << endl;
 //		solution_tsp->CheckSolution(true);
 //		solution_tsp->PrintSolution(true);
 //	}
-
+//
 //	if(localAlgo->IntraRoute2ArcSwap())
 //	{
 //		cout << "IntraRoute2ArcSwap" << endl;
@@ -102,13 +103,43 @@ int main()
 //		solution_tsp->PrintSolution(true);
 //	}
 
-	if(localAlgo->InterRouteInsert())
+	///////////////////////////////// interRoute movements //////////////////////////////////////////////////
+//	if(localAlgo->InterRouteInsert())
+//	{
+//		cout << "InterRouteInsert" << endl;
+//		solution_tsp->CheckSolution(true);
+//		solution_tsp->PrintSolution(true);
+//	}
+//
+//	if(localAlgo->InterRouteArcInsert())
+//	{
+//		cout << "InterRouteArcInsert" << endl;
+//		solution_tsp->CheckSolution(true);
+//		solution_tsp->PrintSolution(true);
+//	}
+//
+//	if(localAlgo->InterRouteSwap())
+//	{
+//		cout << "InterRouteSwap" << endl;
+//		solution_tsp->CheckSolution(true);
+//		solution_tsp->PrintSolution(true);
+//	}
+
+//	if(localAlgo->InterRouteArcSwap())
+//	{
+//		cout << "InterRouteArcSwap" << endl;
+//		solution_tsp->CheckSolution(true);
+//		solution_tsp->PrintSolution(true);
+//	}
+
+	if(localAlgo->InterRoute2ArcSwap())
 	{
-		cout << "InterRouteInsert" << endl;
+		cout << "InterRoute2ArcSwap" << endl;
 		solution_tsp->CheckSolution(true);
 		solution_tsp->PrintSolution(true);
 	}
 
+	///////////////////////////////// movements on indirect encoding //////////////////////////////////////////////////
 //	if(localAlgo->Insert())
 //	{
 //		cout << "Insert" << endl;
