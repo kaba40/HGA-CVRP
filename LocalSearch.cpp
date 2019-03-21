@@ -107,7 +107,6 @@ bool LocalSearch::Insert()
 					cout << " show list after inserting " << insertNode->getClient()->getId() << " before " << moveNode->getClient()->getId()  ;  this->initSol->getSequence()->show() ;
 #endif
 				}
-
 			}
 
 			// decode the list
@@ -171,7 +170,6 @@ bool LocalSearch::Insert()
 		cout << "-------------------------------------------------------------------------------------------------" << endl;
 #endif
 	}
-
 	return false;
 }
 
@@ -280,7 +278,6 @@ bool LocalSearch::ArcInsert()
 						cout << " show list after inserting " << insertNodeFirst->getClient()->getId() << "--" << insertNodeLast->getClient()->getId()  << " before " << moveNode->getClient()->getId()  ;  this->initSol->getSequence()->show();
 #endif
 					}
-
 				}
 
 				// decode the list
@@ -351,7 +348,6 @@ bool LocalSearch::ArcInsert()
 		cout << "-------------------------------------------------------------------------------------------------" << endl;
 #endif
 	}
-
 	return false;
 }
 
@@ -562,7 +558,6 @@ bool LocalSearch::Swap()
 				cout << " show list after inserting " <<  swapNodeSecond->getClient()->getId() << " in its initial place " ;  this->initSol->getSequence()->show() ;
 #endif
 			}
-
 		}
 #ifdef DEBUG_Swap
 		cout << "-------------------------------------------------------------------------------------------------" << endl;
@@ -856,7 +851,6 @@ bool LocalSearch::SwapArcs()
 		cout << "-------------------------------------------------------------------------------------------------" << endl;
 #endif
 	}
-
 	return false;
 }
 
@@ -1140,7 +1134,6 @@ bool LocalSearch::IntraRouteInsert()
 
 	for(int r = 0; r < this->initSol->getRoutesNumber(); r++)
 	{
-
 		// record each route cost
 		double routeCost;
 		bool breakIfImproved = false; // stop insertion move for a route if improved
@@ -1152,7 +1145,6 @@ bool LocalSearch::IntraRouteInsert()
 			routeCost = this->initSol->getRouteForwSeq()[r][0].back()->getDistance();
 			if(this->initSol->getRouteBackSeq()[r][0].back()->getDistance() < routeCost - 0.0001)
 			{
-
 				// apply the move
 				Node *insertNode = this->initSol->getRoutes()[r].first->getNext();
 				Node *moveNode = insertNode->getNext();
@@ -1624,7 +1616,6 @@ bool LocalSearch::IntraRouteInsert()
 			}
 		}
 	}
-
 	return retVal;
 }
 
@@ -1786,7 +1777,6 @@ bool LocalSearch::IntraRouteArcInsert()
 					}
 				}
 			}
-
 		}
 		else if(this->initSol->getNbClientsForRoute(r) > 3) // route contains more than 3 customers
 		{
@@ -1937,9 +1927,7 @@ bool LocalSearch::IntraRouteArcInsert()
 				}
 			}
 		}
-
 	}
-
 	return retVal;
 }
 
@@ -2104,192 +2092,192 @@ bool LocalSearch::IntraRouteSwap()
 			for(Node *swapNodeFirst = this->initSol->getRoutes()[r].first->getNext(); !swapNodeFirst->isDepot() && breakIfImproved == false; swapNodeFirst = swapNodeFirst->getNext(), s1++)
 			{
 #ifdef DEBUG_IntraSwap
-					cout << " ------ swapNodeFirst = " << swapNodeFirst->getClient()->getId() << " ----------" <<  " s1 = " << s1 << endl;
+				cout << " ------ swapNodeFirst = " << swapNodeFirst->getClient()->getId() << " ----------" <<  " s1 = " << s1 << endl;
 #endif
-					swapNodeFirstPrev = swapNodeFirst->getPrevious();
+				swapNodeFirstPrev = swapNodeFirst->getPrevious();
 #ifdef DEBUG_IntraSwap
-					if(swapNodeFirstPrev != NULL)
-						cout << "swapNodeFirstPrev = " << swapNodeFirstPrev->getClient()->getId() << endl ;
+				if(swapNodeFirstPrev != NULL)
+					cout << "swapNodeFirstPrev = " << swapNodeFirstPrev->getClient()->getId() << endl ;
 #endif
-					Node *swapNodeSecondNext = NULL;
+				Node *swapNodeSecondNext = NULL;
 
-					int s2 = s1+1; // see above comment
-					for(Node *swapNodeSecond = swapNodeFirst->getNext(); !swapNodeSecond->isDepot() && breakIfImproved == false; swapNodeSecond = swapNodeSecond->getNext(), s2++)
+				int s2 = s1+1; // see above comment
+				for(Node *swapNodeSecond = swapNodeFirst->getNext(); !swapNodeSecond->isDepot() && breakIfImproved == false; swapNodeSecond = swapNodeSecond->getNext(), s2++)
+				{
+#ifdef DEBUG_IntraSwap
+					cout << " ------ swapNodeSecond = " << swapNodeSecond->getClient()->getId() << " ----------" <<  " s2 = " << s2 << endl;
+#endif
+					swapNodeSecondNext = swapNodeSecond->getNext();
+#ifdef DEBUG_IntraSwap
+					if(swapNodeSecondNext != NULL)
+						cout << "swapNodeSecondNext = " << swapNodeSecondNext->getClient()->getId() << endl ;
+#endif
+					// find sub-sequences
+					SeqData *seq1 = NULL;
+					SeqData *seq2 = NULL;
+					SeqData *seq3 = NULL;
+					SeqData *seq4 = NULL;
+					SeqData *seq5 = NULL;
+
+					// if swapNodeFirst is the first client and swapNodeSecond is the last one
+					// then determine 3 sub-sequences
+					if((s1 == 1) && (s2 == this->initSol->getNbClientsForRoute(r)))
 					{
+						int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
+						seq1 = this->initSol->getRouteBackSeq()[r][s2][indexLastNodeRoute - s2];
 #ifdef DEBUG_IntraSwap
-						cout << " ------ swapNodeSecond = " << swapNodeSecond->getClient()->getId() << " ----------" <<  " s2 = " << s2 << endl;
+						cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
 #endif
-						swapNodeSecondNext = swapNodeSecond->getNext();
+						seq2 = this->initSol->getRouteForwSeq()[r][s1+1][(s2-1)-(s1+1)];
 #ifdef DEBUG_IntraSwap
-						if(swapNodeSecondNext != NULL)
-							cout << "swapNodeSecondNext = " << swapNodeSecondNext->getClient()->getId() << endl ;
+						cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
 #endif
-						// find sub-sequences
-						SeqData *seq1 = NULL;
-						SeqData *seq2 = NULL;
-						SeqData *seq3 = NULL;
-						SeqData *seq4 = NULL;
-						SeqData *seq5 = NULL;
 
-						// if swapNodeFirst is the first client and swapNodeSecond is the last one
-						// then determine 3 sub-sequences
-						if((s1 == 1) && (s2 == this->initSol->getNbClientsForRoute(r)))
+						seq3 = this->initSol->getRouteBackSeq()[r][0][s1];
+#ifdef DEBUG_IntraSwap
+						cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
+						double newCostR;
+						if(this->initSol->EVALN(&newCostR,3, seq1, seq2, seq3) && newCostR < routeCost - 0.0001)
 						{
-							int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
-							seq1 = this->initSol->getRouteBackSeq()[r][s2][indexLastNodeRoute - s2];
-#ifdef DEBUG_IntraSwap
-							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
-#endif
-							seq2 = this->initSol->getRouteForwSeq()[r][s1+1][(s2-1)-(s1+1)];
-#ifdef DEBUG_IntraSwap
-							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
-#endif
+							// remove swapNodeFirst
+							swapNodeFirst->removeNode();
+							// remove swapNodeSecond
+							swapNodeSecond->removeNode();
 
-							seq3 = this->initSol->getRouteBackSeq()[r][0][s1];
-#ifdef DEBUG_IntraSwap
-							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
-#endif
-							double newCostR;
-							if(this->initSol->EVALN(&newCostR,3, seq1, seq2, seq3) && newCostR < routeCost - 0.0001)
-							{
-								// remove swapNodeFirst
-								swapNodeFirst->removeNode();
-								// remove swapNodeSecond
-								swapNodeSecond->removeNode();
+							// insert swapNodeSecond after swapNodeFirstPrev
+							swapNodeFirstPrev->insertAfter(swapNodeSecond);
+							// insert swapNodeFirst before swapNodeSecondNext
+							swapNodeSecondNext->insertBefore(swapNodeFirst);
 
-								// insert swapNodeSecond after swapNodeFirstPrev
-								swapNodeFirstPrev->insertAfter(swapNodeSecond);
-								// insert swapNodeFirst before swapNodeSecondNext
-								swapNodeSecondNext->insertBefore(swapNodeFirst);
+							// update sub-sequences of the route
+							this->initSol->updateOneRouteSetSubSeq(r);
 
-								// update sub-sequences of the route
-								this->initSol->updateOneRouteSetSubSeq(r);
+							// update objective functions
+#ifdef DEBUG_IntraSwap
+							cout << " newCostR = " << newCostR << endl;
+#endif
+							double restCout = this->initSol->getObjVal() - routeCost;
+#ifdef DEBUG_IntraSwap
+							cout << "restCout = " << restCout << endl;
+#endif
+							double newObjVal = restCout + newCostR;
+#ifdef DEBUG_IntraSwap
+							cout << "newObjVal = " << newObjVal << endl;
+#endif
+							this->initSol->setObjVal(newObjVal);
 
-								// update objective functions
-#ifdef DEBUG_IntraSwap
-								cout << " newCostR = " << newCostR << endl;
-#endif
-								double restCout = this->initSol->getObjVal() - routeCost;
-#ifdef DEBUG_IntraSwap
-								cout << "restCout = " << restCout << endl;
-#endif
-								double newObjVal = restCout + newCostR;
-#ifdef DEBUG_IntraSwap
-								cout << "newObjVal = " << newObjVal << endl;
-#endif
-								this->initSol->setObjVal(newObjVal);
-
-								breakIfImproved = true;
-								retVal = true;
-							}
-						}
-						else if( (s1+1 == s2) || (s1+1 == s2-1)) // see above comment
-						{
-							seq1 = this->initSol->getRouteForwSeq()[r][0][s1-1];
-#ifdef DEBUG_IntraSwap
-							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
-#endif
-							seq2 = this->initSol->getRouteBackSeq()[r][s1][s2-s1];
-#ifdef DEBUG_IntraSwap
-							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
-#endif
-							int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
-							seq3 = this->initSol->getRouteForwSeq()[r][s2+1][indexLastNodeRoute - (s2+1)];
-#ifdef DEBUG_IntraSwap
-							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
-#endif
-							double newCostR;
-							if(this->initSol->EVALN(&newCostR,3, seq1, seq2, seq3) && newCostR < routeCost - 0.0001)
-							{
-								// remove swapNodeFirst
-								swapNodeFirst->removeNode();
-								// remove swapNodeSecond
-								swapNodeSecond->removeNode();
-
-								// insert swapNodeSecond after swapNodeFirstPrev
-								swapNodeFirstPrev->insertAfter(swapNodeSecond);
-								// insert swapNodeFirst before swapNodeSecondNext
-								swapNodeSecondNext->insertBefore(swapNodeFirst);
-
-								// update sub-sequences of the route
-								this->initSol->updateOneRouteSetSubSeq(r);
-
-								// update objective functions
-#ifdef DEBUG_IntraSwap
-								cout << " newCostR = " << newCostR << endl;
-#endif
-								double restCout = this->initSol->getObjVal() - routeCost;
-#ifdef DEBUG_IntraSwap
-								cout << "restCout = " << restCout << endl;
-#endif
-								double newObjVal = restCout + newCostR;
-#ifdef DEBUG_IntraSwap
-								cout << "newObjVal = " << newObjVal << endl;
-#endif
-								this->initSol->setObjVal(newObjVal);
-
-								breakIfImproved = true;
-								retVal = true;
-							}
-						}
-						else if( s1+1 != s2-1) // if the successor of swapNodeFirst is not the predecessor of swapNodeSecond
-						{
-							seq1 = this->initSol->getRouteForwSeq()[r][0][s1-1];
-#ifdef DEBUG_IntraSwap
-							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
-#endif
-							seq2 = this->initSol->getRouteForwSeq()[r][s2][0];
-#ifdef DEBUG_IntraSwap
-							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
-#endif
-							seq3 = this->initSol->getRouteForwSeq()[r][s1+1][(s2-1)-(s1+1)];
-#ifdef DEBUG_IntraSwap
-							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
-#endif
-							seq4 = this->initSol->getRouteForwSeq()[r][s1][0];
-#ifdef DEBUG_IntraSwap
-							cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
-#endif
-							int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
-							seq5 = this->initSol->getRouteForwSeq()[r][s2+1][indexLastNodeRoute - (s2+1)];
-#ifdef DEBUG_IntraSwap
-							cout << seq5->getHead()->getClient()->getId() << "--" << seq5->getTail()->getClient()->getId() << endl;
-#endif
-							double newCostR;
-							if(this->initSol->EVALN(&newCostR,5, seq1, seq2, seq3, seq4, seq5) && newCostR < routeCost - 0.0001)
-							{
-								// remove swapNodeFirst
-								swapNodeFirst->removeNode();
-								// remove swapNodeSecond
-								swapNodeSecond->removeNode();
-
-								// insert swapNodeSecond after swapNodeFirstPrev
-								swapNodeFirstPrev->insertAfter(swapNodeSecond);
-								// insert swapNodeFirst before swapNodeSecondNext
-								swapNodeSecondNext->insertBefore(swapNodeFirst);
-
-								// update sub-sequences of the route
-								this->initSol->updateOneRouteSetSubSeq(r);
-
-								// update objective functions
-#ifdef DEBUG_IntraSwap
-								cout << " newCostR = " << newCostR << endl;
-#endif
-								double restCout = this->initSol->getObjVal() - routeCost;
-#ifdef DEBUG_IntraSwap
-								cout << "restCout = " << restCout << endl;
-#endif
-								double newObjVal = restCout + newCostR;
-#ifdef DEBUG_IntraSwap
-								cout << "newObjVal = " << newObjVal << endl;
-#endif
-								this->initSol->setObjVal(newObjVal);
-
-								breakIfImproved = true;
-								retVal = true;
-							}
+							breakIfImproved = true;
+							retVal = true;
 						}
 					}
+					else if( (s1+1 == s2) || (s1+1 == s2-1)) // see above comment
+					{
+						seq1 = this->initSol->getRouteForwSeq()[r][0][s1-1];
+#ifdef DEBUG_IntraSwap
+						cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+#endif
+						seq2 = this->initSol->getRouteBackSeq()[r][s1][s2-s1];
+#ifdef DEBUG_IntraSwap
+						cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+#endif
+						int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
+						seq3 = this->initSol->getRouteForwSeq()[r][s2+1][indexLastNodeRoute - (s2+1)];
+#ifdef DEBUG_IntraSwap
+						cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
+						double newCostR;
+						if(this->initSol->EVALN(&newCostR,3, seq1, seq2, seq3) && newCostR < routeCost - 0.0001)
+						{
+							// remove swapNodeFirst
+							swapNodeFirst->removeNode();
+							// remove swapNodeSecond
+							swapNodeSecond->removeNode();
+
+							// insert swapNodeSecond after swapNodeFirstPrev
+							swapNodeFirstPrev->insertAfter(swapNodeSecond);
+							// insert swapNodeFirst before swapNodeSecondNext
+							swapNodeSecondNext->insertBefore(swapNodeFirst);
+
+							// update sub-sequences of the route
+							this->initSol->updateOneRouteSetSubSeq(r);
+
+							// update objective functions
+#ifdef DEBUG_IntraSwap
+							cout << " newCostR = " << newCostR << endl;
+#endif
+							double restCout = this->initSol->getObjVal() - routeCost;
+#ifdef DEBUG_IntraSwap
+							cout << "restCout = " << restCout << endl;
+#endif
+							double newObjVal = restCout + newCostR;
+#ifdef DEBUG_IntraSwap
+							cout << "newObjVal = " << newObjVal << endl;
+#endif
+							this->initSol->setObjVal(newObjVal);
+
+							breakIfImproved = true;
+							retVal = true;
+						}
+					}
+					else if( s1+1 != s2-1) // if the successor of swapNodeFirst is not the predecessor of swapNodeSecond
+					{
+						seq1 = this->initSol->getRouteForwSeq()[r][0][s1-1];
+#ifdef DEBUG_IntraSwap
+						cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+#endif
+						seq2 = this->initSol->getRouteForwSeq()[r][s2][0];
+#ifdef DEBUG_IntraSwap
+						cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+#endif
+						seq3 = this->initSol->getRouteForwSeq()[r][s1+1][(s2-1)-(s1+1)];
+#ifdef DEBUG_IntraSwap
+						cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
+						seq4 = this->initSol->getRouteForwSeq()[r][s1][0];
+#ifdef DEBUG_IntraSwap
+						cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
+#endif
+						int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
+						seq5 = this->initSol->getRouteForwSeq()[r][s2+1][indexLastNodeRoute - (s2+1)];
+#ifdef DEBUG_IntraSwap
+						cout << seq5->getHead()->getClient()->getId() << "--" << seq5->getTail()->getClient()->getId() << endl;
+#endif
+						double newCostR;
+						if(this->initSol->EVALN(&newCostR,5, seq1, seq2, seq3, seq4, seq5) && newCostR < routeCost - 0.0001)
+						{
+							// remove swapNodeFirst
+							swapNodeFirst->removeNode();
+							// remove swapNodeSecond
+							swapNodeSecond->removeNode();
+
+							// insert swapNodeSecond after swapNodeFirstPrev
+							swapNodeFirstPrev->insertAfter(swapNodeSecond);
+							// insert swapNodeFirst before swapNodeSecondNext
+							swapNodeSecondNext->insertBefore(swapNodeFirst);
+
+							// update sub-sequences of the route
+							this->initSol->updateOneRouteSetSubSeq(r);
+
+							// update objective functions
+#ifdef DEBUG_IntraSwap
+							cout << " newCostR = " << newCostR << endl;
+#endif
+							double restCout = this->initSol->getObjVal() - routeCost;
+#ifdef DEBUG_IntraSwap
+							cout << "restCout = " << restCout << endl;
+#endif
+							double newObjVal = restCout + newCostR;
+#ifdef DEBUG_IntraSwap
+							cout << "newObjVal = " << newObjVal << endl;
+#endif
+							this->initSol->setObjVal(newObjVal);
+
+							breakIfImproved = true;
+							retVal = true;
+						}
+					}
+				}
 			}
 		}
 	}
@@ -4136,7 +4124,7 @@ bool LocalSearch::InterRouteArcSwap()
 											retVal = true;
 										}
 									}
-								} //
+								}
 							}
 						}
 					}
@@ -4148,7 +4136,6 @@ bool LocalSearch::InterRouteArcSwap()
 }
 
 //////////////////////////////////////////// InterRoute2ArcSwap ////////////////////////////////////////////////////////////////
-
 
 bool LocalSearch::InterRoute2ArcSwap()
 {
