@@ -18,6 +18,7 @@
 #include "Node.hpp"
 #include "DLinkedList.hpp"
 #include "LocalSearch.hpp"
+#include "Population.hpp"
 
 using namespace std;
 
@@ -47,7 +48,7 @@ int main()
 	solution_tsp = new Solution(data_instance, data_instance->getCustomerList());
 
 
-	solution_tsp->setRandomSequence();
+//	solution_tsp->setRandomSequence();
 
 #ifdef DEBUG_Main
 
@@ -58,6 +59,22 @@ int main()
 
 #endif
 
+	solution_tsp->getSequence()->show(); cout << "Head--Tail : " << solution_tsp->getSequence()->getHead()->getClient()->getId() << "--" << solution_tsp->getSequence()->getTail()->getClient()->getId() << endl;
+
+
+	// test de la classe population
+	Population popInit =  Population(data_instance, 5);
+
+	exit(-1);
+
+
+	for(int i = 0; i < popInit.getIndividus().size(); i++)
+	{
+		cout << "individu[" << i << "] " << "cost = " << popInit.getIndividus()[i]->getObjVal() << endl;
+	}
+
+	exit(-1);
+
 	// true means we use direct encoding to do local search
 	if(solution_tsp->Decodage(true))
 	{
@@ -65,72 +82,73 @@ int main()
 		solution_tsp->PrintSolution(true);
 	}
 
+
 	LocalSearch* localAlgo = new LocalSearch(solution_tsp);
 
 	///////////////////////////////// intraRoute movements //////////////////////////////////////////////////
-//	if(localAlgo->IntraRouteInsert())
-//	{
-//		cout << "IntraRouteInsert" << endl;
-//		solution_tsp->CheckSolution(true);
-//		solution_tsp->PrintSolution(true);
-//	}
-//
-//	if(localAlgo->IntraRouteArcInsert())
-//	{
-//		cout << "IntraRouteArcInsert" << endl;
-//		solution_tsp->CheckSolution(true);
-//		solution_tsp->PrintSolution(true);
-//	}
-//
-//	if(localAlgo->IntraRouteSwap())
-//	{
-//		cout << "IntraRouteSwap" << endl;
-//		solution_tsp->CheckSolution(true);
-//		solution_tsp->PrintSolution(true);
-//	}
-//
-//	if(localAlgo->IntraRouteArcSwap())
-//	{
-//		cout << "IntraRouteArcSwap" << endl;
-//		solution_tsp->CheckSolution(true);
-//		solution_tsp->PrintSolution(true);
-//	}
-//
-//	if(localAlgo->IntraRoute2ArcSwap())
-//	{
-//		cout << "IntraRoute2ArcSwap" << endl;
-//		solution_tsp->CheckSolution(true);
-//		solution_tsp->PrintSolution(true);
-//	}
+	if(localAlgo->IntraRouteInsert())
+	{
+		cout << "IntraRouteInsert" << endl;
+		solution_tsp->CheckSolution(true);
+		solution_tsp->PrintSolution(true);
+	}
+
+	if(localAlgo->IntraRouteArcInsert())
+	{
+		cout << "IntraRouteArcInsert" << endl;
+		solution_tsp->CheckSolution(true);
+		solution_tsp->PrintSolution(true);
+	}
+
+	if(localAlgo->IntraRouteSwap())
+	{
+		cout << "IntraRouteSwap" << endl;
+		solution_tsp->CheckSolution(true);
+		solution_tsp->PrintSolution(true);
+	}
+
+	if(localAlgo->IntraRouteArcSwap())
+	{
+		cout << "IntraRouteArcSwap" << endl;
+		solution_tsp->CheckSolution(true);
+		solution_tsp->PrintSolution(true);
+	}
+
+	if(localAlgo->IntraRoute2ArcSwap())
+	{
+		cout << "IntraRoute2ArcSwap" << endl;
+		solution_tsp->CheckSolution(true);
+		solution_tsp->PrintSolution(true);
+	}
 
 	///////////////////////////////// interRoute movements //////////////////////////////////////////////////
-//	if(localAlgo->InterRouteInsert())
-//	{
-//		cout << "InterRouteInsert" << endl;
-//		solution_tsp->CheckSolution(true);
-//		solution_tsp->PrintSolution(true);
-//	}
-//
-//	if(localAlgo->InterRouteArcInsert())
-//	{
-//		cout << "InterRouteArcInsert" << endl;
-//		solution_tsp->CheckSolution(true);
-//		solution_tsp->PrintSolution(true);
-//	}
-//
-//	if(localAlgo->InterRouteSwap())
-//	{
-//		cout << "InterRouteSwap" << endl;
-//		solution_tsp->CheckSolution(true);
-//		solution_tsp->PrintSolution(true);
-//	}
+	if(localAlgo->InterRouteInsert())
+	{
+		cout << "InterRouteInsert" << endl;
+		solution_tsp->CheckSolution(true);
+		solution_tsp->PrintSolution(true);
+	}
 
-//	if(localAlgo->InterRouteArcSwap())
-//	{
-//		cout << "InterRouteArcSwap" << endl;
-//		solution_tsp->CheckSolution(true);
-//		solution_tsp->PrintSolution(true);
-//	}
+	if(localAlgo->InterRouteArcInsert())
+	{
+		cout << "InterRouteArcInsert" << endl;
+		solution_tsp->CheckSolution(true);
+		solution_tsp->PrintSolution(true);
+	}
+
+	if(localAlgo->InterRouteSwap())
+	{
+		cout << "InterRouteSwap" << endl;
+		solution_tsp->CheckSolution(true);
+		solution_tsp->PrintSolution(true);
+	}
+
+	if(localAlgo->InterRouteArcSwap())
+	{
+		cout << "InterRouteArcSwap" << endl;
+		solution_tsp->CheckSolution(true);
+		solution_tsp->PrintSolution(true);
+	}
 
 	if(localAlgo->InterRoute2ArcSwap())
 	{

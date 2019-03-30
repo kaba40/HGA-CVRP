@@ -40,6 +40,7 @@ public:
 
 	inline int getSize(){return size;}
 	void show();
+	void showBack();
 
 };
 

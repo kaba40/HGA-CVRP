@@ -1657,7 +1657,7 @@ bool LocalSearch::IntraRouteArcInsert()
 				insertNodeFirst = insertNode;
 				insertNodeLast = insertNodeFirst->getNext();
 
-				if(!insertNodeLast->isDepot())
+				if(!insertNodeLast->isDepot()) // move it the for condition
 				{
 #ifdef DEBUG_IntraArcInsert
 					cout << " ------ insert arc = " << insertNodeFirst->getClient()->getId() << "--" << insertNodeLast->getClient()->getId() << " ----------" <<  " in1 = " << in1 << "---------- " << "in2 = " << in2 << endl;
@@ -1936,7 +1936,7 @@ bool LocalSearch::IntraRouteSwap()
 {
 #ifdef DEBUG_IntraSwap
 	cout << endl;
-	cout << "local search IntraRouteArcInsert initial route = " ; this->initSol->PrintSolution(true) ;
+	cout << "local search IntraRouteSwap initial route = " ; this->initSol->PrintSolution(true) ;
 #endif
 
 	// return value
@@ -1966,7 +1966,7 @@ bool LocalSearch::IntraRouteSwap()
 #endif
 					swapNodeFirstPrev = swapNodeFirst->getPrevious();
 #ifdef DEBUG_IntraSwap
-					if(swapNodeFirstPrev != NULL)
+					if(swapNodeFirstPrev != NULL) // no sens here
 						cout << "swapNodeFirstPrev = " << swapNodeFirstPrev->getClient()->getId() << endl ;
 #endif
 					Node *swapNodeSecondNext = NULL;
@@ -2303,7 +2303,7 @@ bool LocalSearch::IntraRouteArcSwap()
 
 		// if a route contains less than 2 customers then no move
 		// intraRouteSwap movement start with more than 2 customers
-		if(this->initSol->getNbClientsForRoute(r) == 3)
+		if(this->initSol->getNbClientsForRoute(r) == 3) // replace by faux
 		{//if the number of clients in a route is equal 3
 
 			routeCost = this->initSol->getRouteForwSeq()[r][0].back()->getDistance();
@@ -2457,7 +2457,7 @@ bool LocalSearch::IntraRouteArcSwap()
 				}
 			}
 		}
-		else if(this->initSol->getNbClientsForRoute(r) == 4)
+		else if(this->initSol->getNbClientsForRoute(r) == 4) // >= 3 et <= 4
 		{// if the number of clients in a route is equal 4
 			routeCost = this->initSol->getRouteForwSeq()[r][0].back()->getDistance();
 #ifdef DEBUG_IntraArcSwap
@@ -3202,7 +3202,7 @@ bool LocalSearch::IntraRoute2ArcSwap()
 				for(swapNodeFirst = arcLastNode->getNext(); !swapNodeFirst->isDepot() && breakIfImproved == false; swapNodeFirst = swapNodeFirst->getNext(), s1++, s2++)
 				{
 					swapNodeSecond = swapNodeFirst->getNext();
-					if(!swapNodeSecond->isDepot())
+					if(!swapNodeSecond->isDepot()) // add to the cycle
 					{
 #ifdef DEBUG_Intra2ArcSwap
 						cout << " ------ swap arc second = " << swapNodeFirst->getClient()->getId() << "--" << swapNodeSecond->getClient()->getId() << " ----------" <<  " s1 = " << s1 << "---------- " << " s2 = " << s2  << endl;
@@ -4295,4 +4295,55 @@ bool LocalSearch::InterRoute2ArcSwap()
 		}
 	}
 	return retVal;
+}
+
+//////////////////////////////////////////// restore the sequence after direct encoding movements ////////////////////////////////////////////////////////////////
+
+void LocalSearch::RestoreSequence()
+{
+
+#ifdef DEBUG_RestoreSequence
+	cout << endl;
+	cout << "direct encoding = " ; this->initSol->PrintSolution(true) ;
+#endif
+
+	vector<Node*> seqNodes;
+	for(int r = 0; r < this->initSol->getDataAP()->getNumberNodes()-1; r++)
+	{
+		if(this->initSol->getNbClientsForRoute(r) >= 1)
+		{
+
+			cout << "r = " << r << endl;
+			for(Node *routeNode = this->initSol->getRoutes()[r].first->getNext(); !routeNode->isDepot(); routeNode = routeNode->getNext())
+			{
+				seqNodes.push_back(routeNode);
+			}
+		}
+	}
+
+
+	this->initSol->getSequence()->delete_list();
+
+	this->initSol->getRoutes().clear();
+
+	for(uint r = 0; r < this->initSol->getRoutes().size(); r++ )
+	{
+//		this->initSol->getRoutes().erase(this->initSol->getRoutes().begin()+r);
+		cout << "route[" << r << "] contains" << endl;
+		for(Node *routeNode = this->initSol->getRoutes()[r].first; routeNode != NULL; routeNode = routeNode->getNext())
+		{
+
+			cout <<  routeNode->getClient()->getId() << "--";
+		}
+		cout << endl;
+	}
+
+exit(-1);
+
+	this->initSol->getTourStructure().clear();
+	for(uint i = 0; i < seqNodes.size(); i++)
+	{
+		cout << "seqNodes[" << i << "] id = " << seqNodes[i]->getClient()->getId() << endl;
+		this->initSol->getSequence()->push_back(seqNodes[i]);
+	}
 }

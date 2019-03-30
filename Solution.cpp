@@ -57,7 +57,9 @@ bool Solution::Decodage(bool useDecoDirect)
 		// count the number of routes -- numberOfRoutes
 		int nbTour = tsp_data->getNumberNodes()-1;
 		vector<int> pred = splitAlgo->getPredence();
+//		cout << "pred size = " << pred.size() << endl;
         vector<Node*> predNode = splitAlgo->getPredenceNode();
+//      cout << "predNode size = " << predNode.size() << endl;
 		numberOfRouteInSolution = 0; // to remove
 		while(nbTour != 0)
 		{
@@ -70,11 +72,11 @@ bool Solution::Decodage(bool useDecoDirect)
 
 		if(useDecoDirect)
 		{
-//	        routeSeq = vector<Node*>(numberOfRouteInSolution);
 	        routes = vector<pair<Node*, uint>>(numberOfRouteInSolution);
 
 	        Node* last = encodage->getTail(); // to record the last element of the route
 
+//	        cout << "last1 = " << last->getClient()->getId() << endl;
 			for (int i = numberOfRouteInSolution-1 ; i >= 0 ; i --)
 			{
 
@@ -85,6 +87,9 @@ bool Solution::Decodage(bool useDecoDirect)
 	            Node* depotNodeLast = new Node(depotCustomerlLast); // depot associated node
 
 	            Node* tmp = predNode[nbTour]->getPrevious();
+//	            cout << "predNode[" << nbTour << "] = " << predNode[nbTour]->getClient()->getId() << endl;
+//	            if(tmp != NULL)
+//	            	cout << "tmp = " << tmp->getClient()->getId() << endl;
 
 	            predNode[nbTour]->setPrevious(depotNodeFirst);
 	            depotNodeFirst->setNext(predNode[nbTour]);
@@ -94,9 +99,10 @@ bool Solution::Decodage(bool useDecoDirect)
 	#ifdef DEBUG_DecodSol
 	            std::cout << predNode[nbTour]->getClient()->getId() << " " << last->getClient()->getId() << std::endl;
 	#endif
-//	            routeSeq[i] = depotNodeFirst; // routeSeq[i].make_pair(depotNodeFirst, last.index-predNode.index+1)
 	            routes[i].first = depotNodeFirst;
 	            last = tmp;
+//	            if(last != NULL)
+//	            	cout << "last2 = " << last->getClient()->getId() << endl;
 
 				nbTour = pred[nbTour] ;
 
@@ -402,13 +408,17 @@ void Solution::CheckSolution(bool useDecoDirect)
 	#endif
 
 			Node *routeStartNodeFirst = encodage->find(start-1);
+//			encodage->show();
 			for(int j = start; j < end; j++)
 			{
 	#ifdef DEBUG_CheckSol
 				cout << "numberOfRouteInSolution= " << numberOfRouteInSolution << endl;
 				cout << "j= " << j << endl;
+				if(routeStartNodeFirst != NULL) // to remove
+					cout << "routeStartNodeFirst = " << routeStartNodeFirst->getClient()->getId() << endl;
 	#endif
-				load += routeStartNodeFirst->getClient()->getDemand(); //encodage->find(j-1);
+				if(routeStartNodeFirst != NULL) // to remove
+					load += routeStartNodeFirst->getClient()->getDemand();
 				routeStartNodeFirst = routeStartNodeFirst->getNext();
 			}
 

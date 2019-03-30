@@ -18,13 +18,14 @@ private:
 	Customer *client;
 public:
 	Node(Customer *clt);
-	Node();
+//	Node();
 //	Node(Node *node);
 //	Node(Node *nxt, Node *prev, Customer *clt);
 	virtual ~Node();
 
 	bool isDepot();
 	bool isLastDepot();
+	bool isFirstDepot();
 	Node* getNext();
 	Node* getPrevious();
 	void setNext(Node *nxt);

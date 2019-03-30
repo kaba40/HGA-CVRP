@@ -42,6 +42,9 @@ public:
 	bool InterRouteSwap();
 	bool InterRouteArcSwap();
 	bool InterRoute2ArcSwap();
+
+	//restore the sequence after movements on direct encoding
+	void RestoreSequence(); // create may be a new sequence
 };
 
 #endif /* LOCALSEARCH_HPP_ */

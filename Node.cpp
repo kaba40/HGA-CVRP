@@ -16,13 +16,13 @@ Node::Node(Customer* clt)
 	this->previous = NULL;
 }
 
-Node::Node()
-{
-	this->client = NULL;
-	this->next = NULL;
-	this->previous = NULL;
-}
-
+//Node::Node()
+//{
+//	this->client = NULL;
+//	this->next = NULL;
+//	this->previous = NULL;
+//}
+//
 //Node::Node(Node *node)
 //{
 //	this->client = node->getClient();
@@ -49,6 +49,15 @@ bool Node::isDepot()
 		return true;
 	}
 
+	return false;
+}
+
+bool Node::isFirstDepot()
+{
+	if(this->getPrevious() == NULL)
+	{
+		return true;
+	}
 	return false;
 }
 

@@ -310,17 +310,25 @@ void DLinkedList::show()
 	cout << " list : " ;
 
 	Node *tmp = head;
-	int num = 0;
 
-	while(tmp)
+	while(tmp->getNext() != NULL)
 	{
-	//	cout << "Element " << num  << " Id = " << tmp->getClient()->getId() << " index = " << tmp->getClient()->getIndex() ;
 		cout << tmp->getClient()->getId() << "--"  ;
 		tmp = tmp->getNext();
-		num++;
 	}
-
-	cout << endl;
+	cout << tmp->getClient()->getId() << " ----> ";
 }
 
+void DLinkedList::showBack()
+{
+	cout << " list back : " ;
 
+	Node *tmp = tail;
+
+	while(tmp->getPrevious() != NULL)
+	{
+		cout << tmp->getClient()->getId() << "--"  ;
+		tmp = tmp->getPrevious();
+	}
+	cout << tmp->getClient()->getId() << " ----> ";
+}
