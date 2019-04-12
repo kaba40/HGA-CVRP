@@ -26,8 +26,11 @@ Solution::~Solution()
 void Solution::setRandomSequence()
 {
 	vector<Customer*> encod = tsp_data->getCustomers();
-	srand(unsigned (time(0)) );
-	random_shuffle(encod.begin(), encod.end());
+//	srand(unsigned (time(0)) );
+
+	std::random_device rd;
+	std::mt19937 g(rd());
+	std::random_shuffle(encod.begin(), encod.end()); // random_shuffle(encod.begin(), encod.end());
 
 	encodage->delete_list();
 
@@ -96,9 +99,9 @@ bool Solution::Decodage(bool useDecoDirect)
 
 	            last->setNext(depotNodeLast); // not last->setPrevious(depotNodeLast);
 	            depotNodeLast->setPrevious(last); // not depotNodeLast->setNext(last);
-	#ifdef DEBUG_DecodSol
+#ifdef DEBUG_DecodSol
 	            std::cout << predNode[nbTour]->getClient()->getId() << " " << last->getClient()->getId() << std::endl;
-	#endif
+#endif
 	            routes[i].first = depotNodeFirst;
 	            last = tmp;
 //	            if(last != NULL)
@@ -480,12 +483,20 @@ void Solution::PrintSolution(bool useDecoDirect)
 		for(int i = 0; i < numberOfRouteInSolution; i++)
 		{
 			start = tour[i];
+//			cout << "Start = " << start << endl;
 			if( i < numberOfRouteInSolution-1)
+			{
 				end = tour[i+1];
+//				cout << "end1 = " << end << endl;
+			}
 			else
+			{
 				end = encodage->getSize() +1;
+//				cout << "end2 = " << end << endl;
+			}
 			cout << "TOUR[" << i << "] = {" ;
 			Node *routeStartNode = encodage->find(start-1);
+//			cout << "routeStartNode " << start-1 << " = " << routeStartNode->getClient()->getId() << endl;
 			for(int j = start; j < end-1; j++)
 			{
 				cout << routeStartNode->getClient()->getId() << "--";
@@ -532,7 +543,7 @@ vector<int> Solution::getTourStructure()
 	return tour;
 }
 
-double Solution::getObjVal()
+double Solution::getObjVal() const
 {
 	return solutionCost;
 }
@@ -603,6 +614,7 @@ void Solution::initRouteSetSubSeq()
 #endif
 	}
 }
+
 // update methods
 
 void Solution::updateOneRouteSetSubSeq(int numRoute)
@@ -658,6 +670,67 @@ void Solution::updateRouteNbNodes(int numRoute, int numNodes)
 {
 	this->routes[numRoute].second = numNodes;
 }
+
+void Solution::restoreSequence()
+{
+
+	cout << "direct encoding = " ; PrintSolution(true) ;
+
+
+	vector<Node*> seqNodes;
+	for(uint r = 0; r < routes.size(); r++)
+	{
+		if(routes[r].second > 2)
+		{
+//			Node* first = NULL;
+//			Node* last = NULL;
+			//			cout << "r = " << r << endl;
+			//			for(Node *routeNode = routes[r].first->getNext(); !routeNode->isDepot(); routeNode = routeNode->getNext())
+			for(Node *routeNode = routes[r].first; routeNode != NULL; routeNode = routeNode->getNext())
+			{
+				if(!routeNode->isDepot())
+				{
+//					routeNode->removeNode();
+					seqNodes.push_back(routeNode);
+				}
+//				else
+//				{
+//					if(routeNode->isFirstDepot())
+//					{
+//						first = routeNode;
+//					}
+//					else
+//					{
+//						last = routeNode;
+//					}
+//				}
+			}
+//			first->getNext()->setPrevious(NULL);
+//			first->setNext(NULL);
+//
+//			last->getPrevious()->setNext(NULL);
+//			last->setPrevious(NULL);
+
+		}
+	}
+
+
+	encodage->delete_list();
+
+	for(uint i = 0; i < seqNodes.size(); i++)
+	{
+		//		cout << "seqNodes[" << i << "] id = " << seqNodes[i]->getClient()->getId() << endl;
+		encodage->push_back(seqNodes[i]);
+	}
+
+	routes.clear();
+	vector<pair<Node*, uint>>().swap(routes);
+	tour.clear();
+	solutionCost = 0;
+	numberOfRouteInSolution = 0;
+
+}
+
 // setter methods
 
 void Solution::setObjVal(double objVal)
@@ -673,4 +746,10 @@ void Solution::setTourStructure(vector<int> route)
 void Solution::setRouteNumber(int numRoute)
 {
 	this->numberOfRouteInSolution = numRoute;
+}
+
+// overloading operator<
+bool operator<( const Solution &sol1, const Solution &sol2)
+{
+	return sol1.getObjVal() < sol2.getObjVal();
 }

@@ -9,6 +9,8 @@
 #define LOCALSEARCH_HPP_
 
 #include<stdio.h>
+#include<limits>
+#include<float.h>
 
 #include "DLinkedList.hpp"
 #include "SeqData.hpp"
@@ -43,8 +45,11 @@ public:
 	bool InterRouteArcSwap();
 	bool InterRoute2ArcSwap();
 
-	//restore the sequence after movements on direct encoding
-	void RestoreSequence(); // create may be a new sequence
+	//successive localSearch on direct encoding
+	bool Iri(int maxIter);
+	//successive  localSearch on indirect encoding
+	bool Isi(int maxIter);
+
 };
 
 #endif /* LOCALSEARCH_HPP_ */

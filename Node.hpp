@@ -19,7 +19,7 @@ private:
 public:
 	Node(Customer *clt);
 //	Node();
-//	Node(Node *node);
+	Node(Node *node);
 //	Node(Node *nxt, Node *prev, Customer *clt);
 	virtual ~Node();
 

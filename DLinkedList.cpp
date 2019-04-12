@@ -146,9 +146,7 @@ void DLinkedList::insert(int position, Node *node) // modify insert function
 	    	 tail->setNext(node);
 	    	 tail = node;
 		}
-
 		 tail->setNext(NULL);
-
 	}
 	else if(tmp != NULL)
 	{
@@ -167,9 +165,7 @@ void DLinkedList::insert(int position, Node *node) // modify insert function
 			node->setNext(tmp);
 			node->setPrevious(tmp->getPrevious());
 			tmp->setPrevious(node);
-
 		}
-
 	}
 
 	size++;
@@ -182,11 +178,13 @@ Node* DLinkedList::find(int position)
 	if(head != NULL)
 	{
 		Node *tmp = head;
+//		cout << "tmp1 = " << tmp->getClient()->getId() << endl;
 		int i = 0;
 
 		while(tmp != NULL && i != position)
 		{
 			tmp = tmp->getNext();
+//			cout << "tmp2 = " << tmp->getClient()->getId() << endl;
 			i++;
 		}
 
@@ -196,12 +194,24 @@ Node* DLinkedList::find(int position)
 	return ret;
 }
 
+bool DLinkedList::search(Node *node)
+{
+	if(!head)
+		throw string("Cannot search in a empty List");
+	Node *current = head;
+	while(current != NULL)
+	{
+		if(current->getClient()->getId() == node->getClient()->getId())
+		{
+			return true;
+		}
+		current = current->getNext();
+	}
 
+	return false;
+}
 Node* DLinkedList::pop_front()
 {
-
-    // kairaba : on peut imaginer aussi que quand la tête est NULL,
-    // kairaba : on retourne NULL. C'est une question de goût
     if(!head)
 	throw out_of_range("Can't delete from empty list");
 
@@ -212,7 +222,6 @@ Node* DLinkedList::pop_front()
     size--;
 
     return tmp;
-
 }
 
 Node* DLinkedList::pop_back()
@@ -289,6 +298,19 @@ void DLinkedList::removeNode(Node *node)
 //	size--;
 }
 
+//void DLinkedList::removeDepot(Node *node)
+//{
+//	if(node->getPrevious() == NULL)
+//	{
+//		node->getNext()->setPrevious(NULL);
+//	}
+//
+//	if(node->getNext() == NULL)
+//	{
+//		node->getPrevious()->setNext(NULL);
+//	}
+//}
+
 void DLinkedList::delete_list()
 {
 	Node *tmp = head;
@@ -313,22 +335,33 @@ void DLinkedList::show()
 
 	while(tmp->getNext() != NULL)
 	{
-		cout << tmp->getClient()->getId() << "--"  ;
+		cout << tmp->getClient()->getId() << "--" ;
 		tmp = tmp->getNext();
 	}
 	cout << tmp->getClient()->getId() << " ----> ";
 }
 
-void DLinkedList::showBack()
+string DLinkedList::toString()
 {
-	cout << " list back : " ;
-
-	Node *tmp = tail;
-
-	while(tmp->getPrevious() != NULL)
+	string retVal;
+	Node *tmp = head;
+	while(tmp != NULL)
 	{
-		cout << tmp->getClient()->getId() << "--"  ;
-		tmp = tmp->getPrevious();
+		retVal += tmp->getClient()->getId();
+		tmp = tmp->getNext();
 	}
-	cout << tmp->getClient()->getId() << " ----> ";
+	return retVal;
 }
+//void DLinkedList::showBack()
+//{
+//	cout << " list back : " ;
+//
+//	Node *tmp = tail;
+//
+//	while(tmp->getPrevious() != NULL)
+//	{
+//		cout << tmp->getClient()->getId() << "--"  ;
+//		tmp = tmp->getPrevious();
+//	}
+//	cout << tmp->getClient()->getId() << " ----> ";
+//}

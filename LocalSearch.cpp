@@ -1652,127 +1652,123 @@ bool LocalSearch::IntraRouteArcInsert()
 
 			int in1 = 1; /* n1 is the index of the arc first client in the route, n2 is the one of the arc second client */
 			int in2 = in1+1; /* 0--a--b--c--0, in1 = 1, in2 = 2 --> in1-in2 = a--b   */
-			for(Node *insertNode = this->initSol->getRoutes()[r].first->getNext(); !insertNode->isDepot() && breakIfImproved == false; insertNode = insertNode->getNext(), in1++,in2++)
+//			for(Node *insertNode = this->initSol->getRoutes()[r].first->getNext(); !insertNode->isDepot() && breakIfImproved == false; insertNode = insertNode->getNext(), in1++,in2++)
+			for(insertNodeFirst = this->initSol->getRoutes()[r].first->getNext(); !insertNodeFirst->getNext()->isDepot() && breakIfImproved == false; insertNodeFirst = insertNodeFirst->getNext(), in1++,in2++)
 			{
-				insertNodeFirst = insertNode;
 				insertNodeLast = insertNodeFirst->getNext();
 
-				if(!insertNodeLast->isDepot()) // move it the for condition
+#ifdef DEBUG_IntraArcInsert
+				cout << " ------ insert arc = " << insertNodeFirst->getClient()->getId() << "--" << insertNodeLast->getClient()->getId() << " ----------" <<  " in1 = " << in1 << "---------- " << "in2 = " << in2 << endl;
+#endif
+				insertNodeFirstPrev = insertNodeFirst->getPrevious();
+				insertNodeLastNext = insertNodeLast->getNext();
+#ifdef DEBUG_IntraArcInsert
+				if(insertNodeFirstPrev != NULL)
+					cout << "insertNodeFirstPrev = " << insertNodeFirstPrev->getClient()->getId() << " ;" ;
+				if(insertNodeLastNext != NULL)
+					cout << " insertNodeLastNext = " << insertNodeLastNext->getClient()->getId() << endl;
+				cout << endl;
+#endif
+				bool addAfter = false;
+				// mn is the index of moveNode in the route
+				int mn = 1; /* 0--a--b--c--0, mn = 1 --> mn = a   */
+				for(Node *moveNode = this->initSol->getRoutes()[r].first->getNext(); !moveNode->isDepot() && breakIfImproved == false; moveNode = moveNode->getNext(), mn++)
 				{
 #ifdef DEBUG_IntraArcInsert
-					cout << " ------ insert arc = " << insertNodeFirst->getClient()->getId() << "--" << insertNodeLast->getClient()->getId() << " ----------" <<  " in1 = " << in1 << "---------- " << "in2 = " << in2 << endl;
+					cout << "---------- moveNode " << " " << " = " << moveNode->getClient()->getId() << " ---------- " << " mn = " << "" << mn << endl;
 #endif
-					insertNodeFirstPrev = insertNode->getPrevious();
-					insertNodeLastNext = insertNodeLast->getNext();
-#ifdef DEBUG_IntraArcInsert
-					if(insertNodeFirstPrev != NULL)
-						cout << "insertNodeFirstPrev = " << insertNodeFirstPrev->getClient()->getId() << " ;" ;
-					if(insertNodeLastNext != NULL)
-						cout << " insertNodeLastNext = " << insertNodeLastNext->getClient()->getId() << endl;
-					cout << endl;
-#endif
-					bool addAfter = false;
-					// mn is the index of moveNode in the route
-					int mn = 1; /* 0--a--b--c--0, mn = 1 --> mn = a   */
-					for(Node *moveNode = this->initSol->getRoutes()[r].first->getNext(); !moveNode->isDepot() && breakIfImproved == false; moveNode = moveNode->getNext(), mn++)
+					// if insertNodeFirst == moveNode or insertNodeLast == moveNode do nothing and addAfter = true
+					// or if (in1 = mn || in2 = mn) do nothing and addAfter = true
+					if(insertNodeFirst == moveNode || insertNodeLast == moveNode)
 					{
-#ifdef DEBUG_IntraArcInsert
-						cout << "---------- moveNode " << " " << " = " << moveNode->getClient()->getId() << " ---------- " << " mn = " << "" << mn << endl;
-#endif
-						// if insertNodeFirst == moveNode or insertNodeLast == moveNode do nothing and addAfter = true
-						// or if (in1 = mn || in2 = mn) do nothing and addAfter = true
-						if(insertNodeFirst == moveNode || insertNodeLast == moveNode)
+						addAfter = true;
+					}
+					else
+					{
+						//find sub-sequences used to form the new route
+
+						SeqData *seq1 = NULL;
+						SeqData *seq2 = NULL;
+						SeqData *seq3 = NULL;
+
+						if(addAfter)
 						{
-							addAfter = true;
+							seq1 = this->initSol->getRouteBackSeq()[r][mn][mn-in2];
+#ifdef DEBUG_IntraArcInsert
+							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+#endif
+							seq2 = this->initSol->getRouteForwSeq()[r][in1][in2-in1];
+#ifdef DEBUG_IntraArcInsert
+							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+#endif
+							int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
+							seq3 = this->initSol->getRouteForwSeq()[r][mn+1][indexLastNodeRoute-(mn+1)];
+#ifdef DEBUG_IntraArcInsert
+							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
 						}
 						else
 						{
-							//find sub-sequences used to form the new route
+							seq1 = this->initSol->getRouteForwSeq()[r][0][mn-1];
+#ifdef DEBUG_IntraArcInsert
+							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+#endif
+							seq2 = this->initSol->getRouteForwSeq()[r][in1][in2-in1];
+#ifdef DEBUG_IntraArcInsert
+							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+#endif
+							seq3 = this->initSol->getRouteBackSeq()[r][0][mn];
+#ifdef DEBUG_IntraArcInsert
+							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
+						}
 
-							SeqData *seq1 = NULL;
-							SeqData *seq2 = NULL;
-							SeqData *seq3 = NULL;
+						// evaluate the feasibility for the concatenation of the 3 sub-sequences
+						// then compare the cost of the new route to the former one
+						double newCostR;
+						if(this->initSol->EVALN(&newCostR,3, seq1, seq2, seq3) && newCostR < routeCost - 0.0001)
+						{
+							// apply the move
+
+							// remove insertNodeFirst
+							insertNodeFirst->removeNode();
+							// remove insertNodeLast
+							insertNodeLast->removeNode();
 
 							if(addAfter)
 							{
-								seq1 = this->initSol->getRouteBackSeq()[r][mn][mn-in2];
-#ifdef DEBUG_IntraArcInsert
-							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
-#endif
-								seq2 = this->initSol->getRouteForwSeq()[r][in1][in2-in1];
-#ifdef DEBUG_IntraArcInsert
-							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
-#endif
-								int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
-								seq3 = this->initSol->getRouteForwSeq()[r][mn+1][indexLastNodeRoute-(mn+1)];
-#ifdef DEBUG_IntraArcInsert
-							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
-#endif
+								// insert insertNodeFirst after moveNode
+								moveNode->insertAfter(insertNodeFirst);
+								// insert insertNodeLast after insertNodeFirst
+								insertNodeFirst->insertAfter(insertNodeLast);
 							}
 							else
 							{
-								seq1 = this->initSol->getRouteForwSeq()[r][0][mn-1];
-#ifdef DEBUG_IntraArcInsert
-							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
-#endif
-								seq2 = this->initSol->getRouteForwSeq()[r][in1][in2-in1];
-#ifdef DEBUG_IntraArcInsert
-							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
-#endif
-								seq3 = this->initSol->getRouteBackSeq()[r][0][mn];
-#ifdef DEBUG_IntraArcInsert
-							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
-#endif
+								// insert insertNodeLast before moveNode
+								moveNode->insertBefore(insertNodeLast);
+								// insert insertNodeFirst before insertNodeLast
+								insertNodeLast->insertBefore(insertNodeFirst);
 							}
 
+							// update sub-sequences of the route
+							this->initSol->updateOneRouteSetSubSeq(r);
 
-							// evaluate the feasibility for the concatenation of the 3 sub-sequences
-							// then compare the cost of the new route to the former one
-							double newCostR;
-							if(this->initSol->EVALN(&newCostR,3, seq1, seq2, seq3) && newCostR < routeCost - 0.0001)
-							{
-								// apply the move
-
-								// remove insertNodeFirst
-								insertNodeFirst->removeNode();
-								// remove insertNodeLast
-								insertNodeLast->removeNode();
-
-								if(addAfter)
-								{
-									// insert insertNodeFirst after moveNode
-									moveNode->insertAfter(insertNodeFirst);
-									// insert insertNodeLast after insertNodeFirst
-									insertNodeFirst->insertAfter(insertNodeLast);
-								}
-								else
-								{
-									// insert insertNodeLast before moveNode
-									moveNode->insertBefore(insertNodeLast);
-									// insert insertNodeFirst before insertNodeLast
-									insertNodeLast->insertBefore(insertNodeFirst);
-								}
-
-								// update sub-sequences of the route
-								this->initSol->updateOneRouteSetSubSeq(r);
-
-								// update objective functions
+							// update objective functions
 #ifdef DEBUG_IntraArcInsert
-								cout << " newCostR = " << newCostR << endl;
+							cout << " newCostR = " << newCostR << endl;
 #endif
-								double restCout = this->initSol->getObjVal() - routeCost;
+							double restCout = this->initSol->getObjVal() - routeCost;
 #ifdef DEBUG_IntraArcInsert
-								cout << "restCout = " << restCout << endl;
+							cout << "restCout = " << restCout << endl;
 #endif
-								double newObjVal = restCout + newCostR;
+							double newObjVal = restCout + newCostR;
 #ifdef DEBUG_IntraArcInsert
-								cout << "newObjVal = " << newObjVal << endl;
+							cout << "newObjVal = " << newObjVal << endl;
 #endif
-								this->initSol->setObjVal(newObjVal);
+							this->initSol->setObjVal(newObjVal);
 
-								breakIfImproved = true;
-								retVal = true;
-							}
+							breakIfImproved = true;
+							retVal = true;
 						}
 					}
 				}
@@ -1792,78 +1788,75 @@ bool LocalSearch::IntraRouteArcInsert()
 
 			int in1 = 1; // see above comment
 			int in2 = in1+1; /* 0--a--b--c--d--0, in1 = 1, in2 = 2 --> in1-in2 = a--b   */
-			for(Node *insertNode = this->initSol->getRoutes()[r].first->getNext(); !insertNode->isDepot() && breakIfImproved == false; insertNode = insertNode->getNext(), in1++,in2++)
+			for(insertNodeFirst = this->initSol->getRoutes()[r].first->getNext(); !insertNodeFirst->getNext()->isDepot() && breakIfImproved == false; insertNodeFirst = insertNodeFirst->getNext(), in1++,in2++)
 			{
-				insertNodeFirst = insertNode;
 				insertNodeLast = insertNodeFirst->getNext();
 
-				if(!insertNodeLast->isDepot())
+#ifdef DEBUG_IntraArcInsert
+				cout << " ------ insert arc = " << insertNodeFirst->getClient()->getId() << "--" << insertNodeLast->getClient()->getId() << " ----------" <<  " in1 = " << in1 << "---------- " << "in2 = " << in2  << endl;
+#endif
+				insertNodeFirstPrev = insertNodeFirst->getPrevious();
+				insertNodeLastNext = insertNodeLast->getNext();
+#ifdef DEBUG_IntraArcInsert
+				if(insertNodeFirstPrev != NULL)
+					cout << "insertNodeFirstPrev = " << insertNodeFirstPrev->getClient()->getId() << " ;" ;
+				if(insertNodeLastNext != NULL)
+					cout << " insertNodeLastNext = " << insertNodeLastNext->getClient()->getId() << endl;
+				cout << endl;
+#endif
+				bool addAfter = false;
+				int mn = 1; /* 0--a--b--c--d--0, mn = 1 --> mn = a   */
+				for(Node *moveNode = this->initSol->getRoutes()[r].first->getNext(); !moveNode->isDepot() && breakIfImproved == false; moveNode = moveNode->getNext(), mn++)
 				{
 #ifdef DEBUG_IntraArcInsert
-					cout << " ------ insert arc = " << insertNodeFirst->getClient()->getId() << "--" << insertNodeLast->getClient()->getId() << " ----------" <<  " in1 = " << in1 << "---------- " << "in2 = " << in2  << endl;
+					cout << "---------- moveNode " << " " << " = " << moveNode->getClient()->getId() << " ---------- " << " mn = " << "" << mn << endl;
 #endif
-					insertNodeFirstPrev = insertNode->getPrevious();
-					insertNodeLastNext = insertNodeLast->getNext();
-#ifdef DEBUG_IntraArcInsert
-					if(insertNodeFirstPrev != NULL)
-						cout << "insertNodeFirstPrev = " << insertNodeFirstPrev->getClient()->getId() << " ;" ;
-					if(insertNodeLastNext != NULL)
-						cout << " insertNodeLastNext = " << insertNodeLastNext->getClient()->getId() << endl;
-					cout << endl;
-#endif
-					bool addAfter = false;
-					int mn = 1; /* 0--a--b--c--d--0, mn = 1 --> mn = a   */
-					for(Node *moveNode = this->initSol->getRoutes()[r].first->getNext(); !moveNode->isDepot() && breakIfImproved == false; moveNode = moveNode->getNext(), mn++)
+					// if insertNodeFirst == moveNode or insertNodeLast == moveNode do nothing and addAfter = true
+					// or if (in1 = mn || in2 = mn) do nothing and addAfter = true
+					if(insertNodeFirst == moveNode || insertNodeLast == moveNode)
 					{
-#ifdef DEBUG_IntraArcInsert
-						cout << "---------- moveNode " << " " << " = " << moveNode->getClient()->getId() << " ---------- " << " mn = " << "" << mn << endl;
-#endif
-						// if insertNodeFirst == moveNode or insertNodeLast == moveNode do nothing and addAfter = true
-						// or if (in1 = mn || in2 = mn) do nothing and addAfter = true
-						if(insertNodeFirst == moveNode || insertNodeLast == moveNode)
-						{
-							addAfter = true;
-						}
-						else
-						{
-							//find sub-sequences used to form the new route
+						addAfter = true;
+					}
+					else
+					{
+						//find sub-sequences used to form the new route
 
-							SeqData *seq1 = NULL;
-							SeqData *seq2 = NULL;
-							SeqData *seq3 = NULL;
-							SeqData *seq4 = NULL;
+						SeqData *seq1 = NULL;
+						SeqData *seq2 = NULL;
+						SeqData *seq3 = NULL;
+						SeqData *seq4 = NULL;
 
-							if(addAfter)
-							{
-								seq1 = this->initSol->getRouteForwSeq()[r][0][in1-1];
+						if(addAfter)
+						{
+							seq1 = this->initSol->getRouteForwSeq()[r][0][in1-1];
 #ifdef DEBUG_IntraArcInsert
 							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
 #endif
-								seq2 = this->initSol->getRouteForwSeq()[r][in2+1][mn-(in2+1)];
+							seq2 = this->initSol->getRouteForwSeq()[r][in2+1][mn-(in2+1)];
 #ifdef DEBUG_IntraArcInsert
 							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
 #endif
-								seq3 = this->initSol->getRouteForwSeq()[r][in1][in2-in1];
+							seq3 = this->initSol->getRouteForwSeq()[r][in1][in2-in1];
 #ifdef DEBUG_IntraArcInsert
 							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
 #endif
-								int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
-								seq4 = this->initSol->getRouteForwSeq()[r][mn+1][indexLastNodeRoute-(mn+1)];
+							int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
+							seq4 = this->initSol->getRouteForwSeq()[r][mn+1][indexLastNodeRoute-(mn+1)];
 #ifdef DEBUG_IntraArcInsert
 							cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
 #endif
-							}
-							else
-							{
-								seq1 = this->initSol->getRouteForwSeq()[r][0][mn-1];
+						}
+						else
+						{
+							seq1 = this->initSol->getRouteForwSeq()[r][0][mn-1];
 #ifdef DEBUG_IntraArcInsert
 							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
 #endif
-								seq2 = this->initSol->getRouteForwSeq()[r][in1][in2-in1];
+							seq2 = this->initSol->getRouteForwSeq()[r][in1][in2-in1];
 #ifdef DEBUG_IntraArcInsert
 							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
 #endif
-								seq3 = this->initSol->getRouteForwSeq()[r][mn][(in1-1)-mn];
+							seq3 = this->initSol->getRouteForwSeq()[r][mn][(in1-1)-mn];
 #ifdef DEBUG_IntraArcInsert
 							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
 #endif
@@ -1872,56 +1865,54 @@ bool LocalSearch::IntraRouteArcInsert()
 #ifdef DEBUG_IntraArcInsert
 							cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
 #endif
-							}
+						}
 
+						// evaluate the feasibility for the concatenation of the 3 sub-sequences
+						// then compare the cost of the new route to the former one
+						double newCostR;
+						if(this->initSol->EVALN(&newCostR,4, seq1, seq2, seq3, seq4) && newCostR < routeCost - 0.0001)
+						{
+							// apply the move
 
-							// evaluate the feasibility for the concatenation of the 3 sub-sequences
-							// then compare the cost of the new route to the former one
-							double newCostR;
-							if(this->initSol->EVALN(&newCostR,4, seq1, seq2, seq3, seq4) && newCostR < routeCost - 0.0001)
+							// remove insertNodeFirst
+							insertNodeFirst->removeNode();
+							// remove insertNodeLast
+							insertNodeLast->removeNode();
+
+							if(addAfter)
 							{
-								// apply the move
-
-								// remove insertNodeFirst
-								insertNodeFirst->removeNode();
-								// remove insertNodeLast
-								insertNodeLast->removeNode();
-
-								if(addAfter)
-								{
-									// insert insertNodeFirst after moveNode
-									moveNode->insertAfter(insertNodeFirst);
-									// insert insertNodeLast after insertNodeFirst
-									insertNodeFirst->insertAfter(insertNodeLast);
-								}
-								else
-								{
-									// insert insertNodeLast before moveNode
-									moveNode->insertBefore(insertNodeLast);
-									// insert insertNodeFirst before insertNodeLast
-									insertNodeLast->insertBefore(insertNodeFirst);
-								}
-
-								// update sub-sequences of the route
-								this->initSol->updateOneRouteSetSubSeq(r);
-
-								// update objective functions
-#ifdef DEBUG_IntraArcInsert
-								cout << " newCostR = " << newCostR << endl;
-#endif
-								double restCout = this->initSol->getObjVal() - routeCost;
-#ifdef DEBUG_IntraArcInsert
-								cout << "restCout = " << restCout << endl;
-#endif
-								double newObjVal = restCout + newCostR;
-#ifdef DEBUG_IntraArcInsert
-								cout << "newObjVal = " << newObjVal << endl;
-#endif
-								this->initSol->setObjVal(newObjVal);
-
-								breakIfImproved = true;
-								retVal = true;
+								// insert insertNodeFirst after moveNode
+								moveNode->insertAfter(insertNodeFirst);
+								// insert insertNodeLast after insertNodeFirst
+								insertNodeFirst->insertAfter(insertNodeLast);
 							}
+							else
+							{
+								// insert insertNodeLast before moveNode
+								moveNode->insertBefore(insertNodeLast);
+								// insert insertNodeFirst before insertNodeLast
+								insertNodeLast->insertBefore(insertNodeFirst);
+							}
+
+							// update sub-sequences of the route
+							this->initSol->updateOneRouteSetSubSeq(r);
+
+							// update objective functions
+#ifdef DEBUG_IntraArcInsert
+							cout << " newCostR = " << newCostR << endl;
+#endif
+							double restCout = this->initSol->getObjVal() - routeCost;
+#ifdef DEBUG_IntraArcInsert
+							cout << "restCout = " << restCout << endl;
+#endif
+							double newObjVal = restCout + newCostR;
+#ifdef DEBUG_IntraArcInsert
+							cout << "newObjVal = " << newObjVal << endl;
+#endif
+							this->initSol->setObjVal(newObjVal);
+
+							breakIfImproved = true;
+							retVal = true;
 						}
 					}
 				}
@@ -1962,122 +1953,120 @@ bool LocalSearch::IntraRouteSwap()
 			for(Node *swapNodeFirst = this->initSol->getRoutes()[r].first->getNext(); !swapNodeFirst->isDepot() && breakIfImproved == false; swapNodeFirst = swapNodeFirst->getNext(), s1++)
 			{
 #ifdef DEBUG_IntraSwap
-					cout << " ------ swapNodeFirst = " << swapNodeFirst->getClient()->getId() << " ----------" <<  " s1 = " << s1 << endl;
+				cout << " ------ swapNodeFirst = " << swapNodeFirst->getClient()->getId() << " ----------" <<  " s1 = " << s1 << endl;
 #endif
-					swapNodeFirstPrev = swapNodeFirst->getPrevious();
+				swapNodeFirstPrev = swapNodeFirst->getPrevious();
 #ifdef DEBUG_IntraSwap
-					if(swapNodeFirstPrev != NULL) // no sens here
-						cout << "swapNodeFirstPrev = " << swapNodeFirstPrev->getClient()->getId() << endl ;
+				if(swapNodeFirstPrev != NULL) // no sens here
+					cout << "swapNodeFirstPrev = " << swapNodeFirstPrev->getClient()->getId() << endl ;
 #endif
-					Node *swapNodeSecondNext = NULL;
-					/* s2 is the index of clients to swap in the route r, e.g, (0--a--b--c--0) */
-					int s2 = s1+1; /* 0--a--b--c--0, s2 = 2 --> s2 = b */
-					for(Node *swapNodeSecond = swapNodeFirst->getNext(); !swapNodeSecond->isDepot() && breakIfImproved == false; swapNodeSecond = swapNodeSecond->getNext(), s2++)
+				Node *swapNodeSecondNext = NULL;
+				/* s2 is the index of clients to swap in the route r, e.g, (0--a--b--c--0) */
+				int s2 = s1+1; /* 0--a--b--c--0, s2 = 2 --> s2 = b */
+				for(Node *swapNodeSecond = swapNodeFirst->getNext(); !swapNodeSecond->isDepot() && breakIfImproved == false; swapNodeSecond = swapNodeSecond->getNext(), s2++)
+				{
+#ifdef DEBUG_IntraSwap
+					cout << " ------ swapNodeSecond = " << swapNodeSecond->getClient()->getId() << " ----------" <<  " s2 = " << s2 << endl;
+#endif
+					swapNodeSecondNext = swapNodeSecond->getNext();
+#ifdef DEBUG_IntraSwap
+					if(swapNodeSecondNext != NULL)
+						cout << "swapNodeSecondNext = " << swapNodeSecondNext->getClient()->getId() << endl ;
+#endif
+					// if swapNodeFirst is the first client and swapNodeSecond is the last one
+					// then evaluate the inverse route
+					if((s1 == 1) && (s2 == this->initSol->getNbClientsForRoute(r)))
 					{
-#ifdef DEBUG_IntraSwap
-						cout << " ------ swapNodeSecond = " << swapNodeSecond->getClient()->getId() << " ----------" <<  " s2 = " << s2 << endl;
-#endif
-						swapNodeSecondNext = swapNodeSecond->getNext();
-#ifdef DEBUG_IntraSwap
-						if(swapNodeSecondNext != NULL)
-							cout << "swapNodeSecondNext = " << swapNodeSecondNext->getClient()->getId() << endl ;
-#endif
-						// if swapNodeFirst is the first client and swapNodeSecond is the last one
-						// then evaluate the inverse route
-						if((s1 == 1) && (s2 == this->initSol->getNbClientsForRoute(r)))
+						double newCostR = this->initSol->getRouteBackSeq()[r][0][s2+1]->getDistance();
+						if(newCostR < routeCost - 0.0001)
 						{
-							double newCostR = this->initSol->getRouteBackSeq()[r][0][s2+1]->getDistance();
-							if(newCostR < routeCost - 0.0001)
-							{
-								// remove swapNodeFirst
-								swapNodeFirst->removeNode();
-								// remove swapNodeSecond
-								swapNodeSecond->removeNode();
+							// remove swapNodeFirst
+							swapNodeFirst->removeNode();
+							// remove swapNodeSecond
+							swapNodeSecond->removeNode();
 
-								// insert swapNodeSecond after swapNodeFirstPrev
-								swapNodeFirstPrev->insertAfter(swapNodeSecond);
-								// insert swapNodeFirst before swapNodeSecondNext
-								swapNodeSecondNext->insertBefore(swapNodeFirst);
+							// insert swapNodeSecond after swapNodeFirstPrev
+							swapNodeFirstPrev->insertAfter(swapNodeSecond);
+							// insert swapNodeFirst before swapNodeSecondNext
+							swapNodeSecondNext->insertBefore(swapNodeFirst);
 
-								// update sub-sequences of the route
-								this->initSol->updateOneRouteSetSubSeq(r);
+							// update sub-sequences of the route
+							this->initSol->updateOneRouteSetSubSeq(r);
 
-								// update objective functions
+							// update objective functions
 #ifdef DEBUG_IntraSwap
-								cout << " newCostR = " << newCostR << endl;
+							cout << " newCostR = " << newCostR << endl;
 #endif
-								double restCout = this->initSol->getObjVal() - routeCost;
+							double restCout = this->initSol->getObjVal() - routeCost;
 #ifdef DEBUG_IntraSwap
-								cout << "restCout = " << restCout << endl;
+							cout << "restCout = " << restCout << endl;
 #endif
-								double newObjVal = restCout + newCostR;
+							double newObjVal = restCout + newCostR;
 #ifdef DEBUG_IntraSwap
-								cout << "newObjVal = " << newObjVal << endl;
+							cout << "newObjVal = " << newObjVal << endl;
 #endif
-								this->initSol->setObjVal(newObjVal);
+							this->initSol->setObjVal(newObjVal);
 
-								breakIfImproved = true;
-								retVal = true;
+							breakIfImproved = true;
+							retVal = true;
 
-							}
 						}
-						else if( (s1+1 == s2) || (s1+1 == s2-1)) // if swapNodeFirst is the immediate predecessor of swapNodeSecond or the successor of swapNodeFirst is the predecessor of swapNodeSecond
-						{
-							SeqData *seq1 = NULL;
-							SeqData *seq2 = NULL;
-							SeqData *seq3 = NULL;
-
-							seq1 = this->initSol->getRouteForwSeq()[r][0][s1-1];
-#ifdef DEBUG_IntraSwap
-							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
-#endif
-							seq2 = this->initSol->getRouteBackSeq()[r][s1][s2-s1];
-#ifdef DEBUG_IntraSwap
-							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
-#endif
-							int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
-							seq3 = this->initSol->getRouteForwSeq()[r][s2+1][indexLastNodeRoute - (s2+1)];
-#ifdef DEBUG_IntraSwap
-							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
-#endif
-
-							double newCostR;
-							if(this->initSol->EVALN(&newCostR,3, seq1, seq2, seq3) && newCostR < routeCost - 0.0001)
-							{
-								// remove swapNodeFirst
-								swapNodeFirst->removeNode();
-								// remove swapNodeSecond
-								swapNodeSecond->removeNode();
-
-								// insert swapNodeSecond after swapNodeFirstPrev
-								swapNodeFirstPrev->insertAfter(swapNodeSecond);
-								// insert swapNodeFirst before swapNodeSecondNext
-								swapNodeSecondNext->insertBefore(swapNodeFirst);
-
-								// update sub-sequences of the route
-								this->initSol->updateOneRouteSetSubSeq(r);
-
-								// update objective functions
-#ifdef DEBUG_IntraSwap
-								cout << " newCostR = " << newCostR << endl;
-#endif
-								double restCout = this->initSol->getObjVal() - routeCost;
-#ifdef DEBUG_IntraSwap
-								cout << "restCout = " << restCout << endl;
-#endif
-								double newObjVal = restCout + newCostR;
-#ifdef DEBUG_IntraSwap
-								cout << "newObjVal = " << newObjVal << endl;
-#endif
-								this->initSol->setObjVal(newObjVal);
-
-								breakIfImproved = true;
-								retVal = true;
-							}
-						}
-
 					}
+					else if( (s1+1 == s2) || (s1+1 == s2-1)) // if swapNodeFirst is the immediate predecessor of swapNodeSecond or the successor of swapNodeFirst is the predecessor of swapNodeSecond
+					{
+						SeqData *seq1 = NULL;
+						SeqData *seq2 = NULL;
+						SeqData *seq3 = NULL;
 
+						seq1 = this->initSol->getRouteForwSeq()[r][0][s1-1];
+#ifdef DEBUG_IntraSwap
+						cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+#endif
+						seq2 = this->initSol->getRouteBackSeq()[r][s1][s2-s1];
+#ifdef DEBUG_IntraSwap
+						cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+#endif
+						int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
+						seq3 = this->initSol->getRouteForwSeq()[r][s2+1][indexLastNodeRoute - (s2+1)];
+#ifdef DEBUG_IntraSwap
+						cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
+
+						double newCostR;
+						if(this->initSol->EVALN(&newCostR,3, seq1, seq2, seq3) && newCostR < routeCost - 0.0001)
+						{
+							// remove swapNodeFirst
+							swapNodeFirst->removeNode();
+							// remove swapNodeSecond
+							swapNodeSecond->removeNode();
+
+							// insert swapNodeSecond after swapNodeFirstPrev
+							swapNodeFirstPrev->insertAfter(swapNodeSecond);
+							// insert swapNodeFirst before swapNodeSecondNext
+							swapNodeSecondNext->insertBefore(swapNodeFirst);
+
+							// update sub-sequences of the route
+							this->initSol->updateOneRouteSetSubSeq(r);
+
+							// update objective functions
+#ifdef DEBUG_IntraSwap
+							cout << " newCostR = " << newCostR << endl;
+#endif
+							double restCout = this->initSol->getObjVal() - routeCost;
+#ifdef DEBUG_IntraSwap
+							cout << "restCout = " << restCout << endl;
+#endif
+							double newObjVal = restCout + newCostR;
+#ifdef DEBUG_IntraSwap
+							cout << "newObjVal = " << newObjVal << endl;
+#endif
+							this->initSol->setObjVal(newObjVal);
+
+							breakIfImproved = true;
+							retVal = true;
+						}
+					}
+				}
 			}
 		}
 		else if(this->initSol->getNbClientsForRoute(r) > 3) // if the route r contains more than 3 clients
@@ -2303,7 +2292,7 @@ bool LocalSearch::IntraRouteArcSwap()
 
 		// if a route contains less than 2 customers then no move
 		// intraRouteSwap movement start with more than 2 customers
-		if(this->initSol->getNbClientsForRoute(r) == 3) // replace by faux
+		if(this->initSol->getNbClientsForRoute(r) == 3)
 		{//if the number of clients in a route is equal 3
 
 			routeCost = this->initSol->getRouteForwSeq()[r][0].back()->getDistance();
@@ -2318,146 +2307,143 @@ bool LocalSearch::IntraRouteArcSwap()
 
 			int a1 = 1; /* a1 is the index of the arc first client in the route, a2 is the one of the arc second client */
 			int a2 = a1+1; /* 0--b--c--d--0, a1 = 1, a2 = 2 --> a1--a2 = b--c   */
-			for(arcFirstNode = this->initSol->getRoutes()[r].first->getNext(); !arcFirstNode->isDepot() && breakIfImproved == false; arcFirstNode = arcFirstNode->getNext(), a1++, a2++)
+			for(arcFirstNode = this->initSol->getRoutes()[r].first->getNext(); !arcFirstNode->getNext()->isDepot() && breakIfImproved == false; arcFirstNode = arcFirstNode->getNext(), a1++, a2++)
 			{
 #ifdef DEBUG_IntraArcSwap
-		cout << endl;
+				cout << endl;
 #endif
 				arcLastNode = arcFirstNode->getNext();
 
-				// if the second client in the arc is not the depot
-				if(!arcLastNode->isDepot())
+#ifdef DEBUG_IntraArcSwap
+				cout << " ------ insert arc = " << arcFirstNode->getClient()->getId() << "--" << arcLastNode->getClient()->getId() << " ----------" <<  " a1 = " << a1 << "---------- " << "a2 = " << a2  << endl;
+#endif
+				arcFirstNodePrev = arcFirstNode->getPrevious();
+				arcLastNodeNext = arcLastNode->getNext();
+#ifdef DEBUG_IntraArcSwap
+				if(arcFirstNodePrev != NULL)
+					cout << "arcFirstNodePrev = " << arcFirstNodePrev->getClient()->getId() << " ; " ;
+				if(arcLastNodeNext != NULL)
+					cout << "arcLastNodeNext = " << arcLastNodeNext->getClient()->getId() << endl;
+#endif
+				bool arcBefore = false;
+				Node *swapNodeNext = NULL;
+				Node *swapNodePrev = NULL;
+				/* s1 is the index of clients to swap in the route r, e.g, (0--b--c--d--0) */
+				int s = 1; /* 0--b--c--d--0, s = 1 --> s = b   */
+				for(Node *swapNode = this->initSol->getRoutes()[r].first->getNext(); !swapNode->isDepot() && breakIfImproved == false; swapNode = swapNode->getNext(),s++)
 				{
 #ifdef DEBUG_IntraArcSwap
-					cout << " ------ insert arc = " << arcFirstNode->getClient()->getId() << "--" << arcLastNode->getClient()->getId() << " ----------" <<  " a1 = " << a1 << "---------- " << "a2 = " << a2  << endl;
+					cout << " ------ swapNode = " << swapNode->getClient()->getId() << " ----------" <<  " s = " << s << endl;
 #endif
-					arcFirstNodePrev = arcFirstNode->getPrevious();
-					arcLastNodeNext = arcLastNode->getNext();
-#ifdef DEBUG_IntraArcSwap
-					if(arcFirstNodePrev != NULL)
-						cout << "arcFirstNodePrev = " << arcFirstNodePrev->getClient()->getId() << " ; " ;
-					if(arcLastNodeNext != NULL)
-						cout << "arcLastNodeNext = " << arcLastNodeNext->getClient()->getId() << endl;
-#endif
-					bool arcBefore = false;
-					Node *swapNodeNext = NULL;
-					Node *swapNodePrev = NULL;
-					/* s1 is the index of clients to swap in the route r, e.g, (0--b--c--d--0) */
-					int s = 1; /* 0--b--c--d--0, s = 1 --> s = b   */
-					for(Node *swapNode = this->initSol->getRoutes()[r].first->getNext(); !swapNode->isDepot() && breakIfImproved == false; swapNode = swapNode->getNext(),s++)
+					if( a1 == s || a2 == s)
+					{ // the arc is before the swapNode
+						arcBefore = true;
+					}
+					else
 					{
+						swapNodeNext = swapNode->getNext();
+						swapNodePrev = swapNode->getPrevious();
 #ifdef DEBUG_IntraArcSwap
-						cout << " ------ swapNode = " << swapNode->getClient()->getId() << " ----------" <<  " s = " << s << endl;
+						if(swapNodePrev != NULL)
+							cout << "swapNodePrev = " << swapNodePrev->getClient()->getId() <<" ; " ;
+						if(swapNodeNext != NULL)
+							cout << "swapNodeNext = " << swapNodeNext->getClient()->getId() << endl;
 #endif
-						if( a1 == s || a2 == s)
-						{ // the arc is before the swapNode
-							arcBefore = true;
+						// find sub-sequences
+						SeqData *seq1 = NULL;
+						SeqData *seq2 = NULL;
+						SeqData *seq3 = NULL;
+						if(arcBefore)
+						{
+							int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
+							seq1 = this->initSol->getRouteBackSeq()[r][s][indexLastNodeRoute-s];
+#ifdef DEBUG_IntraArcSwap
+							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+#endif
+							seq2 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
+#ifdef DEBUG_IntraArcSwap
+							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+#endif
+							seq3 = this->initSol->getRouteForwSeq()[r][s+1][indexLastNodeRoute-(s+1)];
+#ifdef DEBUG_IntraArcSwap
+							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
 						}
 						else
 						{
-							swapNodeNext = swapNode->getNext();
-							swapNodePrev = swapNode->getPrevious();
-#ifdef DEBUG_IntraArcSwap
-							if(swapNodePrev != NULL)
-								cout << "swapNodePrev = " << swapNodePrev->getClient()->getId() <<" ; " ;
-							if(swapNodeNext != NULL)
-								cout << "swapNodeNext = " << swapNodeNext->getClient()->getId() << endl;
-#endif
-							// find sub-sequences
-							SeqData *seq1 = NULL;
-							SeqData *seq2 = NULL;
-							SeqData *seq3 = NULL;
-							if(arcBefore)
-							{
-								int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
-								seq1 = this->initSol->getRouteBackSeq()[r][s][indexLastNodeRoute-s];
+							seq1 = this->initSol->getRouteForwSeq()[r][0][s-1];
 #ifdef DEBUG_IntraArcSwap
 							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
 #endif
-								seq2 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
+							seq2 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
 #ifdef DEBUG_IntraArcSwap
 							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
 #endif
-								seq3 = this->initSol->getRouteForwSeq()[r][s+1][indexLastNodeRoute-(s+1)];
+							seq3 = this->initSol->getRouteBackSeq()[r][0][s];
 #ifdef DEBUG_IntraArcSwap
 							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
 #endif
+						}
+
+						double newCostR;
+						if(this->initSol->EVALN(&newCostR,3, seq1, seq2, seq3) && newCostR < routeCost - 0.0001)
+						{// if feasibility and optimality condition is respected then
+
+							// remove arcFirstNode
+							arcFirstNode->removeNode();
+
+							// remove arcLastNode
+							arcLastNode->removeNode();
+
+							// remove swapNode
+							swapNode->removeNode();
+
+							if(arcBefore)
+							{
+								// insert arcFirstNode before swapNodeNext
+								swapNodeNext->insertBefore(arcFirstNode);
+								// insert arcLastNode before swapNodeNext
+								swapNodeNext->insertBefore(arcLastNode);
+								// insert swapNode after arcFirstNodePrev
+								arcFirstNodePrev->insertAfter(swapNode);
 							}
 							else
 							{
-								seq1 = this->initSol->getRouteForwSeq()[r][0][s-1];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
-#endif
-								seq2 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
-#endif
-								seq3 = this->initSol->getRouteBackSeq()[r][0][s];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
-#endif
+								// insert arcFirstNode after swapNodePrev
+								swapNodePrev->insertAfter(arcFirstNode);
+								// insert arcLastNode after arcFirstNode
+								arcFirstNode->insertAfter(arcLastNode);
+								// insert swapNode before arcLastNodeNext
+								arcLastNodeNext->insertBefore(swapNode);
 							}
 
-							double newCostR;
-							if(this->initSol->EVALN(&newCostR,3, seq1, seq2, seq3) && newCostR < routeCost - 0.0001)
-							{// if feasibility and optimality condition is respected then
 
-								// remove arcFirstNode
-								arcFirstNode->removeNode();
+							// update sub-sequences of the route
+							this->initSol->updateOneRouteSetSubSeq(r);
 
-								// remove arcLastNode
-								arcLastNode->removeNode();
-
-								// remove swapNode
-								swapNode->removeNode();
-
-								if(arcBefore)
-								{
-									// insert arcFirstNode before swapNodeNext
-									swapNodeNext->insertBefore(arcFirstNode);
-									// insert arcLastNode before swapNodeNext
-									swapNodeNext->insertBefore(arcLastNode);
-									// insert swapNode after arcFirstNodePrev
-									arcFirstNodePrev->insertAfter(swapNode);
-								}
-								else
-								{
-									// insert arcFirstNode after swapNodePrev
-									swapNodePrev->insertAfter(arcFirstNode);
-									// insert arcLastNode after arcFirstNode
-									arcFirstNode->insertAfter(arcLastNode);
-									// insert swapNode before arcLastNodeNext
-									arcLastNodeNext->insertBefore(swapNode);
-								}
-
-
-								// update sub-sequences of the route
-								this->initSol->updateOneRouteSetSubSeq(r);
-
-								// update objective functions
+							// update objective functions
 #ifdef DEBUG_IntraArcSwap
-								cout << " newCostR = " << newCostR << endl;
+							cout << " newCostR = " << newCostR << endl;
 #endif
-								double restCout = this->initSol->getObjVal() - routeCost;
+							double restCout = this->initSol->getObjVal() - routeCost;
 #ifdef DEBUG_IntraArcSwap
-								cout << "restCout = " << restCout << endl;
+							cout << "restCout = " << restCout << endl;
 #endif
-								double newObjVal = restCout + newCostR;
+							double newObjVal = restCout + newCostR;
 #ifdef DEBUG_IntraArcSwap
-								cout << "newObjVal = " << newObjVal << endl;
+							cout << "newObjVal = " << newObjVal << endl;
 #endif
-								this->initSol->setObjVal(newObjVal);
+							this->initSol->setObjVal(newObjVal);
 
-								breakIfImproved = true;
-								retVal = true;
-							}
+							breakIfImproved = true;
+							retVal = true;
 						}
 					}
 				}
 			}
 		}
-		else if(this->initSol->getNbClientsForRoute(r) == 4) // >= 3 et <= 4
+//		else if(this->initSol->getNbClientsForRoute(r) == 3 || this->initSol->getNbClientsForRoute(r) == 4) // >= 3 et <= 4
+		else if(this->initSol->getNbClientsForRoute(r) == 4)
 		{// if the number of clients in a route is equal 4
 			routeCost = this->initSol->getRouteForwSeq()[r][0].back()->getDistance();
 #ifdef DEBUG_IntraArcSwap
@@ -2470,292 +2456,289 @@ bool LocalSearch::IntraRouteArcSwap()
 			Node *arcLastNodeNext = NULL;
 
 			int a1 = 1; // see above comment
-			int a2 = a1+1; /* 0--b--c--d--0, a1 = 1, a2 = 2 --> a1--a2 = b--c */
-			for(arcFirstNode = this->initSol->getRoutes()[r].first->getNext(); !arcFirstNode->isDepot() && breakIfImproved == false; arcFirstNode = arcFirstNode->getNext(), a1++, a2++)
+			int a2 = a1+1; /* 0--b--c--d--e--0, a1 = 1, a2 = 2 --> a1--a2 = b--c */
+			for(arcFirstNode = this->initSol->getRoutes()[r].first->getNext(); !arcFirstNode->getNext()->isDepot() && breakIfImproved == false; arcFirstNode = arcFirstNode->getNext(), a1++, a2++)
 			{
 #ifdef DEBUG_IntraArcSwap
-		cout << endl;
+				cout << endl;
 #endif
 				arcLastNode = arcFirstNode->getNext();
 
-				if(!arcLastNode->isDepot())
+#ifdef DEBUG_IntraArcSwap
+				cout << " ------ insert arc = " << arcFirstNode->getClient()->getId() << "--" << arcLastNode->getClient()->getId() << " ----------" <<  " a1 = " << a1 << "---------- " << "a2 = " << a2  << endl;
+#endif
+				arcFirstNodePrev = arcFirstNode->getPrevious();
+				arcLastNodeNext = arcLastNode->getNext();
+#ifdef DEBUG_IntraArcSwap
+				if(arcFirstNodePrev != NULL)
+					cout << "arcFirstNodePrev = " << arcFirstNodePrev->getClient()->getId() << " ; " ;
+				if(arcLastNodeNext != NULL)
+					cout << "arcLastNodeNext = " << arcLastNodeNext->getClient()->getId() << endl;
+#endif
+				bool arcBefore = false;
+				Node *swapNodeNext = NULL;
+				Node *swapNodePrev = NULL;
+				int s = 1; /* 0--b--c--d--e--0, s = 1 --> s = b   */
+				for(Node *swapNode = this->initSol->getRoutes()[r].first->getNext(); !swapNode->isDepot() && breakIfImproved == false; swapNode = swapNode->getNext(),s++)
 				{
 #ifdef DEBUG_IntraArcSwap
-					cout << " ------ insert arc = " << arcFirstNode->getClient()->getId() << "--" << arcLastNode->getClient()->getId() << " ----------" <<  " a1 = " << a1 << "---------- " << "a2 = " << a2  << endl;
+					cout << " ------ swapNode = " << swapNode->getClient()->getId() << " ----------" <<  " s = " << s << endl;
 #endif
-					arcFirstNodePrev = arcFirstNode->getPrevious();
-					arcLastNodeNext = arcLastNode->getNext();
-#ifdef DEBUG_IntraArcSwap
-					if(arcFirstNodePrev != NULL)
-						cout << "arcFirstNodePrev = " << arcFirstNodePrev->getClient()->getId() << " ; " ;
-					if(arcLastNodeNext != NULL)
-						cout << "arcLastNodeNext = " << arcLastNodeNext->getClient()->getId() << endl;
-#endif
-					bool arcBefore = false;
-					Node *swapNodeNext = NULL;
-					Node *swapNodePrev = NULL;
-					int s = 1; /* 0--b--c--d--0, s = 1 --> s = b   */
-					for(Node *swapNode = this->initSol->getRoutes()[r].first->getNext(); !swapNode->isDepot() && breakIfImproved == false; swapNode = swapNode->getNext(),s++)
+					if( a1 == s || a2 == s)
+					{// the arc is before the swapNode
+						arcBefore = true;
+					}
+					else
 					{
+						swapNodeNext = swapNode->getNext();
+						swapNodePrev = swapNode->getPrevious();
 #ifdef DEBUG_IntraArcSwap
-						cout << " ------ swapNode = " << swapNode->getClient()->getId() << " ----------" <<  " s = " << s << endl;
+						if(swapNodePrev != NULL)
+							cout << "swapNodePrev = " << swapNodePrev->getClient()->getId() <<" ; " ;
+						if(swapNodeNext != NULL)
+							cout << "swapNodeNext = " << swapNodeNext->getClient()->getId() << endl;
 #endif
-						if( a1 == s || a2 == s)
-						{// the arc is before the swapNode
-							arcBefore = true;
-						}
-						else
+						// find sub-sequences
+						SeqData *seq1 = NULL;
+						SeqData *seq2 = NULL;
+						SeqData *seq3 = NULL;
+						SeqData *seq4 = NULL;
+
+						double newCostR;
+						// the arc is before the swapNode
+						if(arcBefore)
 						{
-							swapNodeNext = swapNode->getNext();
-							swapNodePrev = swapNode->getPrevious();
-#ifdef DEBUG_IntraArcSwap
-							if(swapNodePrev != NULL)
-								cout << "swapNodePrev = " << swapNodePrev->getClient()->getId() <<" ; " ;
-							if(swapNodeNext != NULL)
-								cout << "swapNodeNext = " << swapNodeNext->getClient()->getId() << endl;
-#endif
-							// find sub-sequences
-							SeqData *seq1 = NULL;
-							SeqData *seq2 = NULL;
-							SeqData *seq3 = NULL;
-							SeqData *seq4 = NULL;
-
-							double newCostR;
-							// the arc is before the swapNode
-							if(arcBefore)
+							// if the last client of the arc is the predecessor of the swapNode
+							if(a2+1 == s)
 							{
-								// if the last client of the arc is the predecessor of the swapNode
-								if(a2+1 == s)
+								seq1 = this->initSol->getRouteForwSeq()[r][0][a1-1];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+#endif
+								seq2 = this->initSol->getRouteBackSeq()[r][a2+1][s-(a2+1)];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+#endif
+								seq3 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
+								int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
+								seq4 = this->initSol->getRouteForwSeq()[r][s+1][indexLastNodeRoute-(s+1)];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
+#endif
+
+								// evaluate
+								if(this->initSol->EVALN(&newCostR,4, seq1, seq2, seq3,seq4) && newCostR < routeCost - 0.0001)
 								{
-									seq1 = this->initSol->getRouteForwSeq()[r][0][a1-1];
+									// remove arcFirstNode
+									arcFirstNode->removeNode();
+
+									// remove arcLastNode
+									arcLastNode->removeNode();
+
+									// remove swapNode
+									swapNode->removeNode();
+
+									// insert arcFirstNode before swapNodeNext
+									swapNodeNext->insertBefore(arcFirstNode);
+									// insert arcLastNode before swapNodeNext
+									swapNodeNext->insertBefore(arcLastNode);
+									// insert swapNode after arcFirstNodePrev
+									arcFirstNodePrev->insertAfter(swapNode);
+
+									// update sub-sequences of the route
+									this->initSol->updateOneRouteSetSubSeq(r);
+
+									// update objective functions
 #ifdef DEBUG_IntraArcSwap
-							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+									cout << " newCostR = " << newCostR << endl;
 #endif
-									seq2 = this->initSol->getRouteBackSeq()[r][a2+1][s-(a2+1)];
+									double restCout = this->initSol->getObjVal() - routeCost;
 #ifdef DEBUG_IntraArcSwap
-							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+									cout << "restCout = " << restCout << endl;
 #endif
-									seq3 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
+									double newObjVal = restCout + newCostR;
 #ifdef DEBUG_IntraArcSwap
-							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+									cout << "newObjVal = " << newObjVal << endl;
 #endif
-									int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
-									seq4 = this->initSol->getRouteForwSeq()[r][s+1][indexLastNodeRoute-(s+1)];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
-#endif
+									this->initSol->setObjVal(newObjVal);
 
-									// evaluate
-									if(this->initSol->EVALN(&newCostR,4, seq1, seq2, seq3,seq4) && newCostR < routeCost - 0.0001)
-									{
-										// remove arcFirstNode
-										arcFirstNode->removeNode();
-
-										// remove arcLastNode
-										arcLastNode->removeNode();
-
-										// remove swapNode
-										swapNode->removeNode();
-
-										// insert arcFirstNode before swapNodeNext
-										swapNodeNext->insertBefore(arcFirstNode);
-										// insert arcLastNode before swapNodeNext
-										swapNodeNext->insertBefore(arcLastNode);
-										// insert swapNode after arcFirstNodePrev
-										arcFirstNodePrev->insertAfter(swapNode);
-
-										// update sub-sequences of the route
-										this->initSol->updateOneRouteSetSubSeq(r);
-
-										// update objective functions
-		#ifdef DEBUG_IntraArcSwap
-										cout << " newCostR = " << newCostR << endl;
-		#endif
-										double restCout = this->initSol->getObjVal() - routeCost;
-		#ifdef DEBUG_IntraArcSwap
-										cout << "restCout = " << restCout << endl;
-		#endif
-										double newObjVal = restCout + newCostR;
-		#ifdef DEBUG_IntraArcSwap
-										cout << "newObjVal = " << newObjVal << endl;
-		#endif
-										this->initSol->setObjVal(newObjVal);
-
-										breakIfImproved = true;
-										retVal = true;
-									}
-								}
-								else // if the last client of the arc is not the predecessor of the swapNode
-								{
-									seq1 = this->initSol->getRouteBackSeq()[r][a2+1][s-a2];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
-#endif
-									seq2 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
-#endif
-									int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
-									seq3 = this->initSol->getRouteForwSeq()[r][s+1][indexLastNodeRoute-(s+1)];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
-#endif
-									// evaluate feasibility and optimality for the concatenation of seq1, seq2 and seq3
-									if(this->initSol->EVALN(&newCostR,3, seq1, seq2, seq3) && newCostR < routeCost - 0.0001)
-									{
-										// remove arcFirstNode
-										arcFirstNode->removeNode();
-
-										// remove arcLastNode
-										arcLastNode->removeNode();
-
-										// remove swapNode
-										swapNode->removeNode();
-
-										// insert arcFirstNode before swapNodeNext
-										swapNodeNext->insertBefore(arcFirstNode);
-										// insert arcLastNode before swapNodeNext
-										swapNodeNext->insertBefore(arcLastNode);
-										// insert swapNode after arcFirstNodePrev
-										arcFirstNodePrev->insertAfter(swapNode);
-
-										// update sub-sequences of the route
-										this->initSol->updateOneRouteSetSubSeq(r);
-
-										// update objective functions
-		#ifdef DEBUG_IntraArcSwap
-										cout << " newCostR = " << newCostR << endl;
-		#endif
-										double restCout = this->initSol->getObjVal() - routeCost;
-		#ifdef DEBUG_IntraArcSwap
-										cout << "restCout = " << restCout << endl;
-		#endif
-										double newObjVal = restCout + newCostR;
-		#ifdef DEBUG_IntraArcSwap
-										cout << "newObjVal = " << newObjVal << endl;
-		#endif
-										this->initSol->setObjVal(newObjVal);
-
-										breakIfImproved = true;
-										retVal = true;
-									}
+									breakIfImproved = true;
+									retVal = true;
 								}
 							}
-							else // the arc is after the swapNode
+							else // if the last client of the arc is not the predecessor of the swapNode
 							{
-								// if the swapNode is the predecessor of the arcFirstNode
-								if(a1-1 == s)
+								seq1 = this->initSol->getRouteBackSeq()[r][a2+1][s-a2];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+#endif
+								seq2 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+#endif
+								int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
+								seq3 = this->initSol->getRouteForwSeq()[r][s+1][indexLastNodeRoute-(s+1)];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
+								// evaluate feasibility and optimality for the concatenation of seq1, seq2 and seq3
+								if(this->initSol->EVALN(&newCostR,3, seq1, seq2, seq3) && newCostR < routeCost - 0.0001)
 								{
-									seq1 = this->initSol->getRouteForwSeq()[r][0][a1-1];
+									// remove arcFirstNode
+									arcFirstNode->removeNode();
+
+									// remove arcLastNode
+									arcLastNode->removeNode();
+
+									// remove swapNode
+									swapNode->removeNode();
+
+									// insert arcFirstNode before swapNodeNext
+									swapNodeNext->insertBefore(arcFirstNode);
+									// insert arcLastNode before swapNodeNext
+									swapNodeNext->insertBefore(arcLastNode);
+									// insert swapNode after arcFirstNodePrev
+									arcFirstNodePrev->insertAfter(swapNode);
+
+									// update sub-sequences of the route
+									this->initSol->updateOneRouteSetSubSeq(r);
+
+									// update objective functions
 #ifdef DEBUG_IntraArcSwap
-							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+									cout << " newCostR = " << newCostR << endl;
 #endif
-									seq2 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
+									double restCout = this->initSol->getObjVal() - routeCost;
 #ifdef DEBUG_IntraArcSwap
-							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+									cout << "restCout = " << restCout << endl;
 #endif
-									seq3 = this->initSol->getRouteBackSeq()[r][s][(a1-1)-s];
+									double newObjVal = restCout + newCostR;
 #ifdef DEBUG_IntraArcSwap
-							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+									cout << "newObjVal = " << newObjVal << endl;
 #endif
-									int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
-									seq4 = this->initSol->getRouteForwSeq()[r][s][indexLastNodeRoute-(a2+1)];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
-#endif
-									// evaluate concatenation of the 4 sub-seqs then apply the move if the cost is improved
-									if(this->initSol->EVALN(&newCostR,4, seq1, seq2, seq3,seq4) && newCostR < routeCost - 0.0001)
-									{
-										// remove arcFirstNode
-										arcFirstNode->removeNode();
+									this->initSol->setObjVal(newObjVal);
 
-										// remove arcLastNode
-										arcLastNode->removeNode();
-
-										// remove swapNode
-										swapNode->removeNode();
-
-										// insert arcFirstNode after swapNodePrev
-										swapNodePrev->insertAfter(arcFirstNode);
-										// insert arcLastNode after arcFirstNode
-										arcFirstNode->insertAfter(arcLastNode);
-										// insert swapNode before arcLastNodeNext
-										arcLastNodeNext->insertBefore(swapNode);
-
-										// update sub-sequences of the route
-										this->initSol->updateOneRouteSetSubSeq(r);
-
-										// update objective functions
-		#ifdef DEBUG_IntraArcSwap
-										cout << " newCostR = " << newCostR << endl;
-		#endif
-										double restCout = this->initSol->getObjVal() - routeCost;
-		#ifdef DEBUG_IntraArcSwap
-										cout << "restCout = " << restCout << endl;
-		#endif
-										double newObjVal = restCout + newCostR;
-		#ifdef DEBUG_IntraArcSwap
-										cout << "newObjVal = " << newObjVal << endl;
-		#endif
-										this->initSol->setObjVal(newObjVal);
-
-										breakIfImproved = true;
-										retVal = true;
-									}
+									breakIfImproved = true;
+									retVal = true;
 								}
-								else // if the swapNode is not the predecessor of the arcFirstNode
+							}
+						}
+						else // the arc is after the swapNode
+						{
+							// if the swapNode is the predecessor of the arcFirstNode
+							if(a1-1 == s)
+							{
+								seq1 = this->initSol->getRouteForwSeq()[r][0][a1-1];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+#endif
+								seq2 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+#endif
+								seq3 = this->initSol->getRouteBackSeq()[r][s][(a1-1)-s];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
+								int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
+								seq4 = this->initSol->getRouteForwSeq()[r][s][indexLastNodeRoute-(a2+1)];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
+#endif
+								// evaluate concatenation of the 4 sub-seqs then apply the move if the cost is improved
+								if(this->initSol->EVALN(&newCostR,4, seq1, seq2, seq3,seq4) && newCostR < routeCost - 0.0001)
 								{
-									seq1 = this->initSol->getRouteForwSeq()[r][0][s-1];
+									// remove arcFirstNode
+									arcFirstNode->removeNode();
+
+									// remove arcLastNode
+									arcLastNode->removeNode();
+
+									// remove swapNode
+									swapNode->removeNode();
+
+									// insert arcFirstNode after swapNodePrev
+									swapNodePrev->insertAfter(arcFirstNode);
+									// insert arcLastNode after arcFirstNode
+									arcFirstNode->insertAfter(arcLastNode);
+									// insert swapNode before arcLastNodeNext
+									arcLastNodeNext->insertBefore(swapNode);
+
+									// update sub-sequences of the route
+									this->initSol->updateOneRouteSetSubSeq(r);
+
+									// update objective functions
 #ifdef DEBUG_IntraArcSwap
-							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+									cout << " newCostR = " << newCostR << endl;
 #endif
-									seq2 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
+									double restCout = this->initSol->getObjVal() - routeCost;
 #ifdef DEBUG_IntraArcSwap
-							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+									cout << "restCout = " << restCout << endl;
 #endif
-									seq3 = this->initSol->getRouteBackSeq()[r][0][(a2-1)-s];
+									double newObjVal = restCout + newCostR;
 #ifdef DEBUG_IntraArcSwap
-							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+									cout << "newObjVal = " << newObjVal << endl;
 #endif
-									// evaluate concatenation of the 3 sub-seqs then apply the move if the cost is improved
-									if(this->initSol->EVALN(&newCostR,3, seq1, seq2, seq3) && newCostR < routeCost - 0.0001)
-									{
-										// remove arcFirstNode
-										arcFirstNode->removeNode();
+									this->initSol->setObjVal(newObjVal);
 
-										// remove arcLastNode
-										arcLastNode->removeNode();
+									breakIfImproved = true;
+									retVal = true;
+								}
+							}
+							else // if the swapNode is not the predecessor of the arcFirstNode
+							{
+								seq1 = this->initSol->getRouteForwSeq()[r][0][s-1];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+#endif
+								seq2 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+#endif
+								seq3 = this->initSol->getRouteBackSeq()[r][0][(a2-1)-s];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
+								// evaluate concatenation of the 3 sub-seqs then apply the move if the cost is improved
+								if(this->initSol->EVALN(&newCostR,3, seq1, seq2, seq3) && newCostR < routeCost - 0.0001)
+								{
+									// remove arcFirstNode
+									arcFirstNode->removeNode();
 
-										// remove swapNode
-										swapNode->removeNode();
+									// remove arcLastNode
+									arcLastNode->removeNode();
 
-										// insert arcFirstNode after swapNodePrev
-										swapNodePrev->insertAfter(arcFirstNode);
-										// insert arcLastNode after arcFirstNode
-										arcFirstNode->insertAfter(arcLastNode);
-										// insert swapNode before arcLastNodeNext
-										arcLastNodeNext->insertBefore(swapNode);
+									// remove swapNode
+									swapNode->removeNode();
 
-										// update sub-sequences of the route
-										this->initSol->updateOneRouteSetSubSeq(r);
+									// insert arcFirstNode after swapNodePrev
+									swapNodePrev->insertAfter(arcFirstNode);
+									// insert arcLastNode after arcFirstNode
+									arcFirstNode->insertAfter(arcLastNode);
+									// insert swapNode before arcLastNodeNext
+									arcLastNodeNext->insertBefore(swapNode);
 
-										// update objective functions
-		#ifdef DEBUG_IntraArcSwap
-										cout << " newCostR = " << newCostR << endl;
-		#endif
-										double restCout = this->initSol->getObjVal() - routeCost;
-		#ifdef DEBUG_IntraArcSwap
-										cout << "restCout = " << restCout << endl;
-		#endif
-										double newObjVal = restCout + newCostR;
-		#ifdef DEBUG_IntraArcSwap
-										cout << "newObjVal = " << newObjVal << endl;
-		#endif
-										this->initSol->setObjVal(newObjVal);
+									// update sub-sequences of the route
+									this->initSol->updateOneRouteSetSubSeq(r);
 
-										breakIfImproved = true;
-										retVal = true;
-									}
+									// update objective functions
+#ifdef DEBUG_IntraArcSwap
+									cout << " newCostR = " << newCostR << endl;
+#endif
+									double restCout = this->initSol->getObjVal() - routeCost;
+#ifdef DEBUG_IntraArcSwap
+									cout << "restCout = " << restCout << endl;
+#endif
+									double newObjVal = restCout + newCostR;
+#ifdef DEBUG_IntraArcSwap
+									cout << "newObjVal = " << newObjVal << endl;
+#endif
+									this->initSol->setObjVal(newObjVal);
+
+									breakIfImproved = true;
+									retVal = true;
 								}
 							}
 						}
@@ -2776,369 +2759,365 @@ bool LocalSearch::IntraRouteArcSwap()
 			Node *arcLastNodeNext = NULL;
 
 			int a1 = 1; // see above comment
-			int a2 = a1+1; /* 0--b--c--d--0, a1 = 1, a2 = 2 --> a1--a2 = b--c   */
-			for(arcFirstNode = this->initSol->getRoutes()[r].first->getNext(); !arcFirstNode->isDepot() && breakIfImproved == false; arcFirstNode = arcFirstNode->getNext(), a1++, a2++)
+			int a2 = a1+1; /* 0--b--c--d--e--0, a1 = 1, a2 = 2 --> a1--a2 = b--c   */
+			for(arcFirstNode = this->initSol->getRoutes()[r].first->getNext(); !arcFirstNode->getNext()->isDepot() && breakIfImproved == false; arcFirstNode = arcFirstNode->getNext(), a1++, a2++)
 			{
 #ifdef DEBUG_IntraArcSwap
-		cout << endl;
+				cout << endl;
 #endif
 				arcLastNode = arcFirstNode->getNext();
 
-				if(!arcLastNode->isDepot())
+#ifdef DEBUG_IntraArcSwap
+				cout << " ------ insert arc = " << arcFirstNode->getClient()->getId() << "--" << arcLastNode->getClient()->getId() << " ----------" <<  " a1 = " << a1 << "---------- " << "a2 = " << a2  << endl;
+#endif
+				arcFirstNodePrev = arcFirstNode->getPrevious();
+				arcLastNodeNext = arcLastNode->getNext();
+#ifdef DEBUG_IntraArcSwap
+				if(arcFirstNodePrev != NULL)
+					cout << "arcFirstNodePrev = " << arcFirstNodePrev->getClient()->getId() << " ; " ;
+				if(arcLastNodeNext != NULL)
+					cout << "arcLastNodeNext = " << arcLastNodeNext->getClient()->getId() << endl;
+#endif
+				bool arcBefore = false;
+				Node *swapNodeNext = NULL;
+				Node *swapNodePrev = NULL;
+				int s = 1; /* 0--b--c--d--0, s = 1 --> s = b   */
+				for(Node *swapNode = this->initSol->getRoutes()[r].first->getNext(); !swapNode->isDepot() && breakIfImproved == false; swapNode = swapNode->getNext(),s++)
 				{
 #ifdef DEBUG_IntraArcSwap
-					cout << " ------ insert arc = " << arcFirstNode->getClient()->getId() << "--" << arcLastNode->getClient()->getId() << " ----------" <<  " a1 = " << a1 << "---------- " << "a2 = " << a2  << endl;
+					cout << " ------ swapNode = " << swapNode->getClient()->getId() << " ----------" <<  " s = " << s << endl;
 #endif
-					arcFirstNodePrev = arcFirstNode->getPrevious();
-					arcLastNodeNext = arcLastNode->getNext();
-#ifdef DEBUG_IntraArcSwap
-					if(arcFirstNodePrev != NULL)
-						cout << "arcFirstNodePrev = " << arcFirstNodePrev->getClient()->getId() << " ; " ;
-					if(arcLastNodeNext != NULL)
-						cout << "arcLastNodeNext = " << arcLastNodeNext->getClient()->getId() << endl;
-#endif
-					bool arcBefore = false;
-					Node *swapNodeNext = NULL;
-					Node *swapNodePrev = NULL;
-					int s = 1; /* 0--b--c--d--0, s = 1 --> s = b   */
-					for(Node *swapNode = this->initSol->getRoutes()[r].first->getNext(); !swapNode->isDepot() && breakIfImproved == false; swapNode = swapNode->getNext(),s++)
+					if( a1 == s || a2 == s)
+					{// the arc is before the swapNode
+						arcBefore = true;
+					}
+					else
 					{
+						swapNodeNext = swapNode->getNext();
+						swapNodePrev = swapNode->getPrevious();
 #ifdef DEBUG_IntraArcSwap
-						cout << " ------ swapNode = " << swapNode->getClient()->getId() << " ----------" <<  " s = " << s << endl;
+						if(swapNodePrev != NULL)
+							cout << "swapNodePrev = " << swapNodePrev->getClient()->getId() <<" ; " ;
+						if(swapNodeNext != NULL)
+							cout << "swapNodeNext = " << swapNodeNext->getClient()->getId() << endl;
 #endif
-						if( a1 == s || a2 == s)
-						{// the arc is before the swapNode
-							arcBefore = true;
-						}
-						else
+						// find sub-sequences
+						SeqData *seq1 = NULL;
+						SeqData *seq2 = NULL;
+						SeqData *seq3 = NULL;
+						SeqData *seq4 = NULL;
+						SeqData *seq5 = NULL;
+
+						double newCostR;
+						// the arc is before the swapNode
+						if(arcBefore)
 						{
-							swapNodeNext = swapNode->getNext();
-							swapNodePrev = swapNode->getPrevious();
-#ifdef DEBUG_IntraArcSwap
-							if(swapNodePrev != NULL)
-								cout << "swapNodePrev = " << swapNodePrev->getClient()->getId() <<" ; " ;
-							if(swapNodeNext != NULL)
-								cout << "swapNodeNext = " << swapNodeNext->getClient()->getId() << endl;
-#endif
-							// find sub-sequences
-							SeqData *seq1 = NULL;
-							SeqData *seq2 = NULL;
-							SeqData *seq3 = NULL;
-							SeqData *seq4 = NULL;
-							SeqData *seq5 = NULL;
-
-							double newCostR;
-							// the arc is before the swapNode
-							if(arcBefore)
+							// if arcFirstNode is the first client in the route r and swapNode the last one
+							if(a1 == 1 && s == this->initSol->getNbClientsForRoute(r))
 							{
-								// if arcFirstNode is the first client in the route r and swapNode the last one
-								if(a1 == 1 && s == this->initSol->getNbClientsForRoute(r))
+								int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
+								seq1 = this->initSol->getRouteBackSeq()[r][s][indexLastNodeRoute-s];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+#endif
+								seq2 = this->initSol->getRouteForwSeq()[r][a2+1][(s-1)-(a2+1)];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+#endif
+								seq3 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
+								seq4 = this->initSol->getRouteForwSeq()[r][s+1][indexLastNodeRoute-(s+1)];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
+#endif
+							}
+							else if(a2+1 == s-1 || a2+1 == s) // if arcLastNode is the predecessor of swapNode or swapNode predecessor's
+							{
+								seq1 = this->initSol->getRouteForwSeq()[r][0][a1-1];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+#endif
+								seq2 = this->initSol->getRouteBackSeq()[r][a2+1][s-(a2+1)];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+#endif
+								seq3 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
+								int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
+								seq4 = this->initSol->getRouteForwSeq()[r][s+1][indexLastNodeRoute-(s+1)];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
+#endif
+							}
+							else
+							{
+								seq1 = this->initSol->getRouteForwSeq()[r][0][a1-1];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+#endif
+								seq2 = this->initSol->getRouteForwSeq()[r][s][0];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+#endif
+								seq3 = this->initSol->getRouteForwSeq()[r][a2+1][(s-1)-(a2+1)];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
+								seq4 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
+#endif
+								int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
+								seq5 = this->initSol->getRouteForwSeq()[r][s+1][indexLastNodeRoute-(s+1)];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq5->getHead()->getClient()->getId() << "--" << seq5->getTail()->getClient()->getId() << endl;
+#endif
+							}
+
+							if((a1 == 1 && s == this->initSol->getNbClientsForRoute(r)) || (a2+1 == s-1 || a2+1 == s))
+							{
+								// evaluate concatenation of the 4 sub-seqs then apply the move if the cost is improved
+								if(this->initSol->EVALN(&newCostR,4, seq1, seq2, seq3,seq4) && newCostR < routeCost - 0.0001)
 								{
-									int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
-									seq1 = this->initSol->getRouteBackSeq()[r][s][indexLastNodeRoute-s];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
-#endif
-									seq2 = this->initSol->getRouteForwSeq()[r][a2+1][(s-1)-(a2+1)];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
-#endif
-									seq3 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
-#endif
-									seq4 = this->initSol->getRouteForwSeq()[r][s+1][indexLastNodeRoute-(s+1)];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
-#endif
-								}
-								else if(a2+1 == s-1 || a2+1 == s) // if arcLastNode is the predecessor of swapNode or swapNode predecessor's
-								{
-									seq1 = this->initSol->getRouteForwSeq()[r][0][a1-1];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
-#endif
-									seq2 = this->initSol->getRouteBackSeq()[r][a2+1][s-(a2+1)];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
-#endif
-									seq3 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
-#endif
-									int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
-									seq4 = this->initSol->getRouteForwSeq()[r][s+1][indexLastNodeRoute-(s+1)];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
-#endif
-								}
-								else
-								{
-									seq1 = this->initSol->getRouteForwSeq()[r][0][a1-1];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
-#endif
-									seq2 = this->initSol->getRouteForwSeq()[r][s][0];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
-#endif
-									seq3 = this->initSol->getRouteForwSeq()[r][a2+1][(s-1)-(a2+1)];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
-#endif
-									seq4 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
-#endif
-									int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
-									seq5 = this->initSol->getRouteForwSeq()[r][s+1][indexLastNodeRoute-(s+1)];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq5->getHead()->getClient()->getId() << "--" << seq5->getTail()->getClient()->getId() << endl;
-#endif
-								}
+									// remove arcFirstNode
+									arcFirstNode->removeNode();
 
-								if((a1 == 1 && s == this->initSol->getNbClientsForRoute(r)) || (a2+1 == s-1 || a2+1 == s))
-								{
-									// evaluate concatenation of the 4 sub-seqs then apply the move if the cost is improved
-									if(this->initSol->EVALN(&newCostR,4, seq1, seq2, seq3,seq4) && newCostR < routeCost - 0.0001)
-									{
-										// remove arcFirstNode
-										arcFirstNode->removeNode();
+									// remove arcLastNode
+									arcLastNode->removeNode();
 
-										// remove arcLastNode
-										arcLastNode->removeNode();
+									// remove swapNode
+									swapNode->removeNode();
 
-										// remove swapNode
-										swapNode->removeNode();
+									// insert arcFirstNode before swapNodeNext
+									swapNodeNext->insertBefore(arcFirstNode);
+									// insert arcLastNode before swapNodeNext
+									swapNodeNext->insertBefore(arcLastNode);
+									// insert swapNode arcFirstNodePrev
+									arcFirstNodePrev->insertAfter(swapNode);
 
-										// insert arcFirstNode before swapNodeNext
-										swapNodeNext->insertBefore(arcFirstNode);
-										// insert arcLastNode before swapNodeNext
-										swapNodeNext->insertBefore(arcLastNode);
-										// insert swapNode arcFirstNodePrev
-										arcFirstNodePrev->insertAfter(swapNode);
+									// update sub-sequences of the route
+									this->initSol->updateOneRouteSetSubSeq(r);
 
-										// update sub-sequences of the route
-										this->initSol->updateOneRouteSetSubSeq(r);
+									// update objective functions
+#ifdef DEBUG_IntraArcSwap
+									cout << " newCostR = " << newCostR << endl;
+#endif
+									double restCout = this->initSol->getObjVal() - routeCost;
+#ifdef DEBUG_IntraArcSwap
+									cout << "restCout = " << restCout << endl;
+#endif
+									double newObjVal = restCout + newCostR;
+#ifdef DEBUG_IntraArcSwap
+									cout << "newObjVal = " << newObjVal << endl;
+#endif
+									this->initSol->setObjVal(newObjVal);
 
-										// update objective functions
-		#ifdef DEBUG_IntraArcSwap
-										cout << " newCostR = " << newCostR << endl;
-		#endif
-										double restCout = this->initSol->getObjVal() - routeCost;
-		#ifdef DEBUG_IntraArcSwap
-										cout << "restCout = " << restCout << endl;
-		#endif
-										double newObjVal = restCout + newCostR;
-		#ifdef DEBUG_IntraArcSwap
-										cout << "newObjVal = " << newObjVal << endl;
-		#endif
-										this->initSol->setObjVal(newObjVal);
-
-										breakIfImproved = true;
-										retVal = true;
-									}
-								}
-								else
-								{
-									// evaluate concatenation of the 5 sub-seqs then apply the move if the cost is improved
-									if(this->initSol->EVALN(&newCostR,5, seq1, seq2, seq3,seq4,seq5) && newCostR < routeCost - 0.0001)
-									{
-										// remove arcFirstNode
-										arcFirstNode->removeNode();
-
-										// remove arcLastNode
-										arcLastNode->removeNode();
-
-										// remove swapNode
-										swapNode->removeNode();
-
-										// insert arcFirstNode before swapNodeNext
-										swapNodeNext->insertBefore(arcFirstNode);
-										// insert arcLastNode before swapNodeNext
-										swapNodeNext->insertBefore(arcLastNode);
-										// insert swapNode arcFirstNodePrev
-										arcFirstNodePrev->insertAfter(swapNode);
-
-										// update sub-sequences of the route
-										this->initSol->updateOneRouteSetSubSeq(r);
-
-										// update objective functions
-		#ifdef DEBUG_IntraArcSwap
-										cout << " newCostR = " << newCostR << endl;
-		#endif
-										double restCout = this->initSol->getObjVal() - routeCost;
-		#ifdef DEBUG_IntraArcSwap
-										cout << "restCout = " << restCout << endl;
-		#endif
-										double newObjVal = restCout + newCostR;
-		#ifdef DEBUG_IntraArcSwap
-										cout << "newObjVal = " << newObjVal << endl;
-		#endif
-										this->initSol->setObjVal(newObjVal);
-
-										breakIfImproved = true;
-										retVal = true;
-									}
+									breakIfImproved = true;
+									retVal = true;
 								}
 							}
-							else // the arc is after the swapNode
+							else
 							{
-								// if swapNode is the first client in the route r and arcFirstNode the last one
-								if(s == 1 and a2 == this->initSol->getNbClientsForRoute(r))
+								// evaluate concatenation of the 5 sub-seqs then apply the move if the cost is improved
+								if(this->initSol->EVALN(&newCostR,5, seq1, seq2, seq3,seq4,seq5) && newCostR < routeCost - 0.0001)
 								{
-									seq1 = this->initSol->getRouteForwSeq()[r][0][s-1];
+									// remove arcFirstNode
+									arcFirstNode->removeNode();
+
+									// remove arcLastNode
+									arcLastNode->removeNode();
+
+									// remove swapNode
+									swapNode->removeNode();
+
+									// insert arcFirstNode before swapNodeNext
+									swapNodeNext->insertBefore(arcFirstNode);
+									// insert arcLastNode before swapNodeNext
+									swapNodeNext->insertBefore(arcLastNode);
+									// insert swapNode arcFirstNodePrev
+									arcFirstNodePrev->insertAfter(swapNode);
+
+									// update sub-sequences of the route
+									this->initSol->updateOneRouteSetSubSeq(r);
+
+									// update objective functions
 #ifdef DEBUG_IntraArcSwap
-							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+									cout << " newCostR = " << newCostR << endl;
 #endif
-									seq2 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
+									double restCout = this->initSol->getObjVal() - routeCost;
 #ifdef DEBUG_IntraArcSwap
-							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+									cout << "restCout = " << restCout << endl;
 #endif
-									seq3 = this->initSol->getRouteForwSeq()[r][s+1][(a1-1)-(s+1)];
+									double newObjVal = restCout + newCostR;
 #ifdef DEBUG_IntraArcSwap
-							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+									cout << "newObjVal = " << newObjVal << endl;
 #endif
-									seq4 = this->initSol->getRouteBackSeq()[r][0][s];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
-#endif
+									this->initSol->setObjVal(newObjVal);
+
+									breakIfImproved = true;
+									retVal = true;
 								}
-								else if( a1-1 == s+1 || a1-1 == s) // if swapNode or swapNode successor's is the predecessor of arcFirstNode
+							}
+						}
+						else // the arc is after the swapNode
+						{
+							// if swapNode is the first client in the route r and arcFirstNode the last one
+							if(s == 1 and a2 == this->initSol->getNbClientsForRoute(r))
+							{
+								seq1 = this->initSol->getRouteForwSeq()[r][0][s-1];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+#endif
+								seq2 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+#endif
+								seq3 = this->initSol->getRouteForwSeq()[r][s+1][(a1-1)-(s+1)];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
+								seq4 = this->initSol->getRouteBackSeq()[r][0][s];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
+#endif
+							}
+							else if( a1-1 == s+1 || a1-1 == s) // if swapNode or swapNode successor's is the predecessor of arcFirstNode
+							{
+								seq1 = this->initSol->getRouteForwSeq()[r][0][s-1];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+#endif
+								seq2 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+#endif
+								seq3 = this->initSol->getRouteBackSeq()[r][a1-1][(a1-1)-(s+1)];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
+								int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
+								seq4 = this->initSol->getRouteForwSeq()[r][a2+1][indexLastNodeRoute-(a2+1)];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
+#endif
+							}
+							else
+							{
+								seq1 = this->initSol->getRouteForwSeq()[r][0][s-1];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+#endif
+								seq2 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+#endif
+								seq3 = this->initSol->getRouteForwSeq()[r][s+1][(a1-1)-(s+1)];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
+								seq4 = this->initSol->getRouteForwSeq()[r][s][0];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
+#endif
+								int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
+								seq5 = this->initSol->getRouteForwSeq()[r][a2+1][indexLastNodeRoute-(a2+1)];
+#ifdef DEBUG_IntraArcSwap
+								cout << seq5->getHead()->getClient()->getId() << "--" << seq5->getTail()->getClient()->getId() << endl;
+#endif
+							}
+
+							if((s == 1 and a2 == this->initSol->getNbClientsForRoute(r)) || (a1-1 == s+1 || a1-1 == s))
+							{
+								// evaluate concatenation of the 4 sub-seqs then apply the move if the cost is improved
+								if(this->initSol->EVALN(&newCostR,4, seq1, seq2, seq3,seq4) && newCostR < routeCost - 0.0001)
 								{
-									seq1 = this->initSol->getRouteForwSeq()[r][0][s-1];
+									// remove arcFirstNode
+									arcFirstNode->removeNode();
+
+									// remove arcLastNode
+									arcLastNode->removeNode();
+
+									// remove swapNode
+									swapNode->removeNode();
+
+									// insert arcFirstNode after swapNodePrev
+									swapNodePrev->insertAfter(arcFirstNode);
+									// insert arcLastNode after arcFirstNode
+									arcFirstNode->insertAfter(arcLastNode);
+									// insert swapNode before arcLastNodeNext
+									arcLastNodeNext->insertBefore(swapNode);
+
+									// update sub-sequences of the route
+									this->initSol->updateOneRouteSetSubSeq(r);
+
+									// update objective functions
 #ifdef DEBUG_IntraArcSwap
-							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+									cout << " newCostR = " << newCostR << endl;
 #endif
-									seq2 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
+									double restCout = this->initSol->getObjVal() - routeCost;
 #ifdef DEBUG_IntraArcSwap
-							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+									cout << "restCout = " << restCout << endl;
 #endif
-									seq3 = this->initSol->getRouteBackSeq()[r][a1-1][(a1-1)-(s+1)];
+									double newObjVal = restCout + newCostR;
 #ifdef DEBUG_IntraArcSwap
-							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+									cout << "newObjVal = " << newObjVal << endl;
 #endif
-									int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
-									seq4 = this->initSol->getRouteForwSeq()[r][a2+1][indexLastNodeRoute-(a2+1)];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
-#endif
+									this->initSol->setObjVal(newObjVal);
+
+									breakIfImproved = true;
+									retVal = true;
 								}
-								else
+							}
+							else
+							{
+								// evaluate concatenation of the 5 sub-seqs then apply the move if the cost is improved
+								if(this->initSol->EVALN(&newCostR,5, seq1, seq2, seq3,seq4,seq5) && newCostR < routeCost - 0.0001)
 								{
-									seq1 = this->initSol->getRouteForwSeq()[r][0][s-1];
+									// remove arcFirstNode
+									arcFirstNode->removeNode();
+
+									// remove arcLastNode
+									arcLastNode->removeNode();
+
+									// remove swapNode
+									swapNode->removeNode();
+
+									// insert arcFirstNode after swapNodePrev
+									swapNodePrev->insertAfter(arcFirstNode);
+									// insert arcLastNode after arcFirstNode
+									arcFirstNode->insertAfter(arcLastNode);
+									// insert swapNode before arcLastNodeNext
+									arcLastNodeNext->insertBefore(swapNode);
+
+									// update sub-sequences of the route
+									this->initSol->updateOneRouteSetSubSeq(r);
+
+									// update objective functions
 #ifdef DEBUG_IntraArcSwap
-							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+									cout << " newCostR = " << newCostR << endl;
 #endif
-									seq2 = this->initSol->getRouteForwSeq()[r][a1][a2-a1];
+									double restCout = this->initSol->getObjVal() - routeCost;
 #ifdef DEBUG_IntraArcSwap
-							cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+									cout << "restCout = " << restCout << endl;
 #endif
-									seq3 = this->initSol->getRouteForwSeq()[r][s+1][(a1-1)-(s+1)];
+									double newObjVal = restCout + newCostR;
 #ifdef DEBUG_IntraArcSwap
-							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+									cout << "newObjVal = " << newObjVal << endl;
 #endif
-									seq4 = this->initSol->getRouteForwSeq()[r][s][0];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
-#endif
-									int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
-									seq5 = this->initSol->getRouteForwSeq()[r][a2+1][indexLastNodeRoute-(a2+1)];
-#ifdef DEBUG_IntraArcSwap
-							cout << seq5->getHead()->getClient()->getId() << "--" << seq5->getTail()->getClient()->getId() << endl;
-#endif
-								}
+									this->initSol->setObjVal(newObjVal);
 
-								if((s == 1 and a2 == this->initSol->getNbClientsForRoute(r)) || (a1-1 == s+1 || a1-1 == s))
-								{
-									// evaluate concatenation of the 4 sub-seqs then apply the move if the cost is improved
-									if(this->initSol->EVALN(&newCostR,4, seq1, seq2, seq3,seq4) && newCostR < routeCost - 0.0001)
-									{
-										// remove arcFirstNode
-										arcFirstNode->removeNode();
-
-										// remove arcLastNode
-										arcLastNode->removeNode();
-
-										// remove swapNode
-										swapNode->removeNode();
-
-										// insert arcFirstNode after swapNodePrev
-										swapNodePrev->insertAfter(arcFirstNode);
-										// insert arcLastNode after arcFirstNode
-										arcFirstNode->insertAfter(arcLastNode);
-										// insert swapNode before arcLastNodeNext
-										arcLastNodeNext->insertBefore(swapNode);
-
-										// update sub-sequences of the route
-										this->initSol->updateOneRouteSetSubSeq(r);
-
-										// update objective functions
-		#ifdef DEBUG_IntraArcSwap
-										cout << " newCostR = " << newCostR << endl;
-		#endif
-										double restCout = this->initSol->getObjVal() - routeCost;
-		#ifdef DEBUG_IntraArcSwap
-										cout << "restCout = " << restCout << endl;
-		#endif
-										double newObjVal = restCout + newCostR;
-		#ifdef DEBUG_IntraArcSwap
-										cout << "newObjVal = " << newObjVal << endl;
-		#endif
-										this->initSol->setObjVal(newObjVal);
-
-										breakIfImproved = true;
-										retVal = true;
-									}
-								}
-								else
-								{
-									// evaluate concatenation of the 5 sub-seqs then apply the move if the cost is improved
-									if(this->initSol->EVALN(&newCostR,5, seq1, seq2, seq3,seq4,seq5) && newCostR < routeCost - 0.0001)
-									{
-										// remove arcFirstNode
-										arcFirstNode->removeNode();
-
-										// remove arcLastNode
-										arcLastNode->removeNode();
-
-										// remove swapNode
-										swapNode->removeNode();
-
-										// insert arcFirstNode after swapNodePrev
-										swapNodePrev->insertAfter(arcFirstNode);
-										// insert arcLastNode after arcFirstNode
-										arcFirstNode->insertAfter(arcLastNode);
-										// insert swapNode before arcLastNodeNext
-										arcLastNodeNext->insertBefore(swapNode);
-
-										// update sub-sequences of the route
-										this->initSol->updateOneRouteSetSubSeq(r);
-
-										// update objective functions
-		#ifdef DEBUG_IntraArcSwap
-										cout << " newCostR = " << newCostR << endl;
-		#endif
-										double restCout = this->initSol->getObjVal() - routeCost;
-		#ifdef DEBUG_IntraArcSwap
-										cout << "restCout = " << restCout << endl;
-		#endif
-										double newObjVal = restCout + newCostR;
-		#ifdef DEBUG_IntraArcSwap
-										cout << "newObjVal = " << newObjVal << endl;
-		#endif
-										this->initSol->setObjVal(newObjVal);
-
-										breakIfImproved = true;
-										retVal = true;
-									}
+									breakIfImproved = true;
+									retVal = true;
 								}
 							}
 						}
 					}
 				}
 			}
-
 		}
 	}
 	return retVal;
@@ -3176,7 +3155,7 @@ bool LocalSearch::IntraRoute2ArcSwap()
 
 			int a1 = 1; /* a1 is the index of the first arc's first client in the route, a2 is the one of the second one */
 			int a2 = a1+1; /* 0--b--c--d--e--0, a1 = 1, a2 = 2 --> a1--a2 = b--c   */
-			for(arcFirstNode = this->initSol->getRoutes()[r].first->getNext(); !arcFirstNode->isDepot() && breakIfImproved == false; arcFirstNode = arcFirstNode->getNext(), a1++, a2++)
+			for(arcFirstNode = this->initSol->getRoutes()[r].first->getNext(); !arcFirstNode->getNext()->isDepot() && breakIfImproved == false; arcFirstNode = arcFirstNode->getNext(), a1++, a2++) // to verify
 			{
 #ifdef DEBUG_Intra2ArcSwap
 				cout << endl;
@@ -3199,10 +3178,11 @@ bool LocalSearch::IntraRoute2ArcSwap()
 
 				int s1 = a2+1; /* s1 is the index of the second arc's first client in the route, a2 is the one of the second one */
 				int s2 = s1+1; /* 0--b--c--d--e--0, s1 = 3, s2 = 4 --> s1--s2 = d--e   */
-				for(swapNodeFirst = arcLastNode->getNext(); !swapNodeFirst->isDepot() && breakIfImproved == false; swapNodeFirst = swapNodeFirst->getNext(), s1++, s2++)
+				for(swapNodeFirst = arcLastNode->getNext(); !swapNodeFirst->isDepot() && breakIfImproved == false; swapNodeFirst = swapNodeFirst->getNext(), s1++, s2++) // to verify
 				{
 					swapNodeSecond = swapNodeFirst->getNext();
-					if(!swapNodeSecond->isDepot()) // add to the cycle
+
+					if(!swapNodeSecond->isDepot()) // can't put in for cycle
 					{
 #ifdef DEBUG_Intra2ArcSwap
 						cout << " ------ swap arc second = " << swapNodeFirst->getClient()->getId() << "--" << swapNodeSecond->getClient()->getId() << " ----------" <<  " s1 = " << s1 << "---------- " << " s2 = " << s2  << endl;
@@ -3357,7 +3337,6 @@ bool LocalSearch::IntraRoute2ArcSwap()
 			}
 		}
 	}
-
 	return retVal;
 }
 
@@ -3555,157 +3534,14 @@ bool LocalSearch::InterRouteArcInsert()
 
 						int c1f = 1; // index of insertNodeFirst in route r1
 						int c1s = c1f+1; // index of insertNodeLast in route r1
-						for(insertNodeFirstR1 = this->initSol->getRoutes()[r1].first->getNext(); !insertNodeFirstR1->isDepot() && breakIfImproved == false; insertNodeFirstR1 = insertNodeFirstR1->getNext(), c1f++, c1s++)
+						for(insertNodeFirstR1 = this->initSol->getRoutes()[r1].first->getNext(); !insertNodeFirstR1->getNext()->isDepot() && breakIfImproved == false; insertNodeFirstR1 = insertNodeFirstR1->getNext(), c1f++, c1s++)
 						{
 							insertNodeLastR1 = insertNodeFirstR1->getNext();
-							if(!insertNodeLastR1->isDepot())
-							{
-#ifdef DEBUG_InterRouteArcInsert
-								cout << " ------ insert arc = " << insertNodeFirstR1->getClient()->getId() << "--" << insertNodeLastR1->getClient()->getId() << " ----------" <<  " c1f = " << c1f << "---------- " << "c1s = " << c1s << endl;
-#endif
-								// find the 2 sub-sequences for route r1
-								SeqData *seq1 = NULL;
-								SeqData *seq2 = NULL;
 
-								seq1 = this->initSol->getRouteForwSeq()[r1][0][c1f-1];
-#ifdef DEBUG_InterRouteArcInsert
-								cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
-#endif
-								int indexLastNodeRouteR1 = this->initSol->getNbClientsForRoute(r1)+1;
-								seq2 = this->initSol->getRouteForwSeq()[r1][c1s+1][indexLastNodeRouteR1 - (c1s+1)];
-#ifdef DEBUG_InterRouteArcInsert
-								cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
-#endif
-								double newCostR1, reduceCostR1;
-								if(this->initSol->EVAL2(&newCostR1, seq1, seq2))
-								{
-#ifdef DEBUG_InterRouteArcInsert
-									cout << "newCostR1 = " << newCostR1 << endl;
-#endif
-									reduceCostR1 = newCostR1 - costR1;
-#ifdef DEBUG_InterRouteArcInsert
-									cout << "reduceCostR1 = " << reduceCostR1 << endl;
-#endif
-								}
-
-								int c2 = 0; // index of moveNode in route r2
-								for(Node *moveNodeR2 = this->initSol->getRoutes()[r2].first; !moveNodeR2->isLastDepot() && breakIfImproved == false; moveNodeR2 = moveNodeR2->getNext(), c2++)
-								{
-#ifdef DEBUG_InterRouteArcInsert
-									cout << "---------- moveNodeR2 " << " " << " = " << moveNodeR2->getClient()->getId() << " ---------- " << " c2 = " << "" << c2 << endl;
-#endif
-									// find the 3 sub-sequences for route r2
-									SeqData *seq3 = NULL;
-									SeqData *seq4 = NULL;
-									SeqData *seq5 = NULL;
-
-
-									seq3 = this->initSol->getRouteForwSeq()[r2][0][c2];
-#ifdef DEBUG_InterRouteArcInsert
-									cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
-#endif
-									seq4 = this->initSol->getRouteForwSeq()[r1][c1f][c1s-c1f];
-#ifdef DEBUG_InterRouteArcInsert
-									cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
-#endif
-									int indexLastNodeRouteR2 = this->initSol->getNbClientsForRoute(r2)+1;
-									seq5 = this->initSol->getRouteForwSeq()[r2][c2+1][indexLastNodeRouteR2 - (c2+1)];
-#ifdef DEBUG_InterRouteArcInsert
-									cout << seq5->getHead()->getClient()->getId() << "--" << seq5->getTail()->getClient()->getId() << endl;
-#endif
-									double newCostR2, addCostR2, newObjVal;
-									if(this->initSol->EVALN(&newCostR2, 3, seq3, seq4, seq5))
-									{
-#ifdef DEBUG_InterRouteArcInsert
-										cout << "newCostR2 = " << newCostR2 << endl;
-#endif
-										addCostR2 = newCostR2 - costR2;
-#ifdef DEBUG_InterRouteArcInsert
-										cout << "addCostR2 = " << addCostR2 << endl;
-										cout << "oldObjVal = " << this->initSol->getObjVal() << endl;
-#endif
-										newObjVal = this->initSol->getObjVal() + reduceCostR1 + addCostR2;
-#ifdef DEBUG_InterRouteArcInsert
-										cout << "newObjVal = " << newObjVal << endl;
-#endif
-										if(newObjVal < this->initSol->getObjVal() - 0.0001)
-										{
-											// remove insertNodeFirst and insertNodeLast
-											insertNodeFirstR1->removeNode();
-											insertNodeLastR1->removeNode();
-
-											// insert insertNodeFirstR1 after moveNodeR2
-											moveNodeR2->insertAfter(insertNodeFirstR1);
-											// insert insertNodeLastR1 after insertNodeFirstR1
-											insertNodeFirstR1->insertAfter(insertNodeLastR1);
-
-											// update R1 number of nodes
-#ifdef DEBUG_InterRouteArcInsert
-											cout << " r1 = " << r1 << endl;
-											cout << "this->initSol->getRoutes()[ " << r1 << " ].second1 = " << this->initSol->getRoutes()[r1].second << endl;
-#endif
-											int numR1 = this->initSol->getRoutes()[r1].second -2;
-											this->initSol->updateRouteNbNodes(r1,numR1);
-#ifdef DEBUG_InterRouteArcInsert
-											cout << "this->initSol->getRoutes()[ " << r1 << " ].second2 = " << this->initSol->getRoutes()[r1].second << endl;
-#endif
-											// update R2 number of nodes
-#ifdef DEBUG_InterRouteArcInsert
-											cout << " r2 = " << r2 << endl;
-											cout << "this->initSol->getRoutes()[ " << r2 << " ].second1 = " << this->initSol->getRoutes()[r2].second << endl;
-#endif
-											int numR2 = this->initSol->getRoutes()[r2].second +2;
-											this->initSol->updateRouteNbNodes(r2,numR2);
-#ifdef DEBUG_InterRouteArcInsert
-											cout << "this->initSol->getRoutes()[ " << r2 << " ].second2 = " << this->initSol->getRoutes()[r2].second << endl;
-#endif
-
-											// update R1 and R2 route sub-sequences
-											this->initSol->updateOneRouteSetSubSeq(r1);
-											this->initSol->updateOneRouteSetSubSeq(r2);
-
-											// update objective value
-											this->initSol->setObjVal(newObjVal);
-
-											breakIfImproved = true;
-											retVal = true;
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		else if(this->initSol->getNbClientsForRoute(r1) > 2)
-		{
-			// record each route r1 cost
-			costR1 = this->initSol->getRouteForwSeq()[r1][0].back()->getDistance();
-#ifdef DEBUG_InterRouteArcInsert
-			cout << "costR1 = " << costR1 << endl;
-#endif
-			bool breakIfImproved = false; // stop InterRouteArcInsert move for a route if improved
-			// r2 is the number of routes including the empty ones
-			for(int r2 = 0; r2 <  this->initSol->getDataAP()->getNumberNodes()-1; r2++)
-			{
-				if(r1 != r2)
-				{
-					double costR2 = this->initSol->getRouteForwSeq()[r2][0].back()->getDistance();
-
-					Node *insertNodeFirstR1 = NULL; // insert arc first node
-					Node *insertNodeLastR1 = NULL; // insert arc second node
-
-					int c1f = 1; // index of insertNodeFirst in route r1
-					int c1s = c1f+1; // index of insertNodeLast in route r1
-					for(insertNodeFirstR1 = this->initSol->getRoutes()[r1].first->getNext(); !insertNodeFirstR1->isDepot() && breakIfImproved == false; insertNodeFirstR1 = insertNodeFirstR1->getNext(), c1f++, c1s++)
-					{
-						insertNodeLastR1 = insertNodeFirstR1->getNext();
-						if(!insertNodeLastR1->isDepot())
-						{
 #ifdef DEBUG_InterRouteArcInsert
 							cout << " ------ insert arc = " << insertNodeFirstR1->getClient()->getId() << "--" << insertNodeLastR1->getClient()->getId() << " ----------" <<  " c1f = " << c1f << "---------- " << "c1s = " << c1s << endl;
-#endif							// find the 2 sub-sequences
+#endif
+							// find the 2 sub-sequences for route r1
 							SeqData *seq1 = NULL;
 							SeqData *seq2 = NULL;
 
@@ -3736,7 +3572,7 @@ bool LocalSearch::InterRouteArcInsert()
 #ifdef DEBUG_InterRouteArcInsert
 								cout << "---------- moveNodeR2 " << " " << " = " << moveNodeR2->getClient()->getId() << " ---------- " << " c2 = " << "" << c2 << endl;
 #endif
-								// find the 3 sub-sequences
+								// find the 3 sub-sequences for route r2
 								SeqData *seq3 = NULL;
 								SeqData *seq4 = NULL;
 								SeqData *seq5 = NULL;
@@ -3819,8 +3655,146 @@ bool LocalSearch::InterRouteArcInsert()
 				}
 			}
 		}
-	}
+		else if(this->initSol->getNbClientsForRoute(r1) > 2)
+		{
+			// record each route r1 cost
+			costR1 = this->initSol->getRouteForwSeq()[r1][0].back()->getDistance();
+#ifdef DEBUG_InterRouteArcInsert
+			cout << "costR1 = " << costR1 << endl;
+#endif
+			bool breakIfImproved = false; // stop InterRouteArcInsert move for a route if improved
+			// r2 is the number of routes including the empty ones
+			for(int r2 = 0; r2 <  this->initSol->getDataAP()->getNumberNodes()-1; r2++)
+			{
+				if(r1 != r2)
+				{
+					double costR2 = this->initSol->getRouteForwSeq()[r2][0].back()->getDistance();
 
+					Node *insertNodeFirstR1 = NULL; // insert arc first node
+					Node *insertNodeLastR1 = NULL; // insert arc second node
+
+					int c1f = 1; // index of insertNodeFirst in route r1
+					int c1s = c1f+1; // index of insertNodeLast in route r1
+					for(insertNodeFirstR1 = this->initSol->getRoutes()[r1].first->getNext(); !insertNodeFirstR1->getNext()->isDepot() && breakIfImproved == false; insertNodeFirstR1 = insertNodeFirstR1->getNext(), c1f++, c1s++)
+					{
+						insertNodeLastR1 = insertNodeFirstR1->getNext();
+
+#ifdef DEBUG_InterRouteArcInsert
+						cout << " ------ insert arc = " << insertNodeFirstR1->getClient()->getId() << "--" << insertNodeLastR1->getClient()->getId() << " ----------" <<  " c1f = " << c1f << "---------- " << "c1s = " << c1s << endl;
+#endif							// find the 2 sub-sequences
+						SeqData *seq1 = NULL;
+						SeqData *seq2 = NULL;
+
+						seq1 = this->initSol->getRouteForwSeq()[r1][0][c1f-1];
+#ifdef DEBUG_InterRouteArcInsert
+						cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
+#endif
+						int indexLastNodeRouteR1 = this->initSol->getNbClientsForRoute(r1)+1;
+						seq2 = this->initSol->getRouteForwSeq()[r1][c1s+1][indexLastNodeRouteR1 - (c1s+1)];
+#ifdef DEBUG_InterRouteArcInsert
+						cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
+#endif
+						double newCostR1, reduceCostR1;
+						if(this->initSol->EVAL2(&newCostR1, seq1, seq2))
+						{
+#ifdef DEBUG_InterRouteArcInsert
+							cout << "newCostR1 = " << newCostR1 << endl;
+#endif
+							reduceCostR1 = newCostR1 - costR1;
+#ifdef DEBUG_InterRouteArcInsert
+							cout << "reduceCostR1 = " << reduceCostR1 << endl;
+#endif
+						}
+
+						int c2 = 0; // index of moveNode in route r2
+						for(Node *moveNodeR2 = this->initSol->getRoutes()[r2].first; !moveNodeR2->isLastDepot() && breakIfImproved == false; moveNodeR2 = moveNodeR2->getNext(), c2++)
+						{
+#ifdef DEBUG_InterRouteArcInsert
+							cout << "---------- moveNodeR2 " << " " << " = " << moveNodeR2->getClient()->getId() << " ---------- " << " c2 = " << "" << c2 << endl;
+#endif
+							// find the 3 sub-sequences
+							SeqData *seq3 = NULL;
+							SeqData *seq4 = NULL;
+							SeqData *seq5 = NULL;
+
+
+							seq3 = this->initSol->getRouteForwSeq()[r2][0][c2];
+#ifdef DEBUG_InterRouteArcInsert
+							cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
+#endif
+							seq4 = this->initSol->getRouteForwSeq()[r1][c1f][c1s-c1f];
+#ifdef DEBUG_InterRouteArcInsert
+							cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
+#endif
+							int indexLastNodeRouteR2 = this->initSol->getNbClientsForRoute(r2)+1;
+							seq5 = this->initSol->getRouteForwSeq()[r2][c2+1][indexLastNodeRouteR2 - (c2+1)];
+#ifdef DEBUG_InterRouteArcInsert
+							cout << seq5->getHead()->getClient()->getId() << "--" << seq5->getTail()->getClient()->getId() << endl;
+#endif
+							double newCostR2, addCostR2, newObjVal;
+							if(this->initSol->EVALN(&newCostR2, 3, seq3, seq4, seq5))
+							{
+#ifdef DEBUG_InterRouteArcInsert
+								cout << "newCostR2 = " << newCostR2 << endl;
+#endif
+								addCostR2 = newCostR2 - costR2;
+#ifdef DEBUG_InterRouteArcInsert
+								cout << "addCostR2 = " << addCostR2 << endl;
+								cout << "oldObjVal = " << this->initSol->getObjVal() << endl;
+#endif
+								newObjVal = this->initSol->getObjVal() + reduceCostR1 + addCostR2;
+#ifdef DEBUG_InterRouteArcInsert
+								cout << "newObjVal = " << newObjVal << endl;
+#endif
+								if(newObjVal < this->initSol->getObjVal() - 0.0001)
+								{
+									// remove insertNodeFirst and insertNodeLast
+									insertNodeFirstR1->removeNode();
+									insertNodeLastR1->removeNode();
+
+									// insert insertNodeFirstR1 after moveNodeR2
+									moveNodeR2->insertAfter(insertNodeFirstR1);
+									// insert insertNodeLastR1 after insertNodeFirstR1
+									insertNodeFirstR1->insertAfter(insertNodeLastR1);
+
+									// update R1 number of nodes
+#ifdef DEBUG_InterRouteArcInsert
+									cout << " r1 = " << r1 << endl;
+									cout << "this->initSol->getRoutes()[ " << r1 << " ].second1 = " << this->initSol->getRoutes()[r1].second << endl;
+#endif
+									int numR1 = this->initSol->getRoutes()[r1].second -2;
+									this->initSol->updateRouteNbNodes(r1,numR1);
+#ifdef DEBUG_InterRouteArcInsert
+									cout << "this->initSol->getRoutes()[ " << r1 << " ].second2 = " << this->initSol->getRoutes()[r1].second << endl;
+#endif
+									// update R2 number of nodes
+#ifdef DEBUG_InterRouteArcInsert
+									cout << " r2 = " << r2 << endl;
+									cout << "this->initSol->getRoutes()[ " << r2 << " ].second1 = " << this->initSol->getRoutes()[r2].second << endl;
+#endif
+									int numR2 = this->initSol->getRoutes()[r2].second +2;
+									this->initSol->updateRouteNbNodes(r2,numR2);
+#ifdef DEBUG_InterRouteArcInsert
+									cout << "this->initSol->getRoutes()[ " << r2 << " ].second2 = " << this->initSol->getRoutes()[r2].second << endl;
+#endif
+
+									// update R1 and R2 route sub-sequences
+									this->initSol->updateOneRouteSetSubSeq(r1);
+									this->initSol->updateOneRouteSetSubSeq(r2);
+
+									// update objective value
+									this->initSol->setObjVal(newObjVal);
+
+									breakIfImproved = true;
+									retVal = true;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 	return retVal;
 }
 
@@ -3998,7 +3972,7 @@ bool LocalSearch::InterRouteArcSwap()
 						Node *arcFirstNodePrev = NULL;
 						int a1 = 1; /* a1 is the index of the arc first client in the route, a2 is the one of the arc second client */
 						int a2 = a1+1; /* 0--b--c--d--0, a1 = 1, a2 = 2 --> a1--a2 = b--c   */
-						for(arcFirstNode = this->initSol->getRoutes()[r1].first->getNext(); !arcFirstNode->isDepot() && breakIfImproved == false; arcFirstNode = arcFirstNode->getNext(), a1++, a2++)
+						for(arcFirstNode = this->initSol->getRoutes()[r1].first->getNext(); !arcFirstNode->getNext()->isDepot() && breakIfImproved == false; arcFirstNode = arcFirstNode->getNext(), a1++, a2++)
 						{
 #ifdef DEBUG_InterRouteArcSwap
 							cout << endl;
@@ -4006,123 +3980,121 @@ bool LocalSearch::InterRouteArcSwap()
 							arcFirstNodePrev = arcFirstNode->getPrevious();
 
 							arcLastNode = arcFirstNode->getNext();
-							if(!arcLastNode->isDepot())
+
+#ifdef DEBUG_InterRouteArcSwap
+							cout << " ------ swap arc first = " << arcFirstNode->getClient()->getId() << "--" << arcLastNode->getClient()->getId() << " ----------" <<  " a1 = " << a1 << "---------- " << "a2 = " << a2  << endl;
+							if(arcFirstNodePrev != NULL)
+								cout << "arcFirstNodePrev = " << arcFirstNodePrev->getClient()->getId() <<  endl;
+#endif
+							Node *swapNodeSecondPrev = NULL;
+							/* s2 is the index of clients to swap in the route r2, e.g, (0--a--b--c--0) */
+							int s2 = 1; /* 0--a--b--c--0, s2 = 1 --> s2 = a */
+							for(Node *swapNodeSecond = this->initSol->getRoutes()[r2].first->getNext(); !swapNodeSecond->isDepot() && breakIfImproved == false; swapNodeSecond = swapNodeSecond->getNext(), s2++)
 							{
 #ifdef DEBUG_InterRouteArcSwap
-								cout << " ------ swap arc first = " << arcFirstNode->getClient()->getId() << "--" << arcLastNode->getClient()->getId() << " ----------" <<  " a1 = " << a1 << "---------- " << "a2 = " << a2  << endl;
-									if(arcFirstNodePrev != NULL)
-										cout << "arcFirstNodePrev = " << arcFirstNodePrev->getClient()->getId() <<  endl;
+								cout << " ------ swapNodeSecond = " << swapNodeSecond->getClient()->getId() << " ----------" <<  " s2 = " << s2 << endl;
 #endif
-								Node *swapNodeSecondPrev = NULL;
-								/* s2 is the index of clients to swap in the route r2, e.g, (0--a--b--c--0) */
-								int s2 = 1; /* 0--a--b--c--0, s2 = 1 --> s2 = a */
-								for(Node *swapNodeSecond = this->initSol->getRoutes()[r2].first->getNext(); !swapNodeSecond->isDepot() && breakIfImproved == false; swapNodeSecond = swapNodeSecond->getNext(), s2++)
+								swapNodeSecondPrev = swapNodeSecond->getPrevious();
+
+#ifdef DEBUG_InterRouteArcSwap
+								if(swapNodeSecondPrev != NULL)
+									cout << "swapNodeSecondPrev = " << swapNodeSecondPrev->getClient()->getId() <<  endl;
+#endif
+								// find sub-sequences to concatenate to form new route r1 and r2
+
+								SeqData *seq1R1 = NULL;
+								SeqData *seq2R1 = NULL;
+								SeqData *seq3R1 = NULL;
+								SeqData *seq1R2 = NULL;
+								SeqData *seq2R2 = NULL;
+								SeqData *seq3R2 = NULL;
+
+								// sub-sequences to form new route r1
+								seq1R1 = this->initSol->getRouteForwSeq()[r1][0][a1-1];
+#ifdef DEBUG_InterRouteArcSwap
+								cout << seq1R1->getHead()->getClient()->getId() << "--" << seq1R1->getTail()->getClient()->getId() << endl;
+#endif
+								seq2R1 = this->initSol->getRouteForwSeq()[r2][s2][0];
+#ifdef DEBUG_InterRouteArcSwap
+								cout << seq2R1->getHead()->getClient()->getId() << "--" << seq2R1->getTail()->getClient()->getId() << endl;
+#endif
+								int indexLastNodeRouteR1 = this->initSol->getNbClientsForRoute(r1)+1;
+								seq3R1 = this->initSol->getRouteForwSeq()[r1][a2+1][indexLastNodeRouteR1 - (a2+1)];
+#ifdef DEBUG_InterRouteArcSwap
+								cout << seq3R1->getHead()->getClient()->getId() << "--" << seq3R1->getTail()->getClient()->getId() << endl;
+#endif
+								// sub-sequences to form new route r2
+								seq1R2 = this->initSol->getRouteForwSeq()[r2][0][s2-1];
+#ifdef DEBUG_InterRouteArcSwap
+								cout << seq1R2->getHead()->getClient()->getId() << "--" << seq1R2->getTail()->getClient()->getId() << endl;
+#endif
+								seq2R2 = this->initSol->getRouteForwSeq()[r1][a1][a2-a1];
+#ifdef DEBUG_InterRouteArcSwap
+								cout << seq2R2->getHead()->getClient()->getId() << "--" << seq2R2->getTail()->getClient()->getId() << endl;
+#endif
+								int indexLastNodeRouteR2 = this->initSol->getNbClientsForRoute(r2)+1;
+								seq3R2 = this->initSol->getRouteForwSeq()[r2][s2+1][indexLastNodeRouteR2 - (s2+1)];
+#ifdef DEBUG_InterRouteArcSwap
+								cout << seq3R2->getHead()->getClient()->getId() << "--" << seq3R2->getTail()->getClient()->getId() << endl;
+#endif
+								// evaluate the concatenation to form new route r1 and r2
+								double newCostR1, newCostR2;
+								if(this->initSol->EVALN(&newCostR1, 3, seq1R1, seq2R1, seq3R1) && this->initSol->EVALN(&newCostR2, 3, seq1R2, seq2R2, seq3R2))
 								{
-#ifdef DEBUG_InterRouteArcSwap
-									cout << " ------ swapNodeSecond = " << swapNodeSecond->getClient()->getId() << " ----------" <<  " s2 = " << s2 << endl;
-#endif
-									swapNodeSecondPrev = swapNodeSecond->getPrevious();
-
-#ifdef DEBUG_InterRouteArcSwap
-									if(swapNodeSecondPrev != NULL)
-										cout << "swapNodeSecondPrev = " << swapNodeSecondPrev->getClient()->getId() <<  endl;
-#endif
-									// find sub-sequences to concatenate to form new route r1 and r2
-
-									SeqData *seq1R1 = NULL;
-									SeqData *seq2R1 = NULL;
-									SeqData *seq3R1 = NULL;
-									SeqData *seq1R2 = NULL;
-									SeqData *seq2R2 = NULL;
-									SeqData *seq3R2 = NULL;
-
-									// sub-sequences to form new route r1
-									seq1R1 = this->initSol->getRouteForwSeq()[r1][0][a1-1];
-#ifdef DEBUG_InterRouteArcSwap
-									cout << seq1R1->getHead()->getClient()->getId() << "--" << seq1R1->getTail()->getClient()->getId() << endl;
-#endif
-									seq2R1 = this->initSol->getRouteForwSeq()[r2][s2][0];
-#ifdef DEBUG_InterRouteArcSwap
-									cout << seq2R1->getHead()->getClient()->getId() << "--" << seq2R1->getTail()->getClient()->getId() << endl;
-#endif
-									int indexLastNodeRouteR1 = this->initSol->getNbClientsForRoute(r1)+1;
-									seq3R1 = this->initSol->getRouteForwSeq()[r1][a2+1][indexLastNodeRouteR1 - (a2+1)];
-#ifdef DEBUG_InterRouteArcSwap
-									cout << seq3R1->getHead()->getClient()->getId() << "--" << seq3R1->getTail()->getClient()->getId() << endl;
-#endif
-									// sub-sequences to form new route r2
-									seq1R2 = this->initSol->getRouteForwSeq()[r2][0][s2-1];
-#ifdef DEBUG_InterRouteArcSwap
-									cout << seq1R2->getHead()->getClient()->getId() << "--" << seq1R2->getTail()->getClient()->getId() << endl;
-#endif
-									seq2R2 = this->initSol->getRouteForwSeq()[r1][a1][a2-a1];
-#ifdef DEBUG_InterRouteArcSwap
-									cout << seq2R2->getHead()->getClient()->getId() << "--" << seq2R2->getTail()->getClient()->getId() << endl;
-#endif
-									int indexLastNodeRouteR2 = this->initSol->getNbClientsForRoute(r2)+1;
-									seq3R2 = this->initSol->getRouteForwSeq()[r2][s2+1][indexLastNodeRouteR2 - (s2+1)];
-#ifdef DEBUG_InterRouteArcSwap
-									cout << seq3R2->getHead()->getClient()->getId() << "--" << seq3R2->getTail()->getClient()->getId() << endl;
-#endif
-									// evaluate the concatenation to form new route r1 and r2
-									double newCostR1, newCostR2;
-									if(this->initSol->EVALN(&newCostR1, 3, seq1R1, seq2R1, seq3R1) && this->initSol->EVALN(&newCostR2, 3, seq1R2, seq2R2, seq3R2))
+									double reduceCostR1, reduceCostR2, newObjVal;
+									if(newCostR1+newCostR2 < costR1+costR2-0.0001)
 									{
-										double reduceCostR1, reduceCostR2, newObjVal;
-										if(newCostR1+newCostR2 < costR1+costR2-0.0001)
-										{
-											reduceCostR1 = costR1-newCostR1;
-											reduceCostR2 = costR2-newCostR2;
+										reduceCostR1 = costR1-newCostR1;
+										reduceCostR2 = costR2-newCostR2;
 #ifdef DEBUG_InterRouteArcSwap
-											cout << "reduceCostR1 = " << reduceCostR1 << endl;
-											cout << "reduceCostR2 = " << reduceCostR2 << endl;
+										cout << "reduceCostR1 = " << reduceCostR1 << endl;
+										cout << "reduceCostR2 = " << reduceCostR2 << endl;
 #endif
-											// remove arcFirstNode, arcLastNode and swapNodeSecond in r1 and r2, respectively
-											arcFirstNode->removeNode();
-											arcLastNode->removeNode();
-											swapNodeSecond->removeNode();
+										// remove arcFirstNode, arcLastNode and swapNodeSecond in r1 and r2, respectively
+										arcFirstNode->removeNode();
+										arcLastNode->removeNode();
+										swapNodeSecond->removeNode();
 
-											// insert swapNodeSecond after arcFirstNodePrev
-											arcFirstNodePrev->insertAfter(swapNodeSecond);
-											// insert arcFirstNode after swapNodeSecondPrev
-											swapNodeSecondPrev->insertAfter(arcFirstNode);
-											// insert arcLastNode after arcFirstNode
-											arcFirstNode->insertAfter(arcLastNode);
+										// insert swapNodeSecond after arcFirstNodePrev
+										arcFirstNodePrev->insertAfter(swapNodeSecond);
+										// insert arcFirstNode after swapNodeSecondPrev
+										swapNodeSecondPrev->insertAfter(arcFirstNode);
+										// insert arcLastNode after arcFirstNode
+										arcFirstNode->insertAfter(arcLastNode);
 
-											// update R1 number of nodes
+										// update R1 number of nodes
 #ifdef DEBUG_InterRouteArcSwap
-											cout << " r1 = " << r1 << endl;
-											cout << "this->initSol->getRoutes()[ " << r1 << " ].second1 = " << this->initSol->getRoutes()[r1].second << endl;
+										cout << " r1 = " << r1 << endl;
+										cout << "this->initSol->getRoutes()[ " << r1 << " ].second1 = " << this->initSol->getRoutes()[r1].second << endl;
 #endif
-											int redR1 = this->initSol->getRoutes()[r1].second -1; // remaining number of nodes in r1 after removing 2 and adding 1
-											this->initSol->updateRouteNbNodes(r1,redR1);
+										int redR1 = this->initSol->getRoutes()[r1].second -1; // remaining number of nodes in r1 after removing 2 and adding 1
+										this->initSol->updateRouteNbNodes(r1,redR1);
 #ifdef DEBUG_InterRouteArcSwap
-											cout << "this->initSol->getRoutes()[ " << r1 << " ].second2 = " << this->initSol->getRoutes()[r1].second << endl;
+										cout << "this->initSol->getRoutes()[ " << r1 << " ].second2 = " << this->initSol->getRoutes()[r1].second << endl;
 #endif
-											// update R2 number of nodes
+										// update R2 number of nodes
 #ifdef DEBUG_InterRouteArcSwap
-											cout << " r2 = " << r2 << endl;
-											cout << "this->initSol->getRoutes()[ " << r2 << " ].second1 = " << this->initSol->getRoutes()[r2].second << endl;
+										cout << " r2 = " << r2 << endl;
+										cout << "this->initSol->getRoutes()[ " << r2 << " ].second1 = " << this->initSol->getRoutes()[r2].second << endl;
 #endif
-											int addR2 = this->initSol->getRoutes()[r2].second +1; // remaining number of nodes in r2 after removing 1 and adding 2
-											this->initSol->updateRouteNbNodes(r2,addR2);
+										int addR2 = this->initSol->getRoutes()[r2].second +1; // remaining number of nodes in r2 after removing 1 and adding 2
+										this->initSol->updateRouteNbNodes(r2,addR2);
 #ifdef DEBUG_InterRouteArcSwap
-											cout << "this->initSol->getRoutes()[ " << r2 << " ].second2 = " << this->initSol->getRoutes()[r2].second << endl;
+										cout << "this->initSol->getRoutes()[ " << r2 << " ].second2 = " << this->initSol->getRoutes()[r2].second << endl;
 #endif
-											// update R1 and R2 route sub-sequences
-											this->initSol->updateOneRouteSetSubSeq(r1);
-											this->initSol->updateOneRouteSetSubSeq(r2);
+										// update R1 and R2 route sub-sequences
+										this->initSol->updateOneRouteSetSubSeq(r1);
+										this->initSol->updateOneRouteSetSubSeq(r2);
 
-											// update objective value
-											newObjVal = this->initSol->getObjVal() - reduceCostR1 - reduceCostR2;
+										// update objective value
+										newObjVal = this->initSol->getObjVal() - reduceCostR1 - reduceCostR2;
 #ifdef DEBUG_InterRouteArcSwap
-											cout << "newObjVal = " << newObjVal << endl;
+										cout << "newObjVal = " << newObjVal << endl;
 #endif
-											this->initSol->setObjVal(newObjVal);
+										this->initSol->setObjVal(newObjVal);
 
-											breakIfImproved = true;
-											retVal = true;
-										}
+										breakIfImproved = true;
+										retVal = true;
 									}
 								}
 							}
@@ -4170,7 +4142,7 @@ bool LocalSearch::InterRoute2ArcSwap()
 						Node *arcFirstNodePrev = NULL;
 						int a1 = 1; /* a1 is the index of the first arc's first client in the route r1, a2 is the one of the second one */
 						int a2 = a1+1; /* 0--b--c--d--e--0, a1 = 1, a2 = 2 --> a1--a2 = b--c   */
-						for(arcFirstNode = this->initSol->getRoutes()[r1].first->getNext(); !arcFirstNode->isDepot() && breakIfImproved == false; arcFirstNode = arcFirstNode->getNext(), a1++, a2++)
+						for(arcFirstNode = this->initSol->getRoutes()[r1].first->getNext(); !arcFirstNode->getNext()->isDepot() && breakIfImproved == false; arcFirstNode = arcFirstNode->getNext(), a1++, a2++)
 						{
 #ifdef DEBUG_InterRoute2ArcSwap
 							cout << endl;
@@ -4178,113 +4150,109 @@ bool LocalSearch::InterRoute2ArcSwap()
 							arcFirstNodePrev = arcFirstNode->getPrevious();
 
 							arcLastNode = arcFirstNode->getNext();
-							if(!arcLastNode->isDepot())
+
+#ifdef DEBUG_InterRoute2ArcSwap
+							cout << " ------ swap arc first = " << arcFirstNode->getClient()->getId() << "--" << arcLastNode->getClient()->getId() << " ----------" <<  " a1 = " << a1 << "---------- " << "a2 = " << a2  << endl;
+							if(arcFirstNodePrev != NULL)
+								cout << "arcFirstNodePrev = " << arcFirstNodePrev->getClient()->getId() <<  endl;
+#endif
+							Node *swapNodeFirst = NULL; // the first node of the second arc
+							Node *swapNodeLast = NULL; // the last node of the second arc
+
+							Node *swapNodeFirstPrev = NULL;
+							int s1 = 1; /* s1 is the index of the second arc's first client in the route r2, a2 is the one of the second one */
+							int s2 = s1+1; /* 0--b--c--d--e--0, s1 = 1, s2 = 2 --> s1--s2 = b--c   */
+							for(swapNodeFirst = this->initSol->getRoutes()[r2].first->getNext(); !swapNodeFirst->getNext()->isDepot() && breakIfImproved == false; swapNodeFirst = swapNodeFirst->getNext(), s1++, s2++)
 							{
-#ifdef DEBUG_InterRoute2ArcSwap
-								cout << " ------ swap arc first = " << arcFirstNode->getClient()->getId() << "--" << arcLastNode->getClient()->getId() << " ----------" <<  " a1 = " << a1 << "---------- " << "a2 = " << a2  << endl;
-								if(arcFirstNodePrev != NULL)
-									cout << "arcFirstNodePrev = " << arcFirstNodePrev->getClient()->getId() <<  endl;
-#endif
-								Node *swapNodeFirst = NULL; // the first node of the second arc
-								Node *swapNodeLast = NULL; // the last node of the second arc
+								swapNodeLast = swapNodeFirst->getNext();
 
-								Node *swapNodeFirstPrev = NULL;
-								int s1 = 1; /* s1 is the index of the second arc's first client in the route r2, a2 is the one of the second one */
-								int s2 = s1+1; /* 0--b--c--d--e--0, s1 = 1, s2 = 2 --> s1--s2 = b--c   */
-								for(swapNodeFirst = this->initSol->getRoutes()[r2].first->getNext(); !swapNodeFirst->isDepot() && breakIfImproved == false; swapNodeFirst = swapNodeFirst->getNext(), s1++, s2++)
+#ifdef DEBUG_InterRoute2ArcSwap
+								cout << " ------ swap arc second = " << swapNodeFirst->getClient()->getId() << "--" << swapNodeLast->getClient()->getId() << " ----------" <<  " s1 = " << s1 << "---------- " << " s2 = " << s2  << endl;
+#endif
+
+								swapNodeFirstPrev = swapNodeFirst->getPrevious();
+#ifdef DEBUG_InterRoute2ArcSwap
+								if(swapNodeFirst != NULL)
+									cout << "swapNodeFirst = " << swapNodeFirst->getClient()->getId() <<  endl;
+#endif
+								// find sub-sequences to concatenate to form new route r1 and r2
+
+								SeqData *seq1R1 = NULL;
+								SeqData *seq2R1 = NULL;
+								SeqData *seq3R1 = NULL;
+								SeqData *seq1R2 = NULL;
+								SeqData *seq2R2 = NULL;
+								SeqData *seq3R2 = NULL;
+
+								// sub-sequences to form new route r1
+								seq1R1 = this->initSol->getRouteForwSeq()[r1][0][a1-1];
+#ifdef DEBUG_InterRoute2ArcSwap
+								cout << seq1R1->getHead()->getClient()->getId() << "--" << seq1R1->getTail()->getClient()->getId() << endl;
+#endif
+								seq2R1 = this->initSol->getRouteForwSeq()[r2][s1][s2-s1];
+#ifdef DEBUG_InterRoute2ArcSwap
+								cout << seq2R1->getHead()->getClient()->getId() << "--" << seq2R1->getTail()->getClient()->getId() << endl;
+#endif
+								int indexLastNodeRouteR1 = this->initSol->getNbClientsForRoute(r1)+1;
+								seq3R1 = this->initSol->getRouteForwSeq()[r1][a2+1][indexLastNodeRouteR1 - (a2+1)];
+#ifdef DEBUG_InterRoute2ArcSwap
+								cout << seq3R1->getHead()->getClient()->getId() << "--" << seq3R1->getTail()->getClient()->getId() << endl;
+#endif
+								// sub-sequences to form new route r2
+								seq1R2 = this->initSol->getRouteForwSeq()[r2][0][s1-1];
+#ifdef DEBUG_InterRoute2ArcSwap
+								cout << seq1R2->getHead()->getClient()->getId() << "--" << seq1R2->getTail()->getClient()->getId() << endl;
+#endif
+								seq2R2 = this->initSol->getRouteForwSeq()[r1][a1][a2-a1];
+#ifdef DEBUG_InterRoute2ArcSwap
+								cout << seq2R2->getHead()->getClient()->getId() << "--" << seq2R2->getTail()->getClient()->getId() << endl;
+#endif
+								int indexLastNodeRouteR2 = this->initSol->getNbClientsForRoute(r2)+1;
+								seq3R2 = this->initSol->getRouteForwSeq()[r2][s2+1][indexLastNodeRouteR2 - (s2+1)];
+#ifdef DEBUG_InterRoute2ArcSwap
+								cout << seq3R2->getHead()->getClient()->getId() << "--" << seq3R2->getTail()->getClient()->getId() << endl;
+#endif
+								// evaluate the concatenation to form new route r1 and r2
+								double newCostR1, newCostR2;
+								if(this->initSol->EVALN(&newCostR1, 3, seq1R1, seq2R1, seq3R1) && this->initSol->EVALN(&newCostR2, 3, seq1R2, seq2R2, seq3R2))
 								{
-									swapNodeLast = swapNodeFirst->getNext();
-									if(!swapNodeLast->isDepot())
+									double reduceCostR1, reduceCostR2, newObjVal;
+									if(newCostR1+newCostR2 < costR1+costR2-0.0001)
 									{
+										reduceCostR1 = costR1-newCostR1;
+										reduceCostR2 = costR2-newCostR2;
 #ifdef DEBUG_InterRoute2ArcSwap
-										cout << " ------ swap arc second = " << swapNodeFirst->getClient()->getId() << "--" << swapNodeLast->getClient()->getId() << " ----------" <<  " s1 = " << s1 << "---------- " << " s2 = " << s2  << endl;
+										cout << "reduceCostR1 = " << reduceCostR1 << endl;
+										cout << "reduceCostR2 = " << reduceCostR2 << endl;
 #endif
+										// remove arcFirstNode, arcLastNode and swapNodeFirst, swapNodeLast in r1 and r2, respectively
+										arcFirstNode->removeNode();
+										arcLastNode->removeNode();
+										swapNodeFirst->removeNode();
+										swapNodeLast->removeNode();
 
-										swapNodeFirstPrev = swapNodeFirst->getPrevious();
-#ifdef DEBUG_InterRoute2ArcSwap
-										if(swapNodeFirst != NULL)
-											cout << "swapNodeFirst = " << swapNodeFirst->getClient()->getId() <<  endl;
-#endif
-										// find sub-sequences to concatenate to form new route r1 and r2
+										// insert swapNodeFirst after arcFirstNodePrev
+										arcFirstNodePrev->insertAfter(swapNodeFirst);
+										// insert swapNodeLast after swapNodeFirst
+										swapNodeFirst->insertAfter(swapNodeLast);
+										// insert arcFirstNode after swapNodeFirstPrev
+										swapNodeFirstPrev->insertAfter(arcFirstNode);
+										// insert arcLastNode after arcFirstNode
+										arcFirstNode->insertAfter(arcLastNode);
 
-										SeqData *seq1R1 = NULL;
-										SeqData *seq2R1 = NULL;
-										SeqData *seq3R1 = NULL;
-										SeqData *seq1R2 = NULL;
-										SeqData *seq2R2 = NULL;
-										SeqData *seq3R2 = NULL;
+										// update R1 and R2 route sub-sequences
+										this->initSol->updateOneRouteSetSubSeq(r1);
+										this->initSol->updateOneRouteSetSubSeq(r2);
 
-										// sub-sequences to form new route r1
-										seq1R1 = this->initSol->getRouteForwSeq()[r1][0][a1-1];
+										// update objective value
+										newObjVal = this->initSol->getObjVal() - reduceCostR1 - reduceCostR2;
 #ifdef DEBUG_InterRoute2ArcSwap
-										cout << seq1R1->getHead()->getClient()->getId() << "--" << seq1R1->getTail()->getClient()->getId() << endl;
+										cout << "newObjVal = " << newObjVal << endl;
 #endif
-										seq2R1 = this->initSol->getRouteForwSeq()[r2][s1][s2-s1];
-#ifdef DEBUG_InterRoute2ArcSwap
-										cout << seq2R1->getHead()->getClient()->getId() << "--" << seq2R1->getTail()->getClient()->getId() << endl;
-#endif
-										int indexLastNodeRouteR1 = this->initSol->getNbClientsForRoute(r1)+1;
-										seq3R1 = this->initSol->getRouteForwSeq()[r1][a2+1][indexLastNodeRouteR1 - (a2+1)];
-#ifdef DEBUG_InterRoute2ArcSwap
-										cout << seq3R1->getHead()->getClient()->getId() << "--" << seq3R1->getTail()->getClient()->getId() << endl;
-#endif
-										// sub-sequences to form new route r2
-										seq1R2 = this->initSol->getRouteForwSeq()[r2][0][s1-1];
-#ifdef DEBUG_InterRoute2ArcSwap
-										cout << seq1R2->getHead()->getClient()->getId() << "--" << seq1R2->getTail()->getClient()->getId() << endl;
-#endif
-										seq2R2 = this->initSol->getRouteForwSeq()[r1][a1][a2-a1];
-#ifdef DEBUG_InterRoute2ArcSwap
-										cout << seq2R2->getHead()->getClient()->getId() << "--" << seq2R2->getTail()->getClient()->getId() << endl;
-#endif
-										int indexLastNodeRouteR2 = this->initSol->getNbClientsForRoute(r2)+1;
-										seq3R2 = this->initSol->getRouteForwSeq()[r2][s2+1][indexLastNodeRouteR2 - (s2+1)];
-#ifdef DEBUG_InterRoute2ArcSwap
-										cout << seq3R2->getHead()->getClient()->getId() << "--" << seq3R2->getTail()->getClient()->getId() << endl;
-#endif
-										// evaluate the concatenation to form new route r1 and r2
-										double newCostR1, newCostR2;
-										if(this->initSol->EVALN(&newCostR1, 3, seq1R1, seq2R1, seq3R1) && this->initSol->EVALN(&newCostR2, 3, seq1R2, seq2R2, seq3R2))
-										{
-											double reduceCostR1, reduceCostR2, newObjVal;
-											if(newCostR1+newCostR2 < costR1+costR2-0.0001)
-											{
-												reduceCostR1 = costR1-newCostR1;
-												reduceCostR2 = costR2-newCostR2;
-#ifdef DEBUG_InterRoute2ArcSwap
-												cout << "reduceCostR1 = " << reduceCostR1 << endl;
-												cout << "reduceCostR2 = " << reduceCostR2 << endl;
-#endif
-												// remove arcFirstNode, arcLastNode and swapNodeFirst, swapNodeLast in r1 and r2, respectively
-												arcFirstNode->removeNode();
-												arcLastNode->removeNode();
-												swapNodeFirst->removeNode();
-												swapNodeLast->removeNode();
+										this->initSol->setObjVal(newObjVal);
 
-												// insert swapNodeFirst after arcFirstNodePrev
-												arcFirstNodePrev->insertAfter(swapNodeFirst);
-												// insert swapNodeLast after swapNodeFirst
-												swapNodeFirst->insertAfter(swapNodeLast);
-												// insert arcFirstNode after swapNodeFirstPrev
-												swapNodeFirstPrev->insertAfter(arcFirstNode);
-												// insert arcLastNode after arcFirstNode
-												arcFirstNode->insertAfter(arcLastNode);
-
-												// update R1 and R2 route sub-sequences
-												this->initSol->updateOneRouteSetSubSeq(r1);
-												this->initSol->updateOneRouteSetSubSeq(r2);
-
-												// update objective value
-												newObjVal = this->initSol->getObjVal() - reduceCostR1 - reduceCostR2;
-#ifdef DEBUG_InterRoute2ArcSwap
-												cout << "newObjVal = " << newObjVal << endl;
-#endif
-												this->initSol->setObjVal(newObjVal);
-
-												breakIfImproved = true;
-												retVal = true;
-											}
-										}
+										breakIfImproved = true;
+										retVal = true;
 									}
 								}
 							}
@@ -4297,53 +4265,67 @@ bool LocalSearch::InterRoute2ArcSwap()
 	return retVal;
 }
 
-//////////////////////////////////////////// restore the sequence after direct encoding movements ////////////////////////////////////////////////////////////////
-
-void LocalSearch::RestoreSequence()
+//////////////////////////////////////////// successive locolSearch on direct encoding ////////////////////////////////////////////////////////////////
+// iterative route improvement (Iri)
+bool LocalSearch::Iri(int maxIter)
 {
+	double initObj = this->initSol->getObjVal();
+	double newObj = DBL_MAX;
 
-#ifdef DEBUG_RestoreSequence
-	cout << endl;
-	cout << "direct encoding = " ; this->initSol->PrintSolution(true) ;
-#endif
-
-	vector<Node*> seqNodes;
-	for(int r = 0; r < this->initSol->getDataAP()->getNumberNodes()-1; r++)
+	bool retVal = false;
+	int i = 0;
+	while(i < maxIter ) // condition || initObj < newObj - 0.0001 is not relevant as objval is not modify if moves is not good
 	{
-		if(this->initSol->getNbClientsForRoute(r) >= 1)
+		// intra route movements for direct encoding, i.e, feasible solution
+		IntraRouteInsert();
+		IntraRouteArcInsert();
+		IntraRouteSwap();
+		IntraRouteArcSwap();
+		IntraRoute2ArcSwap();
+
+		// inter-route movements
+		InterRouteInsert();
+		InterRouteArcInsert();
+		InterRouteSwap();
+		InterRouteArcSwap();
+		InterRoute2ArcSwap();
+
+		newObj = this->initSol->getObjVal();
+		if(newObj < initObj - 0.0001)
 		{
-
-			cout << "r = " << r << endl;
-			for(Node *routeNode = this->initSol->getRoutes()[r].first->getNext(); !routeNode->isDepot(); routeNode = routeNode->getNext())
-			{
-				seqNodes.push_back(routeNode);
-			}
+			retVal = true;
 		}
+		i++;
 	}
 
+	return retVal;
+}
 
-	this->initSol->getSequence()->delete_list();
+//////////////////////////////////////////// successive locolSearch on indirect encoding ////////////////////////////////////////////////////////////////
+// iterative sequence improvement (Isi)
+bool LocalSearch::Isi(int maxIter)
+{
+	double initObj = this->initSol->getObjVal();
+	double newObj = DBL_MAX;
 
-	this->initSol->getRoutes().clear();
-
-	for(uint r = 0; r < this->initSol->getRoutes().size(); r++ )
+	bool retVal = false;
+	int i = 0;
+	while(i < maxIter ) // condition || initObj < newObj - 0.0001 is not relevant as objval is not modify if moves is not good
 	{
-//		this->initSol->getRoutes().erase(this->initSol->getRoutes().begin()+r);
-		cout << "route[" << r << "] contains" << endl;
-		for(Node *routeNode = this->initSol->getRoutes()[r].first; routeNode != NULL; routeNode = routeNode->getNext())
+		// movements for indirect encoding, i.e, giant tour
+		Insert();
+		ArcInsert();
+		Swap();
+		SwapArcs();
+		SwapTwoArcs();
+
+		newObj = this->initSol->getObjVal();
+		if(newObj < initObj - 0.0001)
 		{
-
-			cout <<  routeNode->getClient()->getId() << "--";
+			retVal = true;
 		}
-		cout << endl;
+		i++;
 	}
 
-exit(-1);
-
-	this->initSol->getTourStructure().clear();
-	for(uint i = 0; i < seqNodes.size(); i++)
-	{
-		cout << "seqNodes[" << i << "] id = " << seqNodes[i]->getClient()->getId() << endl;
-		this->initSol->getSequence()->push_back(seqNodes[i]);
-	}
+	return retVal;
 }

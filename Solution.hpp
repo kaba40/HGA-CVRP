@@ -45,7 +45,6 @@ private:
 	vector<vector<vector<SeqData*>>> routeBackwardSeq;
 	vector<int> tour;
     vector<pair<Node*,uint>> routes; // each route is considered as a pair of list of nodes and the number of nodes
-
 	double solutionCost; //objective_value
 	int numberOfRouteInSolution;
 	DataAP *tsp_data;
@@ -62,7 +61,7 @@ public:
 
 	// getter methods
 	vector<int> getTourStructure();
-	double getObjVal();
+	double getObjVal() const;
 	int getRoutesNumber();
 	int getNbClientsForRoute(int r);
 	DLinkedList* getSequence(); // to delete may be
@@ -77,6 +76,7 @@ public:
 	//updater methods
 	void updateRouteNbNodes(int numRoute, int numNodes);
 	void updateOneRouteSetSubSeq(int numRoute);
+	void restoreSequence();
 
 	//setter methods
 	void setRandomSequence();
@@ -86,4 +86,5 @@ public:
 
 };
 
+bool operator<(const Solution &sol1,  const Solution &sol2);
 #endif /* SOLUTION_HPP_ */

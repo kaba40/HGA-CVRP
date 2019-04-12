@@ -23,12 +23,12 @@ Node::Node(Customer* clt)
 //	this->previous = NULL;
 //}
 //
-//Node::Node(Node *node)
-//{
-//	this->client = node->getClient();
-//	this->next = node->getNext(); //NULL
-//	this->previous = node->getPrevious(); //NULL
-//}
+Node::Node(Node *node)
+{
+	this->client = node->getClient();
+	this->next = NULL;
+	this->previous = NULL; //NULL
+}
 //Node::Node(Node *nxt, Node *prev, Customer *clt)
 //{
 //	this->next = nxt;

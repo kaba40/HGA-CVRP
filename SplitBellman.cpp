@@ -52,9 +52,7 @@ int SplitBellman::solve()
 #endif
 
 		Node *current = tmp;
-
 //		cout << " current1 = " << current->getClient()->getId() << endl;
-
 		while((i < tspData->getNumberNodes()) && ((load + current->getClient()->getDemand()) <= tspData->getVehicleCap()))
 		{
 			Customer *clientI, *clientIav;

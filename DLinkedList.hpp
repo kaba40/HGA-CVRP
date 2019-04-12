@@ -32,15 +32,19 @@ public:
 	void push_back(Node *node);
 	void insert(int position, Node *node);
 	Node* find(int position);
+	bool search(Node *node);
 	Node* pop_front();
 	Node* pop_back();
 	Node* pop_position(int position);
 	void removeNode(Node *node);
+//	void removeDepot(Node *node);
 	void delete_list();
 
 	inline int getSize(){return size;}
 	void show();
-	void showBack();
+//	void showBack();
+
+	string toString();
 
 };
 

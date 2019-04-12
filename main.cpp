@@ -17,15 +17,15 @@
 #include "Solution.hpp"
 #include "Node.hpp"
 #include "DLinkedList.hpp"
+#include "Genetic.hpp"
 #include "LocalSearch.hpp"
-#include "Population.hpp"
 
 using namespace std;
 
 int main()
 {
-	string name_data = "Data/E-n7.vrp";
-//	string name_data = "Data/E-n13-k4.vrp";
+//	string name_data = "Data/E-n7.vrp";
+	string name_data = "Data/E-n13-k4.vrp";
 	const char* data_vrp = name_data.c_str();
 
 	int numVeh = 1;
@@ -47,8 +47,8 @@ int main()
 	Solution *solution_tsp;
 	solution_tsp = new Solution(data_instance, data_instance->getCustomerList());
 
-
-//	solution_tsp->setRandomSequence();
+	srand(unsigned (time(0)) );
+	solution_tsp->setRandomSequence();
 
 #ifdef DEBUG_Main
 
@@ -61,16 +61,29 @@ int main()
 
 	solution_tsp->getSequence()->show(); cout << "Head--Tail : " << solution_tsp->getSequence()->getHead()->getClient()->getId() << "--" << solution_tsp->getSequence()->getTail()->getClient()->getId() << endl;
 
+	cout << "list as " << solution_tsp->getSequence()->toString() << endl;
+//	exit(-1);
+	// genetic paraterms initialisation
+	int numInds = 5; // number of individual
+	int maxIt = 10; // maximum number of iteration
+	int stuckMax = 1000; // maximum number of iteration where dFactor = cdFactor (ceiling of dFactor)
+	double dgFactor = 1.08; // diversity growth factor
+	double probLS = 0.5; // Local search call probability
 
-	// test de la classe population
-	Population popInit =  Population(data_instance, 5);
-
-	exit(-1);
+	// test de la classe Genetic
+	Genetic *geneticAlgo = new Genetic(data_instance, numInds, maxIt, stuckMax, dgFactor, probLS);
 
 
-	for(int i = 0; i < popInit.getIndividus().size(); i++)
+	for(uint i = 0; i < geneticAlgo->getIndividus().size(); i++)
 	{
-		cout << "individu[" << i << "] " << "cost = " << popInit.getIndividus()[i]->getObjVal() << endl;
+		cout << "individu[" << i << "] " ; geneticAlgo->getIndividus()[i]->getSequence()->show(); cout << "cost = " << geneticAlgo->getIndividus()[i]->getObjVal() << endl;
+	}
+
+	geneticAlgo->Solve();
+
+	for(uint i = 0; i < geneticAlgo->getIndividus().size(); i++)
+	{
+		cout << "individu[" << i << "] " ; geneticAlgo->getIndividus()[i]->getSequence()->show(); cout << "cost = " << geneticAlgo->getIndividus()[i]->getObjVal() << endl;
 	}
 
 	exit(-1);
@@ -82,8 +95,11 @@ int main()
 		solution_tsp->PrintSolution(true);
 	}
 
+	LocalSearch* localAlgo = new LocalSearch(solution_tsp, true);
 
-	LocalSearch* localAlgo = new LocalSearch(solution_tsp);
+	localAlgo->Iri(10);
+	solution_tsp->PrintSolution(true);
+	exit(-1);
 
 	///////////////////////////////// intraRoute movements //////////////////////////////////////////////////
 	if(localAlgo->IntraRouteInsert())
@@ -121,7 +137,7 @@ int main()
 		solution_tsp->PrintSolution(true);
 	}
 
-	///////////////////////////////// interRoute movements //////////////////////////////////////////////////
+////	///////////////////////////////// interRoute movements //////////////////////////////////////////////////
 	if(localAlgo->InterRouteInsert())
 	{
 		cout << "InterRouteInsert" << endl;
@@ -194,6 +210,7 @@ int main()
 //		solution_tsp->getSequence()->show();
 //	}
 
+//	delete geneticAlgo;
 	delete localAlgo;
 	delete data_instance;
 	delete solution_tsp;
