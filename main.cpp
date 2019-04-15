@@ -24,8 +24,8 @@ using namespace std;
 
 int main()
 {
-//	string name_data = "Data/E-n7.vrp";
-	string name_data = "Data/E-n13-k4.vrp";
+	string name_data = "Data/E-n7.vrp";
+//	string name_data = "Data/E-n13-k4.vrp";
 	const char* data_vrp = name_data.c_str();
 
 	int numVeh = 1;
@@ -61,8 +61,8 @@ int main()
 
 	solution_tsp->getSequence()->show(); cout << "Head--Tail : " << solution_tsp->getSequence()->getHead()->getClient()->getId() << "--" << solution_tsp->getSequence()->getTail()->getClient()->getId() << endl;
 
-	cout << "list as " << solution_tsp->getSequence()->toString() << endl;
-//	exit(-1);
+//	cout << "list as " << solution_tsp->getSequence()->toString() << endl;
+
 	// genetic paraterms initialisation
 	int numInds = 5; // number of individual
 	int maxIt = 10; // maximum number of iteration
@@ -79,7 +79,11 @@ int main()
 		cout << "individu[" << i << "] " ; geneticAlgo->getIndividus()[i]->getSequence()->show(); cout << "cost = " << geneticAlgo->getIndividus()[i]->getObjVal() << endl;
 	}
 
+	double timeDebut = clock();
 	geneticAlgo->Solve();
+	double timeFin = clock();
+
+	cout << "temps d'execution HGA = " << (timeFin-timeDebut)/(CLOCKS_PER_SEC) << endl; //(double) 1000
 
 	for(uint i = 0; i < geneticAlgo->getIndividus().size(); i++)
 	{
@@ -97,120 +101,25 @@ int main()
 
 	LocalSearch* localAlgo = new LocalSearch(solution_tsp, true);
 
-	localAlgo->Iri(10);
+	localAlgo->IterativeSolutionImprovement(true);
+
+	solution_tsp->CheckSolution(true);
 	solution_tsp->PrintSolution(true);
-	exit(-1);
 
-	///////////////////////////////// intraRoute movements //////////////////////////////////////////////////
-	if(localAlgo->IntraRouteInsert())
-	{
-		cout << "IntraRouteInsert" << endl;
-		solution_tsp->CheckSolution(true);
-		solution_tsp->PrintSolution(true);
-	}
+	solution_tsp->restoreSequence();
 
-	if(localAlgo->IntraRouteArcInsert())
-	{
-		cout << "IntraRouteArcInsert" << endl;
-		solution_tsp->CheckSolution(true);
-		solution_tsp->PrintSolution(true);
-	}
+	if(solution_tsp->Decodage(false))
+		solution_tsp->CheckSolution(false);
 
-	if(localAlgo->IntraRouteSwap())
-	{
-		cout << "IntraRouteSwap" << endl;
-		solution_tsp->CheckSolution(true);
-		solution_tsp->PrintSolution(true);
-	}
+	localAlgo->IterativeSolutionImprovement(false);
 
-	if(localAlgo->IntraRouteArcSwap())
-	{
-		cout << "IntraRouteArcSwap" << endl;
-		solution_tsp->CheckSolution(true);
-		solution_tsp->PrintSolution(true);
-	}
+	solution_tsp->CheckSolution(false);
+	solution_tsp->PrintSolution(false);
 
-	if(localAlgo->IntraRoute2ArcSwap())
-	{
-		cout << "IntraRoute2ArcSwap" << endl;
-		solution_tsp->CheckSolution(true);
-		solution_tsp->PrintSolution(true);
-	}
 
-////	///////////////////////////////// interRoute movements //////////////////////////////////////////////////
-	if(localAlgo->InterRouteInsert())
-	{
-		cout << "InterRouteInsert" << endl;
-		solution_tsp->CheckSolution(true);
-		solution_tsp->PrintSolution(true);
-	}
 
-	if(localAlgo->InterRouteArcInsert())
-	{
-		cout << "InterRouteArcInsert" << endl;
-		solution_tsp->CheckSolution(true);
-		solution_tsp->PrintSolution(true);
-	}
 
-	if(localAlgo->InterRouteSwap())
-	{
-		cout << "InterRouteSwap" << endl;
-		solution_tsp->CheckSolution(true);
-		solution_tsp->PrintSolution(true);
-	}
-
-	if(localAlgo->InterRouteArcSwap())
-	{
-		cout << "InterRouteArcSwap" << endl;
-		solution_tsp->CheckSolution(true);
-		solution_tsp->PrintSolution(true);
-	}
-
-	if(localAlgo->InterRoute2ArcSwap())
-	{
-		cout << "InterRoute2ArcSwap" << endl;
-		solution_tsp->CheckSolution(true);
-		solution_tsp->PrintSolution(true);
-	}
-
-	///////////////////////////////// movements on indirect encoding //////////////////////////////////////////////////
-//	if(localAlgo->Insert())
-//	{
-//		cout << "Insert" << endl;
-//		solution_tsp->PrintSolution(false);
-//		solution_tsp->getSequence()->show();
-//	}
-//
-//	if(localAlgo->ArcInsert())
-//	{
-//		cout << "ArcInsert" << endl;
-//		solution_tsp->PrintSolution(false);
-//		solution_tsp->getSequence()->show();
-//	}
-//
-//	if(localAlgo->Swap())
-//	{
-//		cout << "Swap" << endl;
-//		solution_tsp->PrintSolution(false);
-//		solution_tsp->getSequence()->show();
-//	}
-//
-//	if(localAlgo->SwapArcs())
-//	{
-//		cout << "SwapArcs" << endl;
-//		solution_tsp->PrintSolution(false);
-//		solution_tsp->getSequence()->show();
-//	}
-//
-//	if(localAlgo->SwapTwoArcs())
-//	{
-//		cout << "SwapTwoArcs" << endl;
-//		solution_tsp->CheckSolution(false);
-//		solution_tsp->PrintSolution(false);
-//		solution_tsp->getSequence()->show();
-//	}
-
-//	delete geneticAlgo;
+	delete geneticAlgo;
 	delete localAlgo;
 	delete data_instance;
 	delete solution_tsp;

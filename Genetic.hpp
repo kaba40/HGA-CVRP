@@ -46,7 +46,7 @@ public:
 	Solution* Crossover(Solution *p1, Solution *p2);
 
 	// education operator
-	void Educate(Solution *sol, int maxIter);
+	void Educate(Solution *sol);
 
 	// diversity manager operators
 	int EditDistance( string str1, string str2, int len1, int len2);

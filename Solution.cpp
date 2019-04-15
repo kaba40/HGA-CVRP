@@ -674,61 +674,54 @@ void Solution::updateRouteNbNodes(int numRoute, int numNodes)
 void Solution::restoreSequence()
 {
 
-	cout << "direct encoding = " ; PrintSolution(true) ;
+//	cout << "print solution before concat = " ; PrintSolution(true); cout << endl;
 
-
-	vector<Node*> seqNodes;
-	for(uint r = 0; r < routes.size(); r++)
+	Node* tail = NULL;
+	bool tailInit = false;
+	for(uint r = 0; r < routes.size() && tailInit == false; r++)
 	{
-		if(routes[r].second > 2)
+		if(routes[r].second > 2) // if route has at least one client
 		{
-//			Node* first = NULL;
-//			Node* last = NULL;
-			//			cout << "r = " << r << endl;
-			//			for(Node *routeNode = routes[r].first->getNext(); !routeNode->isDepot(); routeNode = routeNode->getNext())
-			for(Node *routeNode = routes[r].first; routeNode != NULL; routeNode = routeNode->getNext())
-			{
-				if(!routeNode->isDepot())
-				{
-//					routeNode->removeNode();
-					seqNodes.push_back(routeNode);
-				}
-//				else
-//				{
-//					if(routeNode->isFirstDepot())
-//					{
-//						first = routeNode;
-//					}
-//					else
-//					{
-//						last = routeNode;
-//					}
-//				}
-			}
-//			first->getNext()->setPrevious(NULL);
-//			first->setNext(NULL);
-//
-//			last->getPrevious()->setNext(NULL);
-//			last->setPrevious(NULL);
-
+			tail = routes[r].first->getNext();
+			tailInit = true;
 		}
 	}
 
+//	cout << "tail = " << tail->getClient()->getId() << endl; //	cout << std::flush;
 
-	encodage->delete_list();
+	encodage->setSize(0);
+	encodage->setHead(NULL);
+	encodage->setTail(NULL);
 
-	for(uint i = 0; i < seqNodes.size(); i++)
+	for(uint r = 0; r < routes.size(); r++)
 	{
-		//		cout << "seqNodes[" << i << "] id = " << seqNodes[i]->getClient()->getId() << endl;
-		encodage->push_back(seqNodes[i]);
+		if(routes[r].second > 2) // if route has at least one client
+		{
+			Node *tmp = tail->getNext();
+//			cout << "tmp = " << tmp->getClient()->getId() << endl;
+			encodage->push_back(tail);
+			for(Node *routeNode = tmp; !tmp->isDepot();)
+			{
+				routeNode = tmp;
+				tmp = routeNode->getNext();
+				encodage->push_back(routeNode);
+			}
+			bool tailUpdate = false;
+			for(uint j = r+1; j < routes.size() && tailUpdate == false; j++)
+			{
+				if(routes[j].second > 2)
+				{
+					tail = routes[j].first->getNext();
+					tailUpdate = true;
+				}
+			}
+		}
 	}
 
 	routes.clear();
-	vector<pair<Node*, uint>>().swap(routes);
 	tour.clear();
 	solutionCost = 0;
 	numberOfRouteInSolution = 0;
-
 }
 
 // setter methods

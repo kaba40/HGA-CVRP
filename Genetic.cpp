@@ -8,6 +8,7 @@
 #include "Genetic.hpp"
 #include<limits> // DBL_MAX;
 #include<algorithm> // min
+#include<time.h>
 
 // to sort a vector of objects solution
 struct solCompare{
@@ -218,10 +219,16 @@ Solution* Genetic::Crossover(Solution *p1, Solution *p2)
 }
 
 // education operator
-void Genetic::Educate(Solution* sol, int maxIter)
+void Genetic::Educate(Solution* sol)
 {
-	LocalSearch *localAlgo = new LocalSearch(sol, false);
-	localAlgo->Isi(10);
+	if(sol->Decodage(true))
+			sol->CheckSolution(true);
+	LocalSearch *localAlgo = new LocalSearch(sol, true);
+	localAlgo->IterativeSolutionImprovement(true);
+	sol->restoreSequence();
+	if(sol->Decodage(false))
+		sol->CheckSolution(false);
+	localAlgo->IterativeSolutionImprovement(false);
 }
 
 // compute edit distance between two strings
@@ -296,20 +303,25 @@ int Genetic::Solve()
 		parent1 = individus.front();
 		parent2 = individus.back();
 
-//		cout << "parent1  = " ; parent1->getSequence()->show(); cout << " obj = " << parent1->getObjVal() << endl;
-//		cout << "parent2  = " ; parent2->getSequence()->show(); cout << " obj = " << parent2->getObjVal() << endl;
-
+#ifdef DEBUG_Genetic
+		cout << "parent1  = " ; parent1->getSequence()->show(); cout << " obj = " << parent1->getObjVal() << endl;
+		cout << "parent2  = " ; parent2->getSequence()->show(); cout << " obj = " << parent2->getObjVal() << endl;
+#endif
 		// cross parent1 and parent2 and return the best son
 		Solution *selectedSon = Crossover(parent1, parent2);
 
 		// apply son selected education randomly
 		if( randFloat(0.0, 1.0) < probaLS - 0.0001)
 		{
-			Educate(selectedSon, 100);
+//			double timeDebut = clock();
+			Educate(selectedSon);
+//			double timeFin = clock();
+//			cout << "temps d'execution Education = " << (timeFin-timeDebut)/(CLOCKS_PER_SEC) << endl; //(double) 1000
 		}
 
-//		cout << "selectedSon2  = " ; selectedSon->getSequence()->show() ; cout << " obj = " << selectedSon->getObjVal() << endl;
-
+#ifdef DEBUG_Genetic
+		cout << "selectedSon2  = " ; selectedSon->getSequence()->show() ; cout << " obj = " << selectedSon->getObjVal() << endl;
+#endif
 		// draw k between |nbIndivs/2| and nbIndivs included
 		int k;
 		int n1 = nbIndivs-1;

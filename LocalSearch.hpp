@@ -45,10 +45,8 @@ public:
 	bool InterRouteArcSwap();
 	bool InterRoute2ArcSwap();
 
-	//successive localSearch on direct encoding
-	bool Iri(int maxIter);
-	//successive  localSearch on indirect encoding
-	bool Isi(int maxIter);
+	//successive localSearch on direct and indirect encoding
+	bool IterativeSolutionImprovement(bool directEncoding);
 
 };
 

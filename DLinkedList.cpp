@@ -35,6 +35,10 @@ void DLinkedList::setTail(Node *node)
 	this->tail = node;
 }
 
+void DLinkedList::setSize(int size)
+{
+	this->size = size;
+}
 // don't increment the list because the node is moved then added
 void DLinkedList::addHead(Node *node)
 {

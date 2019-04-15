@@ -23,6 +23,7 @@ public:
 
 	void setHead(Node *node);
 	void setTail(Node *node);
+	void setSize(int size);
 	void addHead(Node *node);
 	void addTail(Node *node);
 	Node* getHead();
