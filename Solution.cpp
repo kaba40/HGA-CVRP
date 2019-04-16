@@ -515,14 +515,14 @@ vector<pair<Node*,uint>> Solution::getRoutes()
 	return routes;
 }
 
-vector<vector<vector<SeqData*>>> Solution::getRouteForwSeq() // to test sequenceTab in the main method
+vector<vector<vector<SeqData*>>> Solution::getRouteBackSeq() // to test sequenceTab in the main method
 {
-	return routeForwardSeq;
+	return routeBackwardSeq;
 }
 
-vector<vector<vector<SeqData*>>> Solution::getRouteBackSeq()
+vector<vector<vector<SeqData*>>> Solution::getRouteForwSeq()
 {
-	return this->routeBackwardSeq;
+	return this->routeForwardSeq;
 }
 
 vector<int> Solution::getTourStructure()
@@ -547,12 +547,12 @@ int Solution::getNbClientsForRoute(int r)
 
 void Solution::initRouteSetSubSeq()
 {
-	routeForwardSeq.resize(routes.size());
 	routeBackwardSeq.resize(routes.size());
+	routeForwardSeq.resize(routes.size());
 	for(uint i = 0; i < routes.size(); i++) // number of routes
 	{
-		routeForwardSeq[i].resize(routes[i].second); //each route contains 2 dummy nodes depot-depot
-		routeBackwardSeq[i].resize(routes[i].second);
+		routeBackwardSeq[i].resize(routes[i].second); //each route contains 2 dummy nodes depot-depot
+		routeForwardSeq[i].resize(routes[i].second);
 
 		int j = 0;
 		for(Node *seqNode = routes[i].first; seqNode != NULL; seqNode = seqNode->getNext(), j++)
@@ -561,11 +561,11 @@ void Solution::initRouteSetSubSeq()
 			cout << "this[" << i << "][" << j << "]= " << seqNode->getClient()->getId() << endl;
 #endif
 			SeqData* seq = new SeqData(seqNode);
-			SeqData* retFor = NULL;
 			SeqData* retBack = NULL;
+			SeqData* retFor = NULL;
 
-			routeForwardSeq[i][j].push_back(seq);
 			routeBackwardSeq[i][j].push_back(seq);
+			routeForwardSeq[i][j].push_back(seq);
 
 			for(Node *seqNodeNext = seqNode->getNext(); seqNodeNext != NULL; seqNodeNext = seqNodeNext->getNext())
 			{
@@ -576,16 +576,16 @@ void Solution::initRouteSetSubSeq()
 
 				if(seqNodeNext == seqNode->getNext())
 				{
-					retFor = seq->concatForWard(seqNext); // concatenate forward seq and seqNext
-					retBack = seq->concatBackWard(seqNext); // concatenate backward seq and seqNext
+					retBack = seq->concatBackWard(seqNext); // concatenate forward seq and seqNext
+					retFor = seq->concatForWard(seqNext); // concatenate backward seq and seqNext
 				}
 				else
 				{
-					retFor = retFor->concatForWard(seqNext); // concatenate forward retFor and seqNext
-					retBack = retBack->concatBackWard(seqNext); // concatenate backward retFor and seqNext
+					retBack = retBack->concatBackWard(seqNext); // concatenate forward retFor and seqNext
+					retFor = retFor->concatForWard(seqNext); // concatenate backward retFor and seqNext
 				}
-				routeForwardSeq[i][j].push_back(retFor);
 				routeBackwardSeq[i][j].push_back(retBack);
+				routeForwardSeq[i][j].push_back(retFor);
 			}
 #ifdef DEBUG_Sol
 			cout << endl;
@@ -601,26 +601,26 @@ void Solution::initRouteSetSubSeq()
 
 void Solution::updateOneRouteSetSubSeq(int numRoute)
 {
-	//resize the second dimension of routeForwardSeq to take into account the variation of the number of client in route numRoute
-	routeForwardSeq[numRoute].resize(routes[numRoute].second);
+	//resize the second dimension of vectors to take into account the variation of the number of client in route numRoute
 	routeBackwardSeq[numRoute].resize(routes[numRoute].second);
+	routeForwardSeq[numRoute].resize(routes[numRoute].second);
 
 	int j = 0;
 	for(Node *seqNode = routes[numRoute].first; seqNode != NULL; seqNode = seqNode->getNext(), j++)// number of nodes in a route
 	{
-
-		routeForwardSeq[numRoute][j].clear(); // clear vector containing route nodes
+		// clear vector containing route nodes
 		routeBackwardSeq[numRoute][j].clear();
+		routeForwardSeq[numRoute][j].clear();
 #ifdef DEBUG_Sol
 		// routeSeq[numRoute][j] is the updated route
 		cout << "this[" << numRoute << "][" << j << "]= " << seqNode->getClient()->getId() << endl;
 #endif
-		SeqData* seq = new SeqData(seqNode); // first one visit sub-sequence
-		SeqData* retFor = NULL;
+		SeqData* seq = new SeqData(seqNode); // first single visit
 		SeqData* retBack = NULL;
+		SeqData* retFor = NULL;
 
-		routeForwardSeq[numRoute][j].push_back(seq);
 		routeBackwardSeq[numRoute][j].push_back(seq);
+		routeForwardSeq[numRoute][j].push_back(seq);
 
 		for(Node *seqNodeNext = seqNode->getNext(); seqNodeNext != NULL; seqNodeNext = seqNodeNext->getNext())
 		{
@@ -631,16 +631,16 @@ void Solution::updateOneRouteSetSubSeq(int numRoute)
 
 			if(seqNodeNext == seqNode->getNext())
 			{
-				retFor = seq->concatForWard(seqNext); // concatenate forward seq and seqNext
 				retBack = seq->concatBackWard(seqNext); // concatenate backward seq and seqNext
+				retFor = seq->concatForWard(seqNext); // concatenate forward seq and seqNext
 			}
 			else
 			{
-				retFor = retFor->concatForWard(seqNext); // concatenate forward retFor and seqNext
 				retBack = retBack->concatBackWard(seqNext); // concatenate backward retFor and seqNext
+				retFor = retFor->concatForWard(seqNext); // concatenate forward  retFor and seqNext
 			}
-			routeForwardSeq[numRoute][j].push_back(retFor);
 			routeBackwardSeq[numRoute][j].push_back(retBack);
+			routeForwardSeq[numRoute][j].push_back(retFor);
 		}
 #ifdef DEBUG_Sol
 			cout << endl;

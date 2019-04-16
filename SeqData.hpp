@@ -43,8 +43,8 @@ public:
 	Node* getTail();
 
 	// concatenation methods
-	SeqData* concatForWard(SeqData *seq);
-	SeqData* concatBackWard(SeqData *seq);
+	SeqData* concatBackWard(SeqData *seq); // add a single visit after a sub-sequence of visits
+	SeqData* concatForWard(SeqData *seq); // add a single visit before a sub-sequence of visits
 };
 
 #endif /* SEQDATA_HPP_ */

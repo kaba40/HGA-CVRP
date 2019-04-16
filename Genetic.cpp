@@ -326,7 +326,7 @@ int Genetic::Solve()
 
 		if(selectedSon->getObjVal() < individus.front()->getObjVal() - 0.0001) //&& Diversity(selectedSon, k) >= dFact
 		{
-			individus[k] = selectedSon;
+			individus[k] = selectedSon; // individus.back() = selectedSon; // if modify last element
 			sort(individus.begin(), individus.end(), solCompare);
 			cout << "best individual  = " ; individus.front()->getSequence()->show() ; cout << " obj = " << individus.front()->getObjVal() << endl;
 		}

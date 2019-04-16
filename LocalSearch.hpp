@@ -46,7 +46,7 @@ public:
 	bool InterRoute2ArcSwap();
 
 	//successive localSearch on direct and indirect encoding
-	bool IterativeSolutionImprovement(bool directEncoding);
+	void IterativeSolutionImprovement(bool directEncoding);
 
 };
 

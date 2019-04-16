@@ -24,8 +24,8 @@ using namespace std;
 
 int main()
 {
-	string name_data = "Data/E-n7.vrp";
-//	string name_data = "Data/E-n13-k4.vrp";
+//	string name_data = "Data/E-n7.vrp";
+	string name_data = "Data/E-n13-k4.vrp";
 	const char* data_vrp = name_data.c_str();
 
 	int numVeh = 1;
@@ -66,7 +66,7 @@ int main()
 	// genetic paraterms initialisation
 	int numInds = 5; // number of individual
 	int maxIt = 10; // maximum number of iteration
-	int stuckMax = 1000; // maximum number of iteration where dFactor = cdFactor (ceiling of dFactor)
+	int stuckMax = 50; // maximum number of iteration where dFactor = cdFactor (ceiling of dFactor)
 	double dgFactor = 1.08; // diversity growth factor
 	double probLS = 0.5; // Local search call probability
 
@@ -119,7 +119,7 @@ int main()
 
 
 
-	delete geneticAlgo;
+//	delete geneticAlgo;
 	delete localAlgo;
 	delete data_instance;
 	delete solution_tsp;

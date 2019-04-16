@@ -96,8 +96,8 @@ Node* SeqData::getTail()
 	return this->tail;
 }
 
-// concatenate two sub-sequences using forward concatenation
-SeqData* SeqData::concatForWard(SeqData *seq)
+// add a single visit after a sub-sequence of visits
+SeqData* SeqData::concatBackWard(SeqData *seq)
 {
 
 	// get distance between the tail of the first sub-sequence and the head of the second sub-sequence
@@ -138,14 +138,14 @@ SeqData* SeqData::concatForWard(SeqData *seq)
 	// update distance data
 	ret->updateDistance(distAdded);
 
-	// move the tail of the new sub-sequence to the tail of the added sub-sequence
+	// move the tail of the sub-sequence to the tail of the added sub-sequence
 	ret->setTail(seq->tail);
 
 	return ret;
 }
 
-// concatenate two sub-sequences using backward concatenation
-SeqData* SeqData::concatBackWard(SeqData *seq)
+// add a single visit before a sub-sequence of visits
+SeqData* SeqData::concatForWard(SeqData *seq)
 {
 	// get distance between the head of the first sub-sequence and the tail of the second sub-sequence
 	double distAdded;

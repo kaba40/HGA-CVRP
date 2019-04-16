@@ -41,8 +41,8 @@ class Solution
 private:
 
 	DLinkedList* encodage; // indirect encoding, i.e., giant tour
-	vector<vector<vector<SeqData*>>> routeForwardSeq; // 3D vector containing inverse of forward concatenation
-	vector<vector<vector<SeqData*>>> routeBackwardSeq;
+	vector<vector<vector<SeqData*>>> routeBackwardSeq; //  3D vector containing sub-sequences from backward concatenation
+	vector<vector<vector<SeqData*>>> routeForwardSeq; // 3D vector containing sub-sequences from forward concatenation
 	vector<int> tour;
     vector<pair<Node*,uint>> routes; // each route is considered as a pair of list of nodes and the number of nodes
 	double solutionCost; //objective_value
@@ -67,8 +67,8 @@ public:
 	DLinkedList* getSequence(); // to delete may be
 	DataAP* getDataAP();
 	vector<pair<Node*,uint>> getRoutes();
-	vector<vector<vector<SeqData*>>> getRouteForwSeq();
 	vector<vector<vector<SeqData*>>> getRouteBackSeq();
+	vector<vector<vector<SeqData*>>> getRouteForwSeq();
 
 	//initialization methods
 	void initRouteSetSubSeq();
