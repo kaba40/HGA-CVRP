@@ -14,7 +14,6 @@ Solution::Solution(DataAP *tsp_dat, DLinkedList* encod)
 	solutionCost = 0;
 	numberOfRouteInSolution = 0;
 	tsp_data = tsp_dat;
-//	encodage = tsp_dat->getCustomers();
 	encodage = encod;
 }
 
@@ -60,10 +59,9 @@ bool Solution::Decodage(bool useDecoDirect)
 		// count the number of routes -- numberOfRoutes
 		int nbTour = tsp_data->getNumberNodes()-1;
 		vector<int> pred = splitAlgo->getPredence();
-//		cout << "pred size = " << pred.size() << endl;
         vector<Node*> predNode = splitAlgo->getPredenceNode();
-//      cout << "predNode size = " << predNode.size() << endl;
-		numberOfRouteInSolution = 0; // to remove
+
+		numberOfRouteInSolution = 0;
 		while(nbTour != 0)
 		{
 			nbTour = pred[nbTour];
@@ -79,7 +77,6 @@ bool Solution::Decodage(bool useDecoDirect)
 
 	        Node* last = encodage->getTail(); // to record the last element of the route
 
-//	        cout << "last1 = " << last->getClient()->getId() << endl;
 			for (int i = numberOfRouteInSolution-1 ; i >= 0 ; i --)
 			{
 
@@ -90,9 +87,6 @@ bool Solution::Decodage(bool useDecoDirect)
 	            Node* depotNodeLast = new Node(depotCustomerlLast); // depot associated node
 
 	            Node* tmp = predNode[nbTour]->getPrevious();
-//	            cout << "predNode[" << nbTour << "] = " << predNode[nbTour]->getClient()->getId() << endl;
-//	            if(tmp != NULL)
-//	            	cout << "tmp = " << tmp->getClient()->getId() << endl;
 
 	            predNode[nbTour]->setPrevious(depotNodeFirst);
 	            depotNodeFirst->setNext(predNode[nbTour]);
@@ -104,8 +98,6 @@ bool Solution::Decodage(bool useDecoDirect)
 #endif
 	            routes[i].first = depotNodeFirst;
 	            last = tmp;
-//	            if(last != NULL)
-//	            	cout << "last2 = " << last->getClient()->getId() << endl;
 
 				nbTour = pred[nbTour] ;
 
@@ -411,7 +403,6 @@ void Solution::CheckSolution(bool useDecoDirect)
 	#endif
 
 			Node *routeStartNodeFirst = encodage->find(start-1);
-//			encodage->show();
 			for(int j = start; j < end; j++)
 			{
 	#ifdef DEBUG_CheckSol
@@ -483,20 +474,16 @@ void Solution::PrintSolution(bool useDecoDirect)
 		for(int i = 0; i < numberOfRouteInSolution; i++)
 		{
 			start = tour[i];
-//			cout << "Start = " << start << endl;
 			if( i < numberOfRouteInSolution-1)
 			{
 				end = tour[i+1];
-//				cout << "end1 = " << end << endl;
 			}
 			else
 			{
 				end = encodage->getSize() +1;
-//				cout << "end2 = " << end << endl;
 			}
 			cout << "TOUR[" << i << "] = {" ;
 			Node *routeStartNode = encodage->find(start-1);
-//			cout << "routeStartNode " << start-1 << " = " << routeStartNode->getClient()->getId() << endl;
 			for(int j = start; j < end-1; j++)
 			{
 				cout << routeStartNode->getClient()->getId() << "--";
@@ -557,11 +544,6 @@ int Solution::getNbClientsForRoute(int r)
 {
 	return routes[r].second-2;
 }
-
-//void Solution::updateRoute(int numRoute, pair<Node*,uint> rteSeq)
-//{
-//	routes[numRoute] = rteSeq;
-//}
 
 void Solution::initRouteSetSubSeq()
 {

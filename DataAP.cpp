@@ -150,16 +150,16 @@ double DataAP::getDistances(int index1, int index2)
 #ifdef DEBUG_DataAP
 	cout << "index1 =" << index1 << " index2 = " << index2 << endl;
 #endif
-	if(index1 >= numberNodes || index2 >= numberNodes) //
+	if(index1 >= numberNodes || index2 >= numberNodes)
 	{
 		cerr << " index1 and index2 must be inferior to " << numberNodes << endl;
-		throw string(" Verify index"); //exit(-1);
+		throw string(" Verify index");
 	}
 
 	if( index1 == index2)
 	{
 		cerr << " index1 and index2 must not be equal " << endl;
-		throw string(" Verify index"); //exit(-1);
+		throw string(" Verify index");
 	}
 
 	if(index1 < index2)
@@ -178,7 +178,6 @@ Customer* DataAP::getCustomerByIndex( int index)
 		cerr << " index must be superior to 0 or lower than " << numberNodes << endl;
 		throw string(" Verify index"); //exit(-1); // generer une exception
 	}
-//	index--;
 
 	return clients[index];
 

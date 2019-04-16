@@ -13,7 +13,6 @@ Customer::Customer(string idx, int ind, int dem, DataAP* _data)
 	id = idx;
 	index = ind;
 	demand = dem;
-//	data_Inst = new DataAP();
 	data_Inst = _data;
 }
 
@@ -21,8 +20,6 @@ Customer::~Customer() {
 	// TODO Auto-generated destructor stub
 }
 
-//DataAP *data_Inst;
-//data_Inst = new DataAP();
 string Customer::getId()
 {
 	return id;

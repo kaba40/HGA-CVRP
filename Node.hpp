@@ -17,10 +17,9 @@ private:
 	Node *previous;
 	Customer *client;
 public:
-	Node(Customer *clt);
-//	Node();
-	Node(Node *node);
-//	Node(Node *nxt, Node *prev, Customer *clt);
+	Node(Customer *clt); // constructor
+	Node(Node *node); // constructor copy
+
 	virtual ~Node();
 
 	bool isDepot();

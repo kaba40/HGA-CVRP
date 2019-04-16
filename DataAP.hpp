@@ -29,14 +29,6 @@
 
 //#include "Customer.hpp"
 using namespace std;
-//using namespace boost;
-
-
-//struct customer
-//{
-//	int index;
-//	double demand;
-//};
 
 class Customer;
 

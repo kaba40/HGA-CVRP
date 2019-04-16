@@ -88,8 +88,6 @@ int SplitBellman::solve()
 #endif
 			}
 			current = current->getNext();
-//			if(current != NULL)
-//				cout << " current2 = " << current->getClient()->getId() << endl;
 			i++;
 		}
 		tmp = tmp->getNext();

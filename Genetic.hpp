@@ -17,32 +17,25 @@ private:
 	vector<Solution*> individus; // vector of population
 	int nbIndivs; // number of individual in a population
 	int maxIter; // maximum number of iteration
-	int stuckMaxVal; // maximum number of iteration where dFactor = cdFactor (ceiling of dFactor)
+	int stuckMaxVal; // maximum number of iteration where dFactor (diversity factor) = cdFactor (ceiling of dFactor)
 	double dgFactor; // diversity growth factor
-	double probaLS; //local search call probability
+	double probaLS; // local search call probability
 	DataAP *cvrp_data; // data class
 
 	// two parents to be selected
 	Solution *parent1;
 	Solution *parent2;
 
-//	// tow offspring to be created
-//	Solution *son1;
-//	Solution *son2;
 public:
 	//numInds = number of individual; maxIt = maximum iteration; dgFact = diversity growth factor;
 	//probLS = localSearch call probability; stuckMax = maximum number of iteration where dFact = cdFact
 	Genetic(DataAP *vrp_dat, int numInds, int maxIt, int stuckMax, double dgFact, double probLS);
 	virtual ~Genetic();
 
-	// create a local search class
-//	LocalSearch *educate;
-
 	// getter methods
-	vector<Solution*> getIndividus();
+	vector<Solution*> getIndividus(); // for the main.cpp
 
 	//crossover operator
-//	Solution* Crossover(Solution *p1, Solution *p2, int start, int end);
 	Solution* Crossover(Solution *p1, Solution *p2);
 
 	// education operator

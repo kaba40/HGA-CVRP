@@ -42,9 +42,6 @@ Genetic::Genetic(DataAP *vrp_dat, int numInds, int maxIt, int stuckMax, double d
 	this->parent1 = NULL;
 	this->parent2 = NULL;
 
-//	this->son1 = new Solution(cvrp_data, new DLinkedList());
-//	this->son2 = new Solution(cvrp_data, new DLinkedList());
-
 	for(int i = 0; i < nbIndivs; i++)
 	{
 		Solution *individu = new Solution(cvrp_data, cvrp_data->getCustomerList()) ;
@@ -83,9 +80,6 @@ Solution* Genetic::Crossover(Solution *p1, Solution *p2)
 	while (end == start && p1->getSequence()->getSize() > 1)
 		end = rand() % p1->getSequence()->getSize() ;
 
-//	cout << "start = " << start << endl;
-//	cout << "end = " << end << endl;
-
 	// tow offspring to be created
 	Solution *son1 = new Solution(cvrp_data, new DLinkedList());
 	Solution *son2 = new Solution(cvrp_data, new DLinkedList());
@@ -94,6 +88,7 @@ Solution* Genetic::Crossover(Solution *p1, Solution *p2)
 	int i = 0;
 	for(Node *p1Node = p1->getSequence()->getHead(); p1Node != NULL; p1Node = p1Node->getNext(), i++ )
 	{
+		// take into account case where start is greater than end ?
 		if(i == start)
 		{
 			Node *copy = new Node(p1Node);
@@ -205,7 +200,7 @@ Solution* Genetic::Crossover(Solution *p1, Solution *p2)
 		son2->CheckSolution(false);
 	}
 
-	// return the best one may be we can return one child randomly
+	// return the best one may be we can return one child randomly ?
 	if(son1->getObjVal() < son2->getObjVal() - 0.0001)
 	{
 		retSol = son1;
@@ -287,6 +282,7 @@ int Genetic::Solve()
 
 	cout << "best individual  = " ; individus.front()->getSequence()->show() ; cout << " obj = " << individus.front()->getObjVal() << endl;
 
+	// parameters initialization
 	int numIt = 0; // number of iteration
 	int stuck = 0; // number of iteration with dFact = cdFact
 	double dFact = 1; // diversity factor
@@ -310,7 +306,7 @@ int Genetic::Solve()
 		// cross parent1 and parent2 and return the best son
 		Solution *selectedSon = Crossover(parent1, parent2);
 
-		// apply son selected education randomly
+		// apply selectedSon education randomly
 		if( randFloat(0.0, 1.0) < probaLS - 0.0001)
 		{
 //			double timeDebut = clock();
@@ -328,7 +324,7 @@ int Genetic::Solve()
 		int n2 = (int) nbIndivs/2;
 		k = randomInt(n2, n1);
 
-		if(selectedSon->getObjVal() < individus.front()->getObjVal() ) //&& Diversity(selectedSon, k) >= dFact
+		if(selectedSon->getObjVal() < individus.front()->getObjVal() - 0.0001) //&& Diversity(selectedSon, k) >= dFact
 		{
 			individus[k] = selectedSon;
 			sort(individus.begin(), individus.end(), solCompare);

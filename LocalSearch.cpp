@@ -1120,7 +1120,6 @@ bool LocalSearch::SwapTwoArcs()
 // movements for direct encoding, intraRoute movements
 
 //////////////////////////////////////////// IntraRouteInsert ////////////////////////////////////////////////////////////////
-
 bool LocalSearch::IntraRouteInsert()
 {
 
@@ -2442,7 +2441,6 @@ bool LocalSearch::IntraRouteArcSwap()
 				}
 			}
 		}
-//		else if(this->initSol->getNbClientsForRoute(r) == 3 || this->initSol->getNbClientsForRoute(r) == 4) // >= 3 et <= 4
 		else if(this->initSol->getNbClientsForRoute(r) == 4)
 		{// if the number of clients in a route is equal 4
 			routeCost = this->initSol->getRouteForwSeq()[r][0].back()->getDistance();
@@ -4269,9 +4267,10 @@ bool LocalSearch::InterRoute2ArcSwap()
 	return retVal;
 }
 
+//////////////////////////////////////////// successive locolSearch on a solution ////////////////////////////////////////////////////////////////
+
 bool LocalSearch::IterativeSolutionImprovement(bool directEncoding)
 {
-//	double newObj = DBL_MAX;
 
 	bool improvement = true;
 	while(improvement)
@@ -4302,12 +4301,11 @@ bool LocalSearch::IterativeSolutionImprovement(bool directEncoding)
 			SwapTwoArcs();
 		}
 
-//		newObj = this->initSol->getObjVal();
+		//if improvement is not possible then set var improvement to false
 		if(!(this->initSol->getObjVal() < initObj - 0.0001))
 		{
 			improvement = false;
 		}
 	}
 }
-//////////////////////////////////////////// successive locolSearch on direct encoding ////////////////////////////////////////////////////////////////
 
