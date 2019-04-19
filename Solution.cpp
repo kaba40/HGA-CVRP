@@ -376,8 +376,9 @@ void Solution::CheckSolution(bool useDecoDirect)
 
 			if(load > tsp_data->getVehicleCap() + 0.0001)
 			{
-				cout << "ERROR : One route is exceeding the capacity limit" << endl ;
+				cerr << "ERROR : One route is exceeding the capacity limit" << endl ;
 				throw string("ERROR : One route is exceeding the capacity limit");
+//				exit(-1); //return;
 			}
 	    }
 	}
@@ -418,8 +419,9 @@ void Solution::CheckSolution(bool useDecoDirect)
 
 			if(load > tsp_data->getVehicleCap() + 0.0001)
 			{
-				cout << "ERROR : One route is exceeding the capacity limit" << endl ;
+				cerr << "ERROR : One route is exceeding the capacity limit" << endl ;
 				throw string("ERROR : One route is exceeding the capacity limit");
+//				exit(-1); //return;
 			}
 
 			Node *routeStartNodeSecond = encodage->find(start-1);
@@ -434,9 +436,10 @@ void Solution::CheckSolution(bool useDecoDirect)
 
 	if( distance > solutionCost + 0.0001 || distance < solutionCost - 0.0001)
 	{
-		cout << "ERROR : Solution checker does not find the same solution cost" << endl ;
-		cout << "Solution checker cost is = " << distance << endl;
-		cout << "Solution cost is = " << solutionCost << endl;
+		cerr << "ERROR : Solution checker does not find the same solution cost" << endl ;
+		cerr << "Solution checker cost is = " << distance << endl;
+		cerr << "Solution cost is = " << solutionCost << endl;
+		throw string("Check solutionCost");//return;
 	}
 }
 

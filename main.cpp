@@ -10,6 +10,7 @@
 #include<iostream>
 #include<algorithm>
 #include<random>
+#include <boost/program_options.hpp>
 
 #include "DataAP.hpp"
 #include "Customer.hpp"
@@ -21,12 +22,48 @@
 #include "LocalSearch.hpp"
 
 using namespace std;
+namespace po = boost::program_options;
 
-int main()
+int main(int argc, char** argv)
 {
-//	string name_data = "Data/E-n7.vrp";
-	string name_data = "Data/E-n13-k4.vrp";
+	string name_data = "Data/E-n7.vrp";
 	const char* data_vrp = name_data.c_str();
+	try{
+
+		po::options_description desc("Allowed options");
+		desc.add_options()
+		("help", "produce help message")
+		("name_data", po::value<string>(), "instance used");
+
+		po::variables_map vm;
+		po::store(po::parse_command_line(argc, argv, desc), vm);
+		po::notify(vm);
+
+		if (vm.count("help"))
+		{
+			cout << desc << "\n";
+			return 1;
+		}
+
+		if(vm.count("name_data"))
+		{
+			name_data = vm["name_data"].as<string>();
+		}
+		cout << "name_data was set to : " << " " << name_data << endl;
+
+	}
+	catch(exception& e)
+	{
+		cerr << "error :" << e.what() << "\n";
+		return 1;
+	}
+	catch(...)
+	{
+		cerr << "Exception of unknown type!\n";
+	}
+
+//	string name_data = "Data/E-n7.vrp";
+
 
 	int numVeh = 1;
 
@@ -47,8 +84,8 @@ int main()
 	Solution *solution_tsp;
 	solution_tsp = new Solution(data_instance, data_instance->getCustomerList());
 
-	srand(unsigned (time(0)) );
-	solution_tsp->setRandomSequence();
+//	srand(unsigned (time(0)) );
+//	solution_tsp->setRandomSequence();
 
 #ifdef DEBUG_Main
 
@@ -59,6 +96,8 @@ int main()
 
 #endif
 
+//	exit(-1);
+
 	solution_tsp->getSequence()->show(); cout << "Head--Tail : " << solution_tsp->getSequence()->getHead()->getClient()->getId() << "--" << solution_tsp->getSequence()->getTail()->getClient()->getId() << endl;
 
 //	cout << "list as " << solution_tsp->getSequence()->toString() << endl;
@@ -66,7 +105,7 @@ int main()
 	// genetic paraterms initialisation
 	int numInds = 5; // number of individual
 	int maxIt = 10; // maximum number of iteration
-	int stuckMax = 50; // maximum number of iteration where dFactor = cdFactor (ceiling of dFactor)
+	int stuckMax = 10; // maximum number of iteration where dFactor = cdFactor (ceiling of dFactor)
 	double dgFactor = 1.08; // diversity growth factor
 	double probLS = 0.5; // Local search call probability
 
@@ -89,6 +128,8 @@ int main()
 	{
 		cout << "individu[" << i << "] " ; geneticAlgo->getIndividus()[i]->getSequence()->show(); cout << "cost = " << geneticAlgo->getIndividus()[i]->getObjVal() << endl;
 	}
+
+	geneticAlgo->getIndividus().front()->PrintSolution(false);
 
 	exit(-1);
 
@@ -119,7 +160,7 @@ int main()
 
 
 
-//	delete geneticAlgo;
+	delete geneticAlgo;
 	delete localAlgo;
 	delete data_instance;
 	delete solution_tsp;

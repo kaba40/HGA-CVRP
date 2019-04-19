@@ -1433,7 +1433,8 @@ bool LocalSearch::IntraRouteInsert()
 							cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
 #endif
 							// we have subSeq seq2 under some conditions
-							if(((in+1) != mn) && ( in != 1 || mn != this->initSol->getNbClientsForRoute(r)))
+//							if(((in+1) != mn) && ( in != 1 || mn != this->initSol->getNbClientsForRoute(r)))
+							if(((mn+1) != in) && ( in != this->initSol->getNbClientsForRoute(r) || mn != 1))
 							{
 								seq2 = this->initSol->getRouteBackSeq()[r][in][0];
 #ifdef DEBUG_IntraInsert
@@ -1538,7 +1539,8 @@ bool LocalSearch::IntraRouteInsert()
 						}
 						else
 						{
-							if(((in+1) != mn) && ( in != 1 || mn != this->initSol->getNbClientsForRoute(r)))
+//							if(((in+1) != mn) && ( in != 1 || mn != this->initSol->getNbClientsForRoute(r)))
+							if(((mn+1) != in) && ( in != this->initSol->getNbClientsForRoute(r) || mn != 1))
 							{
 								// evaluate the feasibility for the concatenation of the 3 sub-sequences
 								// then compare the cost of the new route to the former one
@@ -1549,7 +1551,9 @@ bool LocalSearch::IntraRouteInsert()
 									insertNode->removeNode();
 
 									// insert insertNode after moveNode
-									moveNode->insertAfter(insertNode);
+//									moveNode->insertAfter(insertNode);
+									// insert insertNode before moveNode
+									moveNode->insertBefore(insertNode);
 
 									// update sub-sequences of the route
 									this->initSol->updateOneRouteSetSubSeq(r);
@@ -1585,7 +1589,9 @@ bool LocalSearch::IntraRouteInsert()
 									insertNode->removeNode();
 
 									// insert insertNode after moveNode
-									moveNode->insertAfter(insertNode);
+									//moveNode->insertAfter(insertNode);
+									// insert insertNode before moveNode
+									moveNode->insertBefore(insertNode);
 
 									// update sub-sequences of the route
 									this->initSol->updateOneRouteSetSubSeq(r);
@@ -2628,7 +2634,8 @@ bool LocalSearch::IntraRouteArcSwap()
 							// if the swapNode is the predecessor of the arcFirstNode
 							if(a1-1 == s)
 							{
-								seq1 = this->initSol->getRouteBackSeq()[r][0][a1-1];
+//								seq1 = this->initSol->getRouteBackSeq()[r][0][a1-1];
+								seq1 = this->initSol->getRouteBackSeq()[r][0][s-1];
 #ifdef DEBUG_IntraArcSwap
 								cout << seq1->getHead()->getClient()->getId() << "--" << seq1->getTail()->getClient()->getId() << endl;
 #endif
@@ -2641,7 +2648,7 @@ bool LocalSearch::IntraRouteArcSwap()
 								cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
 #endif
 								int indexLastNodeRoute = this->initSol->getNbClientsForRoute(r)+1;
-								seq4 = this->initSol->getRouteBackSeq()[r][s][indexLastNodeRoute-(a2+1)];
+								seq4 = this->initSol->getRouteBackSeq()[r][a2+1][indexLastNodeRoute-(a2+1)];
 #ifdef DEBUG_IntraArcSwap
 								cout << seq4->getHead()->getClient()->getId() << "--" << seq4->getTail()->getClient()->getId() << endl;
 #endif
@@ -2993,7 +3000,15 @@ bool LocalSearch::IntraRouteArcSwap()
 #ifdef DEBUG_IntraArcSwap
 								cout << seq2->getHead()->getClient()->getId() << "--" << seq2->getTail()->getClient()->getId() << endl;
 #endif
-								seq3 = this->initSol->getRouteForwSeq()[r][a1-1][(a1-1)-(s+1)];
+								if( a1-1 == s+1)
+								{
+//									seq3 = this->initSol->getRouteForwSeq()[r][a1-1][(a1-1)-(s+1)]; // to modify
+									seq3 = this->initSol->getRouteForwSeq()[r][s][(a1-1)-s];
+								}
+								else if(a1-1 == s)
+								{
+									seq3 = this->initSol->getRouteForwSeq()[r][a1-1][(a1-1)-s]; // to modify
+								}
 #ifdef DEBUG_IntraArcSwap
 								cout << seq3->getHead()->getClient()->getId() << "--" << seq3->getTail()->getClient()->getId() << endl;
 #endif
@@ -4276,29 +4291,92 @@ void LocalSearch::IterativeSolutionImprovement(bool directEncoding)
 	while(improvement)
 	{
 		double initObj = this->initSol->getObjVal();
+//		cout << "initObj = " << initObj << "---- ";
 		if(directEncoding)
 		{
 			// intra route movements for direct encoding, i.e, feasible solution
-			IntraRouteInsert();
-			IntraRouteArcInsert();
-			IntraRouteSwap();
-			IntraRouteArcSwap();
-			IntraRoute2ArcSwap();
+			if(IntraRouteInsert()){
+//				cout << "IntraRouteInsert" << endl;
+//				this->initSol->PrintSolution(true);
+				this->initSol->CheckSolution(true);
+			}
+			if(IntraRouteArcInsert()){
+//				cout << "IntraRouteArcInsert" << endl;
+//				this->initSol->PrintSolution(true);
+				this->initSol->CheckSolution(true);
+
+			}
+			if(IntraRouteSwap()){
+//				cout << "IntraRouteSwap" << endl;
+//				this->initSol->PrintSolution(true);
+				this->initSol->CheckSolution(true);
+			}
+			if(IntraRouteArcSwap()){
+//				cout << "IntraRouteArcSwap" << endl;
+//				this->initSol->PrintSolution(true);
+				this->initSol->CheckSolution(true);
+
+			}
+			if(IntraRoute2ArcSwap()){
+//				cout << "IntraRoute2ArcSwap" << endl;
+//				this->initSol->PrintSolution(true);
+				this->initSol->CheckSolution(true);
+			}
 
 			// inter-route movements
-			InterRouteInsert();
-			InterRouteArcInsert();
-			InterRouteSwap();
-			InterRouteArcSwap();
-			InterRoute2ArcSwap();
+			if(InterRouteInsert()){
+//				cout << "InterRouteInsert" << endl;
+//				this->initSol->PrintSolution(true);
+				this->initSol->CheckSolution(true);
+			}
+			if(InterRouteArcInsert()){
+//				cout << "InterRouteArcInsert" << endl;
+//				this->initSol->PrintSolution(true);
+				this->initSol->CheckSolution(true);
+			}
+			if(InterRouteSwap()){
+//				cout << "InterRouteSwap" << endl;
+//				this->initSol->PrintSolution(true);
+				this->initSol->CheckSolution(true);
+			}
+			if(InterRouteArcSwap()){
+//				cout << "InterRouteArcSwap" << endl;
+//				this->initSol->PrintSolution(true);
+				this->initSol->CheckSolution(true);
+			}
+			if(InterRoute2ArcSwap()){
+//				cout << "InterRoute2ArcSwap" << endl;
+//				this->initSol->PrintSolution(true);
+				this->initSol->CheckSolution(true);
+			}
 		}
 		else
 		{
-			Insert();
-			ArcInsert();
-			Swap();
-			SwapArcs();
-			SwapTwoArcs();
+			if(Insert()){
+//				cout << "Insert" << endl;
+//				this->initSol->PrintSolution(false);
+				this->initSol->CheckSolution(false);
+			}
+			if(ArcInsert()){
+//				cout << "ArcInsert" << endl;
+//				this->initSol->PrintSolution(false);
+				this->initSol->CheckSolution(false);
+				}
+			if(Swap()){
+//				cout << "Swap" << endl;
+//				this->initSol->PrintSolution(false);
+				this->initSol->CheckSolution(false);
+				}
+			if(SwapArcs()){
+//				cout << "SwapArcs" << endl;
+//				this->initSol->PrintSolution(false);
+				this->initSol->CheckSolution(false);
+			}
+			if(SwapTwoArcs()){
+//				cout << "SwapTwoArcs" << endl;
+//				this->initSol->PrintSolution(false);
+				this->initSol->CheckSolution(false);
+			}
 		}
 
 		//if improvement is not possible then set var improvement to false
@@ -4306,6 +4384,7 @@ void LocalSearch::IterativeSolutionImprovement(bool directEncoding)
 		{
 			improvement = false;
 		}
+//		cout << " newObj = " << this->initSol->getObjVal() << endl;
 	}
 }
 

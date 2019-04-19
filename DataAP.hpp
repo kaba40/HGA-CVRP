@@ -45,7 +45,7 @@ private:
 	int vehicleCap;
 
  void readData( const char* data_vrp, int nbVeh);
-
+ int readProblem( const char* data_vrp, int nbVeh);
 
 public:
 

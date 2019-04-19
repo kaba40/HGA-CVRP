@@ -45,88 +45,189 @@ DataAP::~DataAP()
 void DataAP::readData( const char* data_vrp, int nbVeh)
 {
 	numberVehicle = nbVeh;
-
-	// lecture des données
-
-	string line;
-	string uselessStr;
-
+	static const string DIMENSION = "DIMENSION";
+	static const string DEMAND_SECTION = "DEMAND_SECTION";
+	static const string DEPOT_SECTION = "DEPOT_SECTION";
+	static const string EDGE_WEIGHT_TYPE = "EDGE_WEIGHT_TYPE";
+	static const string EUC_2D = "EUC_2D";
+	static const string EXPLICIT = "EXPLICIT";
+	static const string LOWER_DIAG_ROW = "LOWER_DIAG_ROW";
+	static const string EDGE_WEIGHT_FORMAT = "EDGE_WEIGHT_FORMAT";
+	static const string EDGE_WEIGHT_SECTION = "EDGE_WEIGHT_SECTION";
+	static const string NODE_COORD_SECTION = "NODE_COORD_SECTION";
+	static const string CAPACITY = "CAPACITY";
 
 	ifstream fichier(data_vrp);
-	if(fichier.is_open())
+
+	if(!fichier)
 	{
-		// skip useless lines
-		skip_line(fichier, 3);
-
-
-		// read number of nodes
-		skip_uselessStr_storeVal(fichier, numberNodes);
-
-		distNodes.resize(numberNodes);
-
-		//skip useless lines
-		skip_line(fichier, 4);
-
-		//read vehicle capacity
-		skip_uselessStr_storeVal(fichier, vehicleCap);
-
-		//skip useless line
-		skip_line(fichier, 2);
-
-		// get distances between nodes in EDGE_WEIGHT_SECTION
-		for(int i = 0; i < numberNodes; i++)
-		{
-			for(int j = 0; j < i; j++) // fill a complete matrix
-			{
-				int d;
-				fichier >> d;
-				distNodes[i].push_back(d);
-			}
-		}
-#ifdef DEBUG_Distance
-		for(int i = 0; i < numberNodes; i++)
-		{
-			for(int j = 0; j < i; j++)
-			{
-				cout << "distNode["<< i<< "][" << j << "] =" << distNodes[i][j] << endl;
-			}
-		}
-#endif
-		//skip useless string
-		fichier >> uselessStr;
-		string skip = skip_line(fichier,2);
-
-		//fill vector of customer
-		clients = vector<Customer*> (numberNodes-1); // ici numberNodes = nombre des clients + le dépôt
-
-		for(int i = 0; i < numberNodes-1; i++)
-		{
-			string Id;
-			int Idx;
-			int Dde;
-			fichier >> Id;
-			fichier >> Dde;
-			Idx = i;
-
-			clients[i] = new Customer(Id, Idx, Dde, this);
-		}
-
-#ifdef SPLIT_ALGORITHM_DEBUG
-		for(int i = 0; i < numberNodes-1; i++)
-		{
-			cout << "custo " << clients[i]->getId() << " index " << clients[i]->getIndex() << " demand " << clients[i]->getDemand() << endl;
-		}
-#endif
-
-		// skip useless string
-		fichier >> uselessStr;
-
-		fichier.close();
+		cerr << "cannot open file " << data_vrp << endl;
+		return ;
 	}
-	else
+
+	string edge_weight_type = "";
+	string edge_weight_format = "";
+	vector<int> x;
+	vector<int> y;
+
+	while(fichier)
 	{
-	      cout << "Error opening file " << data_vrp << endl;
-	      abort();
+		//--------------------
+		// Read keyword.
+		//--------------------
+
+		string key;
+		string dummy;
+		fichier >> key;
+
+		if(key == DIMENSION)
+		{
+			fichier >> dummy;
+			fichier >> numberNodes;
+			distNodes.resize(numberNodes); /*lint !e732 !e747*/
+		}
+
+		if(key == CAPACITY)
+		{
+			fichier >> dummy;
+			fichier >> vehicleCap;
+		}
+		else if( key == EDGE_WEIGHT_TYPE)
+		{
+			fichier >> dummy;
+			fichier >> edge_weight_type;
+			if( edge_weight_type != EUC_2D && edge_weight_type != EXPLICIT)
+			{
+				cerr << "Wrong " << EDGE_WEIGHT_TYPE << " " << edge_weight_type << endl;
+				return ;
+			}
+			if( edge_weight_type == EUC_2D )
+			{
+				x.resize(numberNodes);
+				y.resize(numberNodes);
+			}
+		}
+		else if ( key == EDGE_WEIGHT_FORMAT )
+		{
+			fichier >> dummy;
+			fichier >> edge_weight_format;
+		}
+		else if ( key == EDGE_WEIGHT_FORMAT + ":" )
+		{
+			fichier >> edge_weight_format;
+		}
+		else if ( key == EDGE_WEIGHT_SECTION )
+		{
+			if ( edge_weight_type != EXPLICIT || edge_weight_format != LOWER_DIAG_ROW )
+			{
+				cerr << "Error. Unsupported edge length type." << endl;
+				return ;
+			}
+			for (int i = 0; i < numberNodes; i++)
+			{
+				for (int j = 0; j < i; j++)
+				{
+					int l;
+					fichier >> l;
+					//						distNodes[i][j] = l; /*lint !e732 !e747*/
+					distNodes[i].push_back(l); /*lint !e732 !e747*/
+				}
+			}
+#ifdef DEBUG_Distance
+			for(int i = 0; i < numberNodes; i++)
+			{
+				for(int j = 0; j < i; j++)
+				{
+					cout << "distNode["<< i<< "][" << j << "] =" << distNodes[i][j] << endl;
+				}
+			}
+#endif
+		}
+		else if ( key == NODE_COORD_SECTION )
+		{
+			if ( edge_weight_type != EUC_2D )
+			{
+				cerr << "Error. Data file contains " << EDGE_WEIGHT_TYPE << " " << edge_weight_type << " and " << NODE_COORD_SECTION << endl;
+				return ;
+			}
+			for (int i = 0; i < numberNodes; i++)
+			{
+				int j, xi, yi;
+				fichier >> j;
+				fichier >> xi;
+				fichier >> yi;
+				if ( j != i+1 )
+				{
+					cerr << "Error reading " << NODE_COORD_SECTION << endl;
+					return ;
+				}
+				x[i] = xi; /*lint !e732 !e747*/
+				y[i] = yi; /*lint !e732 !e747*/
+			}
+			for (int i = 0; i < numberNodes; i++)
+			{
+				for (int j = 0; j < i; j++)
+				{
+					int dx = x[i] - x[j]; /*lint !e732 !e747 !e864*/
+					int dy = y[i] - y[j]; /*lint !e732 !e747 !e864*/
+					int d = int( sqrt((double)dx*dx + dy*dy) + 0.5 ); /*lint !e732 !e747 !e790*/
+					//					  distNodes[i][j] = int( sqrt((double)dx*dx + dy*dy) + 0.5 ); /*lint !e732 !e747 !e790*/
+					distNodes[i].push_back(d);
+				}
+			}
+#ifdef DEBUG_Distance
+			for(int i = 0; i < numberNodes; i++)
+			{
+				for(int j = 0; j < i; j++)
+				{
+					cout << "distNode["<< i<< "][" << j << "] =" << distNodes[i][j] << endl;
+				}
+			}
+#endif
+		}
+		else if ( key == DEMAND_SECTION )
+		{
+			string skip = skip_line(fichier,2);
+			//			  cout << "skip = " << skip << endl;
+			//fill vector of customer
+			clients = vector<Customer*> (numberNodes-1); // ici numberNodes = nombre des clients + le dépôt
+			for (int i = 0; i < numberNodes-1; i++)
+			{
+				string Id;
+				int Idx;
+				int Dde;
+				fichier >> Id;
+				fichier >> Dde;
+				Idx = i;
+
+				clients[i] = new Customer(Id, Idx, Dde, this);
+
+			}
+
+			//#ifdef DEBUG_DataAP
+			for(int i = 0; i < numberNodes-1; i++)
+			{
+				cout << "custo " << clients[i]->getId() << " index " << clients[i]->getIndex() << " demand " << clients[i]->getDemand() << endl;
+			}
+			//#endif
+
+		}
+		else if ( key == DEPOT_SECTION )
+		{
+			for (int i = 0; i != -1 ;)
+			{
+				fichier >> i;
+				if ( i != -1 && i != 1 )
+				{
+					cerr << "Error: This file specifies other depots than 1." << endl;
+					return ;
+				}
+			}
+		}
+		else
+		{
+			(void) getline(fichier, dummy);
+		}
 	}
 }
 
