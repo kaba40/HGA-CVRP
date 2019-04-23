@@ -26,14 +26,28 @@ namespace po = boost::program_options;
 
 int main(int argc, char** argv)
 {
-	string name_data = "Data/E-n7.vrp";
+	string name_data = "/home/kkeita/git/algosplit/Data/E-n22-k4.vrp";
 	const char* data_vrp = name_data.c_str();
+
+	// genetic paraterms initialisation
+	int numInds = 5; // number of individual
+	int maxIt = 100; // maximum number of iteration
+	int stuckMax = 3; // maximum number of iteration where dFactor = cdFactor (ceiling of dFactor)
+	double dgFactor = 1.08; // diversity growth factor
+	double probLS = 0.5; // Local search call probability
+
 	try{
 
 		po::options_description desc("Allowed options");
 		desc.add_options()
 		("help", "produce help message")
-		("name_data", po::value<string>(), "instance used");
+		("name_data", po::value< string>(), "instance used")
+		("numInds", po::value<int>(), "number of individual")
+		("maxIt", po::value<int>(), "maximum iteration")
+		("stuckMax", po::value<int>(), "stuck iteration")
+		("dgFactor", po::value<double>(), "diversity growth factor")
+		("probLS", po::value<double>(), "localSearch probability");
+
 
 		po::variables_map vm;
 		po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -47,9 +61,39 @@ int main(int argc, char** argv)
 
 		if(vm.count("name_data"))
 		{
-			name_data = vm["name_data"].as<string>();
+			name_data = vm["name_data"].as< string >();
 		}
 		cout << "name_data was set to : " << " " << name_data << endl;
+
+		if(vm.count("numInds"))
+		{
+			numInds = vm["numInds"].as<int>();
+		}
+		cout << "number of individual was set to : " << " " << numInds << endl;
+
+		if(vm.count("maxIt"))
+		{
+			maxIt = vm["maxIt"].as<int>();
+		}
+		cout << "number of individual was set to : " << " " << maxIt << endl;
+
+		if(vm.count("stuckMax"))
+		{
+			stuckMax = vm["stuckMax"].as<int>();
+		}
+		cout << "stuckMax was set to : " << " " << stuckMax << endl;
+
+		if(vm.count("dgFactor"))
+		{
+			dgFactor = vm["dgFactor"].as<double>();
+		}
+		cout << "diversity growth factor was set to : " << " " << dgFactor << endl;
+
+		if(vm.count("probLS"))
+		{
+			probLS = vm["probLS"].as<double>();
+		}
+		cout << "localSearch call probability was set to : " << " " << probLS << endl;
 
 	}
 	catch(exception& e)
@@ -102,12 +146,7 @@ int main(int argc, char** argv)
 
 //	cout << "list as " << solution_tsp->getSequence()->toString() << endl;
 
-	// genetic paraterms initialisation
-	int numInds = 5; // number of individual
-	int maxIt = 10; // maximum number of iteration
-	int stuckMax = 10; // maximum number of iteration where dFactor = cdFactor (ceiling of dFactor)
-	double dgFactor = 1.08; // diversity growth factor
-	double probLS = 0.5; // Local search call probability
+
 
 	// test de la classe Genetic
 	Genetic *geneticAlgo = new Genetic(data_instance, numInds, maxIt, stuckMax, dgFactor, probLS);

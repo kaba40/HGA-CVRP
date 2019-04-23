@@ -70,7 +70,7 @@ vector<Solution*> Genetic::getIndividus()
 }
 
 // crossover operator
-Solution* Genetic::Crossover(Solution *p1, Solution *p2)
+Solution* Genetic::Crossover(Solution *p1, Solution *p2) // PIX, OX, etc
 {
 	Solution *retSol = NULL;
 
@@ -200,7 +200,7 @@ Solution* Genetic::Crossover(Solution *p1, Solution *p2)
 		son2->CheckSolution(false);
 	}
 
-	// return the best one may be we can return one child randomly ?
+	// return the best one may be we can return one child randomly ? // generate 0 et 1 if 1 first et 0 second
 	if(son1->getObjVal() < son2->getObjVal() - 0.0001)
 	{
 		retSol = son1;
@@ -240,15 +240,15 @@ int Genetic::EditDistance( string str1, string str2, int len1, int len2)
 		return len2;
 	}
 
-	if(str1[len1-1] == str2[len2-1])
+	if(str1[len1-1] == str2[len2-1]) // if les deux derniers sont egaux
 	{
 		return EditDistance(str1, str2, len1-1, len2-1);
 	}
 	else
 	{
-		int x = 1+ EditDistance(str1, str2, len1, len2-1);
-		int y = 1+ EditDistance(str1, str2, len1-1, len2);
-		int z = 1+ EditDistance(str1, str2, len1-1, len2-1);
+		int x = 1+ EditDistance(str1, str2, len1, len2-1); // enlever un du deuxième string
+		int y = 1+ EditDistance(str1, str2, len1-1, len2); // enlever un du premier string
+		int z = 1+ EditDistance(str1, str2, len1-1, len2-1); // enlever un de deux strings
 
 		return min(x, min(y,z));
 	}
@@ -291,7 +291,7 @@ int Genetic::Solve()
 	double cdFact = mdFact*mdSize ;// ceiling of diversity factor
 	int pi = 0; // number of iterations without improving the best solution (P(1)): if pi = 50 then dFact := min(cdFact, dgFact*dFact)
 
-	while(stuck <= stuckMaxVal || numIt <= maxIter)
+	while(numIt <= maxIter) //stuck <= stuckMaxVal ||
 	{
 		numIt++;
 
@@ -318,7 +318,7 @@ int Genetic::Solve()
 #ifdef DEBUG_Genetic
 		cout << "selectedSon2  = " ; selectedSon->getSequence()->show() ; cout << " obj = " << selectedSon->getObjVal() << endl;
 #endif
-		// draw k between |nbIndivs/2| and nbIndivs included
+		// draw k between |nbIndivs/2| and nbIndivs included // elitism
 		int k;
 		int n1 = nbIndivs-1;
 		int n2 = (int) nbIndivs/2;
@@ -327,7 +327,7 @@ int Genetic::Solve()
 		if(selectedSon->getObjVal() < individus.front()->getObjVal() - 0.0001) //&& Diversity(selectedSon, k) >= dFact
 		{
 			individus[k] = selectedSon; // individus.back() = selectedSon; // if modify last element
-			sort(individus.begin(), individus.end(), solCompare);
+			sort(individus.begin(), individus.end(), solCompare); // contourner le sort decaler les autres puis placer soit avant
 			cout << "best individual  = " ; individus.front()->getSequence()->show() ; cout << " obj = " << individus.front()->getObjVal() << endl;
 		}
 		else
@@ -349,6 +349,7 @@ int Genetic::Solve()
 		{
 			stuck = 0;
 		}
+//		cout << "numIt = " << numIt << endl;
 	}
 
 	cout << "stuck = " << stuck << endl;

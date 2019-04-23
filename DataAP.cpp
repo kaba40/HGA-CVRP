@@ -204,12 +204,12 @@ void DataAP::readData( const char* data_vrp, int nbVeh)
 
 			}
 
-			//#ifdef DEBUG_DataAP
+			#ifdef DEBUG_DataAP
 			for(int i = 0; i < numberNodes-1; i++)
 			{
 				cout << "custo " << clients[i]->getId() << " index " << clients[i]->getIndex() << " demand " << clients[i]->getDemand() << endl;
 			}
-			//#endif
+			#endif
 
 		}
 		else if ( key == DEPOT_SECTION )
