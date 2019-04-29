@@ -39,9 +39,6 @@ Genetic::Genetic(DataAP *vrp_dat, int numInds, int maxIt, int stuckMax, double d
 	this->dgFactor = dgFact;
 	this->probaLS = probLS;
 
-	this->parent1 = NULL;
-	this->parent2 = NULL;
-
 	for(int i = 0; i < nbIndivs; i++)
 	{
 		Solution *individu = new Solution(cvrp_data, cvrp_data->getCustomerList()) ;
@@ -291,22 +288,25 @@ int Genetic::Solve()
 	double cdFact = mdFact*mdSize ;// ceiling of diversity factor
 	int pi = 0; // number of iterations without improving the best solution (P(1)): if pi = 50 then dFact := min(cdFact, dgFact*dFact)
 
-	while(numIt <= maxIter) //stuck <= stuckMaxVal ||
+	time_t  startGenetic;
+	double endGenetic, totGenetic = 0;
+
+	while(totGenetic <= 1800.00) // numIt <= maxIter //stuck <= stuckMaxVal ||
 	{
 		numIt++;
-
-		// select two parents in population: best one and bad one
-		parent1 = individus.front();
-		parent2 = individus.back();
+		startGenetic = time(0);
+		// select two parents in population: best one and bad one // other approach can be used
+		Solution * parent1 = individus.front();
+		Solution * parent2 = individus.back();
 
 #ifdef DEBUG_Genetic
 		cout << "parent1  = " ; parent1->getSequence()->show(); cout << " obj = " << parent1->getObjVal() << endl;
 		cout << "parent2  = " ; parent2->getSequence()->show(); cout << " obj = " << parent2->getObjVal() << endl;
 #endif
-		// cross parent1 and parent2 and return the best son
+		// cross parent1 and parent2 and return the best son // we can return randomly one child
 		Solution *selectedSon = Crossover(parent1, parent2);
 
-		// apply selectedSon education randomly
+		// apply selectedSon education randomly // we can apply education for each iteration
 		if( randFloat(0.0, 1.0) < probaLS - 0.0001)
 		{
 //			double timeDebut = clock();
@@ -327,7 +327,7 @@ int Genetic::Solve()
 		if(selectedSon->getObjVal() < individus.front()->getObjVal() - 0.0001) //&& Diversity(selectedSon, k) >= dFact
 		{
 			individus[k] = selectedSon; // individus.back() = selectedSon; // if modify last element
-			sort(individus.begin(), individus.end(), solCompare); // contourner le sort decaler les autres puis placer soit avant
+			sort(individus.begin(), individus.end(), solCompare); // we can avoid calling sort by shifting selectedSon to keep individus sorted
 			cout << "best individual  = " ; individus.front()->getSequence()->show() ; cout << " obj = " << individus.front()->getObjVal() << endl;
 		}
 		else
@@ -349,6 +349,8 @@ int Genetic::Solve()
 		{
 			stuck = 0;
 		}
+		endGenetic = difftime(time(0), startGenetic);
+		totGenetic += endGenetic;
 //		cout << "numIt = " << numIt << endl;
 	}
 

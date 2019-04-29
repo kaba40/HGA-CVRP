@@ -11,6 +11,7 @@
 #include<stdio.h>
 #include<limits>
 #include<float.h>
+#include<math.h>
 
 #include "DLinkedList.hpp"
 #include "SeqData.hpp"
@@ -44,6 +45,9 @@ public:
 	bool InterRouteSwap();
 	bool InterRouteArcSwap();
 	bool InterRoute2ArcSwap();
+
+	// 2-opt movement
+	int InterRoute2Opt();
 
 	//successive localSearch on direct and indirect encoding
 	void IterativeSolutionImprovement(bool directEncoding);

@@ -20,13 +20,14 @@
 #include "DLinkedList.hpp"
 #include "Genetic.hpp"
 #include "LocalSearch.hpp"
+#include "ILS.hpp"
 
 using namespace std;
 namespace po = boost::program_options;
 
 int main(int argc, char** argv)
 {
-	string name_data = "/home/kkeita/git/algosplit/Data/E-n22-k4.vrp";
+	string name_data = "/home/kkeita/git/algosplit/Data/E-n101-k14.vrp";
 	const char* data_vrp = name_data.c_str();
 
 	// genetic paraterms initialisation
@@ -106,24 +107,16 @@ int main(int argc, char** argv)
 		cerr << "Exception of unknown type!\n";
 	}
 
-//	string name_data = "Data/E-n7.vrp";
-
-
-	int numVeh = 1;
-
 	DataAP * data_instance;
-	data_instance = new DataAP(data_vrp, numVeh);
+	data_instance = new DataAP(data_vrp);
 #ifdef DEBUG_Main
 	cout << " affichage d'information d'une instance " << endl;
 
 	cout<< " number of nodes = "<< data_instance->getNumberNodes() << endl;
-	cout << " number of vehicles = " << data_instance->getNumberVehicle() << endl;
 	cout << " vehicle capacity = " << data_instance->getVehicleCap() << endl;
 
 	cout <<  endl;
 
-	cout << " implementation split algorithm" << endl;
-	cout << endl;
 #endif
 	Solution *solution_tsp;
 	solution_tsp = new Solution(data_instance, data_instance->getCustomerList());
@@ -147,7 +140,15 @@ int main(int argc, char** argv)
 //	cout << "list as " << solution_tsp->getSequence()->toString() << endl;
 
 
-
+//	ILS *localSolver = new ILS(solution_tsp);
+//
+//	if(localSolver->Solve())
+//	{
+//		 solution_tsp->CheckSolution(false);
+//		 solution_tsp->PrintSolution(false);
+//	}
+//
+//	exit(-1);
 	// test de la classe Genetic
 	Genetic *geneticAlgo = new Genetic(data_instance, numInds, maxIt, stuckMax, dgFactor, probLS);
 
@@ -186,6 +187,19 @@ int main(int argc, char** argv)
 	solution_tsp->CheckSolution(true);
 	solution_tsp->PrintSolution(true);
 
+	localAlgo->InterRoute2Opt();
+
+	solution_tsp->PrintSolution(true);
+	solution_tsp->CheckSolution(true);
+
+	localAlgo->IterativeSolutionImprovement(true);
+
+	solution_tsp->CheckSolution(true);
+	solution_tsp->PrintSolution(true);
+
+
+	exit(-1);
+
 	solution_tsp->restoreSequence();
 
 	if(solution_tsp->Decodage(false))
@@ -199,7 +213,8 @@ int main(int argc, char** argv)
 
 
 
-	delete geneticAlgo;
+//	delete localSolver;
+//	delete geneticAlgo;
 	delete localAlgo;
 	delete data_instance;
 	delete solution_tsp;

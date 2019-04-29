@@ -17,6 +17,18 @@ Solution::Solution(DataAP *tsp_dat, DLinkedList* encod)
 	encodage = encod;
 }
 
+Solution::Solution(Solution *sol)
+{
+	this->encodage = sol->encodage;
+	this->routeBackwardSeq = sol->routeBackwardSeq;
+	this->routeForwardSeq = sol->routeForwardSeq;
+	this->tour = sol->tour;
+	this->routes = sol->routes;
+	this->solutionCost = sol->solutionCost;
+	this->numberOfRouteInSolution = sol->numberOfRouteInSolution;
+	this->tsp_data = sol->tsp_data;
+}
+
 Solution::~Solution()
 {
 	// TODO Auto-generated destructor stub

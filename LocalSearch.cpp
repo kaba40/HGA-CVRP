@@ -4282,6 +4282,164 @@ bool LocalSearch::InterRoute2ArcSwap()
 	return retVal;
 }
 
+//////////////////////////////////////////// InterRoute2Opt ////////////////////////////////////////////////////////////////
+
+int LocalSearch::InterRoute2Opt()
+{
+
+#ifdef DEBUG_InterRoute2Opt
+	cout << endl;
+	cout << "local search InterRoute2Opt initial route = " ; this->initSol->PrintSolution(true) ;
+#endif
+
+	bool breakIfImproved = false; // stop InterRouteArcInsert move for a route if improved
+
+	// r1 is the number of routes including the empty ones
+	for(int r1 = 0; r1 < this->initSol->getDataAP()->getNumberNodes()-1  && breakIfImproved == false; r1++)
+	{
+		// record each route r1 and r2 cost
+		int numNodesR1, numNodesR2;
+//		bool breakIfImproved = false; // stop InterRouteArcInsert move for a route if improved
+		// interRoute2Opt movement is applied only if number of nodes in a route is equal or more than 4
+		numNodesR1 = this->initSol->getRoutes()[r1].second;
+		if(numNodesR1 >= 4)
+		{// the first route r1 must contain at least two client
+
+			// record each route cost
+			double costR1 = this->initSol->getRouteBackSeq()[r1][0].back()->getDistance();
+			for(int r2 = r1+1; r2 <  this->initSol->getDataAP()->getNumberNodes()-1  && breakIfImproved == false; r2++)
+			{
+				numNodesR2 = this->initSol->getRoutes()[r2].second;
+				if(numNodesR2 >= 4)
+				{
+					// record each route cost
+					double costR2 = this->initSol->getRouteBackSeq()[r2][0].back()->getDistance();
+
+					Node *r1NodeEnd; //route r1 split first part end node
+					Node *r1NodeStart; // route r1 split second part start node
+					int n1 = 1;
+					for(Node *routeNodeR1 = this->initSol->getRoutes()[r1].first; routeNodeR1 != NULL && breakIfImproved == false; routeNodeR1 = routeNodeR1->getNext(), n1++)
+					{
+						if(n1 == ceil(numNodesR1/2))
+						{
+#ifdef DEBUG_InterRoute2Opt
+							cout << "n1 = " << n1 << endl;
+#endif
+							r1NodeEnd = routeNodeR1;
+							r1NodeStart = routeNodeR1->getNext();
+							if(!r1NodeEnd->isDepot() && !r1NodeStart->isDepot())
+							{
+#ifdef DEBUG_InterRoute2Opt
+								cout << " r1NodeEnd = " << r1NodeEnd->getClient()->getId() << " r1NodeStart = " << r1NodeStart->getClient()->getId() << endl;
+#endif
+								SeqData *seq1R1 = NULL;
+								SeqData *seq2R1 = NULL;
+
+								seq1R1 = this->initSol->getRouteBackSeq()[r1][0][n1-1];
+#ifdef DEBUG_InterRoute2Opt
+								cout << seq1R1->getHead()->getClient()->getId() << "--" << seq1R1->getTail()->getClient()->getId() << endl;
+#endif
+								int indexLastNodeRouteR1 = this->initSol->getNbClientsForRoute(r1)+1;
+								seq2R1 = this->initSol->getRouteBackSeq()[r1][n1][indexLastNodeRouteR1 - (n1)];
+#ifdef DEBUG_InterRoute2Opt
+								cout << seq2R1->getHead()->getClient()->getId() << "--" << seq2R1->getTail()->getClient()->getId() << endl;
+#endif
+								Node *r2NodeEnd; //route r2 split first part end node
+								Node *r2NodeStart; // route r2 split second part start node
+								int n2 = 1;
+								for(Node *routeNodeR2 = this->initSol->getRoutes()[r2].first; routeNodeR2 != NULL && breakIfImproved == false; routeNodeR2 = routeNodeR2->getNext(), n2++)
+								{
+									if(n2 == ceil(numNodesR2/2))
+									{
+#ifdef DEBUG_InterRoute2Opt
+										cout << "n2 = " << n2 << endl;
+#endif
+										r2NodeEnd = routeNodeR2;
+										r2NodeStart = routeNodeR2->getNext();
+										if(!r2NodeEnd->isDepot() && !r2NodeStart->isDepot())
+										{
+#ifdef DEBUG_InterRoute2Opt
+											cout << " r2NodeEnd = " << r2NodeEnd->getClient()->getId() << " r2NodeStart = " << r2NodeStart->getClient()->getId() << endl;
+#endif
+											SeqData *seq1R2 = NULL;
+											SeqData *seq2R2 = NULL;
+
+											seq1R2 = this->initSol->getRouteBackSeq()[r2][0][n2-1];
+#ifdef DEBUG_InterRoute2Opt
+											cout << seq1R2->getHead()->getClient()->getId() << "--" << seq1R2->getTail()->getClient()->getId() << endl;
+#endif
+											int indexLastNodeRouteR2 = this->initSol->getNbClientsForRoute(r2)+1;
+											seq2R2 = this->initSol->getRouteBackSeq()[r2][n2][indexLastNodeRouteR2 - (n2)];
+#ifdef DEBUG_InterRoute2Opt
+											cout << seq2R2->getHead()->getClient()->getId() << "--" << seq2R2->getTail()->getClient()->getId() << endl;
+#endif
+											double newCostR1, newCostR2; // data for r1 and r2;
+											if(this->initSol->EVAL2(&newCostR1,seq1R1, seq2R2) && this->initSol->EVAL2(&newCostR2, seq1R2, seq2R1))
+											{
+												double reduceCostR1, reduceCostR2, newObjVal;
+//												if(newCostR1+newCostR2 <= costR1+costR2+10)
+//												{
+												    reduceCostR1 = costR1-newCostR1;
+												    reduceCostR2 = costR2-newCostR2;
+													// break link between r1NodeEnd and r1NodeStart
+													r1NodeEnd->setNext(NULL);
+													r1NodeStart->setPrevious(NULL);
+													// break link between r2NodeEnd and r2NodeStart
+													r2NodeEnd->setNext(NULL);
+													r2NodeStart->setPrevious(NULL);
+													// make link between r1NodeEnd and r2NodeStart
+													r1NodeEnd->setNext(r2NodeStart);
+													r2NodeStart->setPrevious(r1NodeStart);
+													// make link between r2NodeEnd and r1NodeStart
+													r2NodeEnd->setNext(r1NodeStart);
+													r1NodeStart->setPrevious(r2NodeEnd);
+
+													// update R1 number of nodes
+#ifdef DEBUG_InterRoute2Opt
+													cout << " r1 = " << r1 << endl;
+													cout << "this->initSol->getRoutes()[ " << r1 << " ].second1 = " << this->initSol->getRoutes()[r1].second << endl;
+#endif
+													int newNumNodesR1 = n1 + (numNodesR2-n2); // remaining number of nodes in r1 after removing 2 and adding 1
+													this->initSol->updateRouteNbNodes(r1,newNumNodesR1);
+#ifdef DEBUG_InterRoute2Opt
+													cout << "this->initSol->getRoutes()[ " << r1 << " ].second2 = " << this->initSol->getRoutes()[r1].second << endl;
+#endif
+													// update R2 number of nodes
+#ifdef DEBUG_InterRoute2Opt
+													cout << " r2 = " << r2 << endl;
+													cout << "this->initSol->getRoutes()[ " << r2 << " ].second1 = " << this->initSol->getRoutes()[r2].second << endl;
+#endif
+													int newNumNodesR2 = n2 + (numNodesR1-n1);; // remaining number of nodes in r2 after removing 1 and adding 2
+													this->initSol->updateRouteNbNodes(r2,newNumNodesR2);
+#ifdef DEBUG_InterRoute2Opt
+													cout << "this->initSol->getRoutes()[ " << r2 << " ].second2 = " << this->initSol->getRoutes()[r2].second << endl;
+#endif
+													// update R1 and R2 route sub-sequences
+													this->initSol->updateOneRouteSetSubSeq(r1);
+													this->initSol->updateOneRouteSetSubSeq(r2);
+
+													// update objective value
+													newObjVal = this->initSol->getObjVal() - reduceCostR1 - reduceCostR2;
+#ifdef DEBUG_InterRoute2Opt
+													cout << "newObjVal = " << newObjVal << endl;
+#endif
+													this->initSol->setObjVal(newObjVal);
+
+													breakIfImproved = true;
+//												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return 1;
+}
 //////////////////////////////////////////// successive locolSearch on a solution ////////////////////////////////////////////////////////////////
 
 void LocalSearch::IterativeSolutionImprovement(bool directEncoding)

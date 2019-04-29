@@ -50,6 +50,7 @@ private:
 	DataAP *tsp_data;
 public:
 	Solution(DataAP *tsp_dat, DLinkedList* encod);
+	Solution(Solution *sol);
 	virtual ~Solution();
 
 	// evaluator methods

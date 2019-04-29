@@ -22,10 +22,6 @@ private:
 	double probaLS; // local search call probability
 	DataAP *cvrp_data; // data class
 
-	// two parents to be selected
-	Solution *parent1;
-	Solution *parent2;
-
 public:
 	//numInds = number of individual; maxIt = maximum iteration; dgFact = diversity growth factor;
 	//probLS = localSearch call probability; stuckMax = maximum number of iteration where dFact = cdFact

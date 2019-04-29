@@ -26,12 +26,11 @@ void skip_uselessStr_storeVal(ifstream& file, int& var){
 DataAP::DataAP()
 {
 	 numberNodes = 0;
-	 numberVehicle = 0;
 	 vehicleCap = 0;
 }
-DataAP::DataAP( const char* data_vrp, int nbVeh)
+DataAP::DataAP( const char* data_vrp)
 {
-	readData(data_vrp, nbVeh);
+	readData(data_vrp);
 }
 
 DataAP::~DataAP()
@@ -42,9 +41,8 @@ DataAP::~DataAP()
 	}
 }
 
-void DataAP::readData( const char* data_vrp, int nbVeh)
+void DataAP::readData( const char* data_vrp)
 {
-	numberVehicle = nbVeh;
 	static const string DIMENSION = "DIMENSION";
 	static const string DEMAND_SECTION = "DEMAND_SECTION";
 	static const string DEPOT_SECTION = "DEPOT_SECTION";
@@ -188,7 +186,6 @@ void DataAP::readData( const char* data_vrp, int nbVeh)
 		else if ( key == DEMAND_SECTION )
 		{
 			string skip = skip_line(fichier,2);
-			//			  cout << "skip = " << skip << endl;
 			//fill vector of customer
 			clients = vector<Customer*> (numberNodes-1); // ici numberNodes = nombre des clients + le dépôt
 			for (int i = 0; i < numberNodes-1; i++)
@@ -236,11 +233,6 @@ int DataAP::getNumberNodes()
 	return numberNodes;
 }
 
-int DataAP::getNumberVehicle()
-{
-	return numberVehicle;
-}
-
 int DataAP::getVehicleCap()
 {
 	return vehicleCap;
@@ -277,11 +269,10 @@ Customer* DataAP::getCustomerByIndex( int index)
 	if(index < 0 || index >= numberNodes)
 	{
 		cerr << " index must be superior to 0 or lower than " << numberNodes << endl;
-		throw string(" Verify index"); //exit(-1); // generer une exception
+		throw string(" Verify index");  // generer une exception
 	}
 
 	return clients[index];
-
 }
 
 vector<Customer*> DataAP::getCustomers()

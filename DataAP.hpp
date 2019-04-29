@@ -40,19 +40,16 @@ private:
 	vector<Customer*> clients; // vector of customer
 	vector<vector<double>> distNodes; // distances between nodes LOWER_DIAG_ROW
 
-	int numberNodes;
-	int numberVehicle;
-	int vehicleCap;
+	int numberNodes; // number of nodes including depot
+	int vehicleCap; // vehicle capacity
 
- void readData( const char* data_vrp, int nbVeh);
- int readProblem( const char* data_vrp, int nbVeh);
+ void readData( const char* data_vrp); // method to read data
 
 public:
 
  	DataAP();
-	DataAP( const char* data_vrp, int nbVeh);
+	DataAP( const char* data_vrp);
 	int getNumberNodes();
-	int getNumberVehicle();
 	int getVehicleCap();
 	double getDistances(int index1, int index2);
 	Customer* getCustomerByIndex( int index);
